@@ -72,7 +72,7 @@ class adUserInfo
      *  then a new entry is being created.
      *  @param integer $uid Optional type ID
      */
-    function UserInfo($uid=0)
+    function __construct($uid=0)
     {
         global $_USER;
 
