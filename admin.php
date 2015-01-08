@@ -35,7 +35,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = COM_createLink(
             $icon_arr['edit'],
             CLASSIFIEDS_ADMIN_URL . 
-                "/index.php?mode=editadtype&amp;type_id={$A['id']}"
+                "/index.php?editadtype={$A['id']}"
             );
         break;
 

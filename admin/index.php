@@ -105,7 +105,7 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 
 $action = '';
 $expected = array('edit', 'moderate', 'save', 'deletead',
-        'deleteadtype', 'saveadtype',
+        'deleteadtype', 'saveadtype', 'editadtype',
         'deletecat', 'editcat', 'savecat',
         'cancel', 'admin', 'mode');
 foreach($expected as $provided) {
