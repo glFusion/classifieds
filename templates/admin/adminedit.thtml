@@ -164,12 +164,12 @@ window.addEvent('domready',function() {
       <tr>
         <td align="right"></td>
         <td height="40" align="left">
-          <input type="submit" name="save" value="{saveoption}" />
-          <input type="reset" value="{$LANG_CONFIG['reset_form']}" />
-          <input type="reset" value="{$LANG_ADMIN['cancel']}" name="cancel" 
+          <input type="submit" class="lgButton green" name="save" value="{saveoption}" />
+          <input type="reset" class="lgButton blue" value="{$LANG_CONFIG['reset_form']}" />
+          <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel" 
                 onclick="javascript: document.location.href='{cancel_url}'"
             />
-          <input type="submit" name="deletead" value="{$LANG_ADMIN['delete']}" 
+          <input type="submit" class="lgButton red" name="deletead" value="{$LANG_ADMIN['delete']}" 
                 onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" />
         </td>
       </tr>

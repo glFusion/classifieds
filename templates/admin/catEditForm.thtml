@@ -110,15 +110,15 @@ window.addEvent('domready',function() {
 
   <p>
     <input type="hidden" name="owner_id" value="{owner_id}" />
-    <input type="submit" name="savecat" value="{$LANG_ADVT['upd_cat']}" />
-    <input type="reset" value="{$LANG_ADVT['reset']}" />
-    <input type="reset" value="{$LANG_ADMIN['cancel']}" name="cancel" 
+    <input type="submit" class="lgButton green" name="savecat" value="{$LANG_ADVT['upd_cat']}" />
+    <input type="reset" class="lgButton blue" value="{$LANG_ADVT['reset']}" />
+    <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel" 
         onclick="javascript: document.location.href='{cancel_url}'" />
-    <input type="submit" name="deletecat" value="{$LANG_ADVT['delete']}" />
+    <input type="submit" class="lgButton red" name="deletecat" value="{$LANG_ADVT['delete']}" />
   </p>
   <hr />
 </form>
-
+{!if 0}
 <!--<form method="post" action="?mode=delcat">
   <table border="0" cellpaddig="0" cellspacing="0" width="100%">
     {catlist}
@@ -131,4 +131,5 @@ window.addEvent('domready',function() {
     </tr>
   </table>
 </form>-->
+{!endif}
 {# begin {templatelocation} #}

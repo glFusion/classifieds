@@ -151,9 +151,9 @@
     <tr>
       <td align="right"></td>
       <td height="40" align="left">
-        <input type="submit" name="mode" value="{$lang_save}">
-        <input type="reset" value="{$LANG_ADMIN['reset']}">
-        <input type="submit" name="mode" value="{$LANG_ADMIN['delete']}" onclick="return confirm('{$MESSAGE[76]}');">
+        <input type="submit" class="lgButton green" name="mode" value="{$lang_save}">
+        <input type="reset" class="lgButton blue" value="{$LANG_ADMIN['reset']}">
+        <input type="submit" class="lgButton red" name="mode" value="{$LANG_ADMIN['delete']}" onclick="return confirm('{$MESSAGE[76]}');">
       </td>
     </tr>
     </table>

@@ -18,13 +18,13 @@
   <tr>
     <td></td>
     <td>
-      <input type="submit" name="saveadtype" 
+      <input type="submit" class="lgButton green" name="saveadtype" 
                 value="{$LANG_ADMIN['submit']}" />
-      <input type="reset" value="{$LANG_CONFIG['reset_form']}" />
-      <input type="reset" value="{$LANG_ADMIN['cancel']}" name="cancel" 
+      <input type="reset" class="lgButton blue" value="{$LANG_CONFIG['reset_form']}" />
+      <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel" 
                 onclick="javascript: document.location.href='{cancel_url}'" />
       {!if show_del_btn}
-        <input type="submit" name="deleteadtype" 
+        <input type="submit" class="lgButton red" name="deleteadtype" 
           value="{$LANG_ADMIN['delete']}" 
           onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" />
       {!endif}

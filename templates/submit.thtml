@@ -160,14 +160,14 @@ window.addEvent('domready',function() {
         <td align="right"></td>
         <td height="40" align="left">
           {!if new_ad}
-          <input type="submit" name="mode" value="{$LANG12['8']}" />
+          <input type="submit" class="lgButton green" name="mode" value="{$LANG12['8']}" />
           {!else}
           <input type="hidden" name="mode" value="update_ad" />
-          <input type="submit" name="update_ad" value="{$LANG12['8']}" />
+          <input type="submit" class="lgButton green" name="update_ad" value="{$LANG12['8']}" />
           {!endif}
-          <input type="reset" value="{$LANG_CONFIG['reset_form']}" />
+          <input type="reset" class="lgButton blue" value="{$LANG_CONFIG['reset_form']}" />
           {!if has_delbtn}
-            <input type="submit" name="mode"
+            <input type="submit" class="lgButton red" name="mode"
               value="{$LANG_ADMIN['delete']}"
               onclick="return confirm('{$MESSAGE[76]}');" />
           {!endif}
