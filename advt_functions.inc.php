@@ -470,7 +470,7 @@ function displayCat($cat_id)
 //        displayCat($row['papa_id']);
     }
 
-    return "<small>$location</small>\n";
+    return "<span class=\"adDisplayCat\">$location</span>\n";
 
 }   // function displayCat()
 

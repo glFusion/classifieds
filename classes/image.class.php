@@ -48,7 +48,7 @@ class Image extends upload
      *  Constructor
      *  @param string $name Optional image filename
      */
-    function Image($ad_id, $varname='photo')
+    public function __construct($ad_id, $varname='photo')
     {
         global $_CONF_ADVT, $_CONF;
 
@@ -97,7 +97,7 @@ class Image extends upload
     *   Make sure we can upload the files and create thumbnails before
     *   adding the image to the database.
     */
-    function uploadFiles()
+    public function uploadFiles()
     {
         global $_TABLES;
 
@@ -106,7 +106,8 @@ class Image extends upload
             return;
 
         parent::uploadFiles();
-        $this->MakeThumbs();
+        // Deprecated, use LGLIB_ImageUrl() when rendering
+        //$this->MakeThumbs();
 
         foreach ($this->goodfiles as $filename) {
             $sql = "
@@ -119,7 +120,7 @@ class Image extends upload
                 )";
             $result = DB_query($sql);
             if (!$result) {
-                $this->addError("MakeThumbs() : Failed to insert {$filename}");
+                $this->addError("Image::uploadFiles() : Failed to insert {$filename}");
             }
         }
  
@@ -129,12 +130,13 @@ class Image extends upload
     /**
      *  Calculate the new dimensions needed to keep the image within
      *  the provided width & height while preserving the aspect ratio.
+     *  @deprecated 1.0.8
      *  @param string  $srcfile     Source filepath/name
      *  @param integer $width       New width, in pixels
      *  @param integer $height      New height, in pixels
      *  @return array  $newwidth, $newheight
      */
-    function reDim($srcfile, $width=0, $height=0)
+    public function reDim($srcfile, $width=0, $height=0)
     {
         list($s_width, $s_height) = @getimagesize($srcfile);
 
@@ -161,10 +163,11 @@ class Image extends upload
     /**
      *  Resize an image to the specified dimensions, placing the resulting
      *  image in the specified location.  At least one of $newWidth or
+     *  @deprecated 1.0.8
      *  $newHeight must be specified.
      *  @return string Blank if successful, error message otherwise.
      */
-    function MakeThumbs()
+    public function MakeThumbs()
     {
         global $_CONF_ADVT, $LANG_PHOTO;
 
@@ -180,9 +183,11 @@ class Image extends upload
             if (!file_exists($src))
                 continue;
 
+            USES_lglib_class_image();
             // Calculate the new dimensions
             list($dWidth,$dHeight) = 
-                $this->reDim($src, $thumbsize, $thumbsize);
+                lgImage::reDim($src, $thumbsize, $thumbsize);
+                //$this->reDim($src, $thumbsize, $thumbsize);
 
             if ($dWidth == 0 || $dHeight == 0) {
                 $this->_addError("MakeThumbs() $filename could not get dimensions");
@@ -209,7 +214,7 @@ class Image extends upload
      *  Delete an image from disk.  Called by Entry::Delete if disk
      *  deletion is requested.
      */
-    function Delete()
+    public function Delete()
     {
         global $_TABLES, $_USER, $_CONF_ADVT;
 
@@ -228,7 +233,7 @@ class Image extends upload
      *  @access private
      *  @param string $imgpath Path to file
      */
-    function _deleteOneImage($imgpath)
+    private function _deleteOneImage($imgpath)
     {
         if (file_exists($imgpath . '/' . $this->filename))
             unlink($imgpath . '/' . $this->filename);
@@ -239,7 +244,7 @@ class Image extends upload
      *  If the image isn't validated, the upload doesn't happen.
      *  @param array $file $_FILES array
      */
-    function Upload($file)
+    public function Upload($file)
     {
         global $LANG_PHOTO, $_CONF_ADVT;
 
@@ -259,8 +264,8 @@ class Image extends upload
 
         // Create the display and thumbnail versions.  Errors here
         // aren't good, but aren't fatal.
-        $this->ReSize('thumb');
-        $this->ReSize('disp');
+        //$this->ReSize('thumb');
+        //$this->ReSize('disp');
 
     }   // function Upload()
 
@@ -270,7 +275,7 @@ class Image extends upload
      *  @param array $file $_FILES array
      *  @return boolean True if valid, False otherwise
      */
-    function Validate($file)
+    public function Validate($file)
     {
         global $LANG_PHOTO, $_CONF_ADVT;
 

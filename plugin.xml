@@ -2,7 +2,7 @@
     <id>classifieds</id>
     <name>Classified Ads</name>
     <description>Classified Ads plugin for glFusion.</description>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <glfusionversion>1.4.0</glfusionversion>
     <phpversion>5.3.0</phpversion>
     <dataproxydriver>classifieds.class.php</dataproxydriver>

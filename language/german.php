@@ -288,6 +288,7 @@ $LANG_confignames['classifieds'] = array(
     'centerblock'        => 'Homepage ersetzen?',
     'commentsupport'     => 'Kommentare erlauben?',
     'displayblocks'      => 'Anzeige glFusion Blöcke',
+    'detail_img_width' => 'Image width on ad detail pages',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

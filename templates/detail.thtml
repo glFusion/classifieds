@@ -1,83 +1,101 @@
 {# begin {templatelocation} #}
 {curr_loc}
-<div style="position:relative;">
-  <br {xhtml}>
-  <div style="float:left; width:200px;">
-    <span style="font-weight:bold;">{ad_type}</span>:
-    <p {xhtml}>
+<div id="adDetailWrapper">
+  {!if have_userlinks}
+  <div id="adDetailUserLinks">
+    {!if have_editlink}
+    <form action="{edit_link}" method=POST>
+        <input 
+                name="editbutton" type="image" 
+                src="{layout_url}/images/edit.png"
+                alt="{$LANG_ADVT['edit_item']}"
+                title="{$LANG_ADVT['edit_item']}"
+                />
+    </form>
+    {!endif}
+    <form action="{del_link}" method=POST>
+        <input 
+                name="delbutton" type="image" 
+                src="{layout_url}/images/admin/delete.png"
+                alt="{$LANG_ADVT['del_item']}" 
+                title="{$LANG_ADVT['del_item']}" 
+                onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" 
+                />
+    </form>
+  </div>
+  {!endif}
+  <div class="adImage" style="width:{tn_width}px;max-width:{tn_width}px;">
+    <span class=adTypeHeader">{ad_type}</span>:
+    <p />
     {!if have_photo}
       <!-- BEGIN PhotoBlock -->
-      <a href="{img_url}/{ph_file}" target="_blank" rel="slimbox[ad]">
-              <!--onclick="initLightbox()">-->
-        <img src="{img_url}/thumb/{ph_file}" border="0" 
+      <a href="{disp_url}" target="_blank" rel="slimbox[ad]">
+        <img src="{small_url}" border="0" 
                 alt="{$LANG_ADVT[click_to_enlarge]}" 
-                title="{$LANG_ADVT[click_to_enlarge]}"
-                class="gl_mootip" {xhtml}>
+                title="{$LANG_ADVT[click_to_enlarge]}" />
       </a>
-      <br {xhtml}>
+      <br />
       <!-- END PhotoBlock -->
     {!else}
-      <br {xhtml}>
-      <span style="size:small;color:#808080;">
+      <br />
+      <span class="adNoImage">
         {$LANG_ADVT[no_image]}
       </span>
-      <br {xhtml}>
-      <br {xhtml}>
+      <br />
+      <br />
     {!endif}
 
     <small>
       {$LANG_ADVT['added_col']} {add_date}
-      <br {xhtml}>
+      <br />
       <span 
         {!if is_expired}
-          style="color:red;"  
+          class="adExpiredText"
         {!endif}
       >
         {$LANG_ADVT['expires_col']} {exp_date}
-        <p {xhtml}>
+        <p />
       </span>
 
       {!if max_add_days}
-        <hr width="80%" align="left" {xhtml}>
+        <hr width="80%" align="left" />
         <form method="post" 
           action="{site_url}/classifieds/index.php?mode=moredays&id={ad_id}">
           {$LANG_ADVT['add']}
-          <input type="text" name = "add_days" size="3" {xhtml}> 
+          <input type="text" name = "add_days" size="3" /> 
           {$LANG_ADVT['days']}
-          <br {xhtml}>
+          <br />
           ({$LANG_ADVT['max']} {max_add_days})
         </form>
-        <hr width="80%" align="left" {xhtml}>
+        <hr width="80%" align="left" />
       {!endif}
       {$LANG_ADVT['views']} {views_no}
     </small>
   </div>
 
-  <div style="float:left; width:70%;">
-    <b>{subject}</b>
-    <p {xhtml}>
-    {descript}
-    <br {xhtml}>
-    <br {xhtml}>
+  <div id="adDetailData">
+    <p class="title">{subject}</p>
+    <p>{descript}</p>
     {!if price}
-      <b>{$LANG_ADVT['price']}:</b> {price}<br {xhtml}><br {xhtml}>
+      <p>
+      <span class="title">{$LANG_ADVT['price']}:</span>{price}
+      </p>
     {!endif}
-    <hr width="100%" {xhtml}>
+    <hr width="100%" />
 
-    <span style="font-weight:bold;">{$LANG_ADVT['contact_info']}</span>
-    <br {xhtml}>
-    <table width="70%">
+    <p class="title">{$LANG_ADVT['contact_info']}</p>
+    <table id="adContact">
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['contact']}</td>
-        <td width="80%" height="20">
-          <b>{username}</b>
+        <td class="title">{$LANG_ADVT['contact']}</td>
+        <td class="data">
+          {username}
           {!if ad_uid}
           <a href="{site_url}/profiles.php?uid={ad_uid}">
-            <img class="gl_mootip" style="padding:5px 0px 0px 9px;" 
+            <img 
                 name="editbutton" 
                 alt="{$LANG_ADVT['ask_question']}" 
                 title="{$LANG_ADVT['ask_question']}" 
-                src="{site_url}/classifieds/images/mail.png" {xhtml}>
+                src="{site_url}/classifieds/images/mail.png" />
           </a>
           {!else}
           &nbsp;&nbsp;<i>({$LANG_ADVT['login_to_email']})</i>
@@ -86,44 +104,44 @@
       </tr>
       {!if uinfo_address}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['address']}</td>
-        <td width="80%" height="20">{uinfo_address}</td>
+        <td class="title">{$LANG_ADVT['address']}</td>
+        <td class="data">{uinfo_address}</td>
       </tr>
       {!endif}
       {!if uinfo_city}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['city']}</td>
-        <td width="80%" height="20">{uinfo_city}</td>
+        <td class="title">{$LANG_ADVT['city']}</td>
+        <td class="data">{uinfo_city}</td>
       </tr>
       {!endif}
       {!if uinfo_state}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['state']}</td>
-        <td width="80%" height="20">{uinfo_state}</td>
+        <td class="title">{$LANG_ADVT['state']}</td>
+        <td class="data">{uinfo_state}</td>
       </tr>
       {!endif}
       {!if uinfo_postcode}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['postal']}</td>
-        <td width="80%" height="20">{uinfo_postcode}</td>
+        <td class="title">{$LANG_ADVT['postal']}</td>
+        <td class="data">{uinfo_postcode}</td>
       </tr>
       {!endif}
       {!if uinfo_tel}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['telephone']}</td>
-        <td width="80%" height="20">{uinfo_tel}</td>
+        <td class="title">{$LANG_ADVT['telephone']}</td>
+        <td class="data">{uinfo_tel}</td>
       </tr>
       {!endif}
       {!if uinfo_fax}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['fax']}</td>
-        <td width="80%" height="20">{uinfo_fax}</td>
+        <td class="title">{$LANG_ADVT['fax']}</td>
+        <td class="data">{uinfo_fax}</td>
       </tr>
       {!endif}
       {!if ad_url}
       <tr>
-        <td width="20%" height="20">{$LANG_ADVT['website']}</td>
-        <td width="80%" height="20">
+        <td class="title">{$LANG_ADVT['website']}</td>
+        <td class="data">
           <a href="{ad_url}" target="_blank" rel="nofollow">{ad_url}</a>
         </td>
       </tr>
@@ -137,51 +155,21 @@
       </tr>
       {!endif}
     </table>
-    <hr {xhtml}>
-    <p {xhtml}>
-    <b>{$LANG_ADVT['whats_hot']}</b><br {xhtml}>
+    <hr />
+    <p />
+    <span class="adDetailHotTitle">{$LANG_ADVT['whats_hot']}</span><br />
   
-    <table border="0" width="100%" height="100%" 
-            cellspacing="0" cellpadding="0">
-      {whats_hot_row}
+    <table class="adDetailHotTable">
+    <!-- BEGIN HotBlock -->
+    <tr>
+      <td class="hottitle"><a href="{hot_url}">{hot_title}</a></td>
+      <td class="hotcat">{hot_cat}</td>
+    </tr>
+    <!-- END HotBlock -->
     </table>
 
     {usercomments}
 
-  </div>
-
-  <div style="position:absolute; top:0; right:0;">
-    {!if have_userlinks}
-    <table border="0">
-      <tr>
-        {!if have_editlink}
-        <td>
-          <form action="{edit_link}" method=POST>
-            <input class="gl_mootip" style="padding:5px 0px 0px 9px;" 
-                name="editbutton" type="image" 
-                src="{layout_url}/images/edit.png"
-                alt="{$LANG_ADVT['edit_item']}"
-                title="{$LANG_ADVT['edit_item']}"
-                {xhtml}>
-          </form>
-                <!--src="{site_url}/classifieds/images/edit.png" -->
-        </td>
-        {!endif}
-        <td>
-          <form action="{del_link}" method=POST>
-            <input class="gl_mootip" style="padding:5px 0px 0px 9px;" 
-                name="delbutton" type="image" 
-                src="{layout_url}/images/admin/delete.png"
-                alt="{$LANG_ADVT['del_item']}" 
-                title="{$LANG_ADVT['del_item']}" 
-                onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" 
-                {xhtml}>
-          </form>
-                <!--src="{site_url}/classifieds/images/edit-delete.png" -->
-        </td>
-      </tr>
-    </table>
-    {!endif}
   </div>
 
 </div>

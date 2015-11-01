@@ -291,6 +291,7 @@ $LANG_confignames['classifieds'] = array(
     'commentsupport' => 'Comments Supported?',
     'displayblocks'  => 'Display glFusion Blocks',
     'disp_fullname' => 'Show owner full name with ads?',
+    'detail_img_width' => 'Image width on ad detail pages',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

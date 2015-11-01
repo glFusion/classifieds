@@ -26,9 +26,11 @@ if (!defined('GVERSION')) {
 global $_ADVT_DEFAULT, $_CONF_ADVT;
 $_ADVT_DEFAULT = array();
 
-// Max image dimensions
+// Max image dimensions for display popups (slimbox)
 $_ADVT_DEFAULT['img_max_height'] = 600;
 $_ADVT_DEFAULT['img_max_width'] = 800;
+// Max image width for ad detail page, typically larger than thumbnail
+$_CONF_ADVT['detail_img_width'] = 200;
 $_ADVT_DEFAULT['random_blk_width'] = 100;   // Max width for random ad block
 $_ADVT_DEFAULT['thumb_max_size'] = 100; // Max dimension for thumbnails
 $_ADVT_DEFAULT['imagecount']    = 3;    // max number of user images
@@ -140,6 +142,8 @@ function plugin_initconfig_classifieds($group_id = 0)
                 'text', 0, 0, 0, 10, true, $_CONF_ADVT['pi_name']);
         $c->add('img_max_width', $_ADVT_DEFAULT['img_max_width'], 
                 'text', 0, 0, 0, 20, true, $_CONF_ADVT['pi_name']);
+        $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
+                'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
         $c->add('thumb_max_size', $_ADVT_DEFAULT['thumb_max_size'], 
                 'text', 0, 0, 0, 30, true, $_CONF_ADVT['pi_name']);
         $c->add('random_blk_width', $_ADVT_DEFAULT['random_blk_width'], 

@@ -160,3 +160,75 @@ img.RandBlock {
 .adBreadcrumb {
     font-weight: bold;
 }
+
+#adDetailWrapper {
+    position: relative;
+    margin-top: 2rem;
+}
+
+#adDetailWrapper .adImage {
+    float: left;
+    margin-right: 10px;
+    max-width: 200px;
+    width: 200px;
+}
+
+#adDetailData {
+    float: left;
+    width: 70%;
+}
+
+#adDetailData img {
+    padding: 5px 0px 0px 9px;
+}
+
+#adDetailData .title {
+    font-weight: bold;
+    margin-right: 3rem;
+}
+
+.adTypeHeader {
+    font-weight:bold;
+}
+
+.adDetailHotTable {
+    border: 0px;
+    margin-bottom: 2rem;
+    width: 100%;
+    border-spacing: 0px;
+    border-padding: 0px;
+}
+
+#adContact {
+    width: 70%;
+}
+#adContact .title {
+    padding-right: 3rem;
+    width: 20%;
+    height: 20px;
+}
+#adContact .data {
+    width: 80%;
+    height; 20px;
+}
+
+div #adDetailUserLinks {
+    float:right;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#adDetailUserLinks input {
+    padding: 5px 0px 0px 9px;
+}
+
+/* "No Image Available" text */
+.adNoImage {
+    size: small;
+    color: #808080;
+}
+
+.adExpiredText {
+    color: red;
+}
+  

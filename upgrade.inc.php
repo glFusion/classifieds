@@ -2,11 +2,11 @@
 /**
 *   Upgrade routines for the Classifieds plugin
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2015 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.0
+*   @version    1.0.8
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
-*   GNU Public License v2 or later
+*               GNU Public License v2 or later
 *   @filesource
 */
 
@@ -75,6 +75,11 @@ function classifieds_do_upgrade($current_ver)
 
     if ($current_ver < '1.0.4') {
         $error = classifieds_upgrade_1_0_4();
+        if ($error)
+            return $error;
+    }
+    if ($current_ver < '1.0.8') {
+        $error = classifieds_upgrade_1_0_8();
         if ($error)
             return $error;
     }
@@ -455,6 +460,25 @@ function classifieds_upgrade_1_0_4()
     }
 
     return classifieds_do_upgrade_sql('1.0.4', $sql);
+
+}
+
+/** Upgrade to version 1.0.8
+    Adds config item for max image width on ad detail page
+*/
+function classifieds_upgrade_1_0_8()
+{
+    global $_ADVT_DEFAULT, $_CONF_ADVT;
+
+    // Add new configuration items
+    $c = config::get_instance();
+    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
+        COM_errorLog("Adding new configuration items");
+        $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
+                'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
+    }
+
+    return classifieds_do_upgrade_sql('1.1.0', $sql);
 
 }
 
