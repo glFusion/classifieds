@@ -121,10 +121,10 @@ function CLASSIFIEDS_catEdit($catid = 0)
         $T->set_var('bgcolor', $row['bgcolor']);
 
         if ($row['image'] != '' && 
-            file_exists("{$_CONF_ADVT['catimgpath']}/{$row['image']}")) {
+            file_exists(CLASSIFIEDS_IMGPATH . '/cat/' . $row['image'])) {
             $T->set_var('existing_image',
-                "<td>
-                    <img src=\"{$_CONF_ADVT['catimgurl']}/{$row['image']}\" 
+                '<td>
+                    <img src=\"' . CLASSIFIEDS_thumbUrl($row['image'] . "\" 
                         width=48 height=48><br />
                     <a href=\"?mode=delcatimg&cat_id={$row['cat_id']}\">{$LANG_ADVT['delete']}</a>
                 </td>");
@@ -211,7 +211,7 @@ function catSave($catid = 0)
     if (is_uploaded_file($_FILES['imagefile']['tmp_name'])) {
         $img_filename = $time . "_" . rand(1,100) . "_" . $_FILES['imagefile']['name'];
         if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
-            $_CONF_ADVT['catimgpath']."/$img_filename")) {
+            CLASSIFIEDS_IMGPATH . '/cat/' . $img_filename)) {
             $retval .= CLASSIFIEDS_errorMsg("Error Moving Image", 'alert');
         }
 
@@ -359,14 +359,13 @@ function catDelete($id)
     // Delete this category
     // First, see if there's an image to delete
     $img_name = DB_getItem($_TABLES['ad_category'], 'image', "cat_id=$id");
-    if ($img_name != '' && file_exists($_CONF_ADVT['catimgpath']."/$img_name")) {
-        unlink($_CONF_ADVT['catimgpath']."/$img_name");
+    if ($img_name != '' && file_exists(CLASSIFIES_IMGPATH . '/cat/' . $img_name)) {
+        unlink(CLASSIFIES_IMGPATH . '/cat/' . $img_name);
     }
     DB_delete($_TABLES['ad_category'], 'cat_id', $id);
 
     // If we made it this far, must have worked ok
     return true;
-
 }
 
 
@@ -387,16 +386,12 @@ function catDelImage($cat_id = 0)
     if ($img_name == '')
         return;
 
-    if (file_exists("{$_CONF_ADVT['catimgpath']}/$img_name")) {
-        unlink("{$_CONF_ADVT['catimgpath']}/$img_name");
+    if (file_exists(CLASSIFIEDS_IMGPATH . '/cat/' . $img_name)) {
+        unlink(CLASSIFIEDS_IMGPATH . '/cat/' . $img_name);
     }
-    DB_query("UPDATE
-            {$_TABLES['ad_category']}
-        SET
-            image=''
-        WHERE
-            cat_id=$cat_id");
-
+    DB_query("UPDATE {$_TABLES['ad_category']}
+            SET image=''
+            WHERE cat_id=$cat_id");
 }
 
 

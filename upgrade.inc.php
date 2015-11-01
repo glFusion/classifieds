@@ -4,7 +4,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2015 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.8
+*   @version    1.1.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -78,8 +78,8 @@ function classifieds_do_upgrade($current_ver)
         if ($error)
             return $error;
     }
-    if ($current_ver < '1.0.8') {
-        $error = classifieds_upgrade_1_0_8();
+    if ($current_ver < '1.1.0') {
+        $error = classifieds_upgrade_1_1_0();
         if ($error)
             return $error;
     }
@@ -463,19 +463,61 @@ function classifieds_upgrade_1_0_4()
 
 }
 
-/** Upgrade to version 1.0.8
+/** Upgrade to version 1.1.0
     Adds config item for max image width on ad detail page
 */
-function classifieds_upgrade_1_0_8()
+function classifieds_upgrade_1_1_0()
 {
     global $_ADVT_DEFAULT, $_CONF_ADVT;
 
     // Add new configuration items
     $c = config::get_instance();
+    $old_imgpath = pathinfo($_CONF_ADVT['image_dir']);
+    $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
+    $mv_userimages = $old_imgpath['dirname'] != CLASSIFIEDS_IMGPATH ? true : false;
+    $mv_catimages = $old_imgpath['catimgpath'] != CLASSIFIEDS_IMGPATH . '/cat' ? true : false;
+    if ($_CONF_ADVT['catimgpath'] != CLASSIFIEDS_IMGPATH . '/cat') {
+        if (!is_dir(CLASSIFIEDS_IMGPATH . '/cat')) {
+            @mkdir(CLASSIFIEDS_IMGPATH, true);
+        }
+        if (!is_dir(CLASSIFIEDS_IMGPATH . '/cat')) {
+            COM_errorLog("Error creating new dir " . CLASSIFIEDS_IMGPATH . "/cat");
+            return 1
+        }
+    }
+    // Move ad images to new location
+    if ($mv_userimages) {
+        $files = glob($_CONF_ADVT['image_dir'] . '/*');
+        if ($files) {
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $parts = pathinfo($file);
+                    rename($file, CLASSIFIEDS_IMGPATH . '/' . $parts['basename']);
+                }
+            }
+        }
+    }
+    // Now move category images
+    if ($mv_catimages) {
+        $files = glob($_CONF_ADVT['catimgpath'] . '/*');
+        if ($files) {
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $parts = pathinfo($file);
+                    rename($file, CLASSIFIEDS_IMGPATH . '/cat/' . $parts['basename']);
+                }
+            }
+        }
+    }
+
     if ($c->group_exists($_CONF_ADVT['pi_name'])) {
         COM_errorLog("Adding new configuration items");
         $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
                 'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
+        $c->del('catimgpath','classifieds');
+        $c->del('catimgurl','classifieds');
+        $c->del('image_dir','classifieds');
+        $c->del('image_url','classifieds');
     }
 
     return classifieds_do_upgrade_sql('1.1.0', $sql);

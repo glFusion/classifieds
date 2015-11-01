@@ -4,8 +4,7 @@
     {!if img_url}
     <p>
       <img class="RandBlock" src="{img_url}" 
-        width="{img_width}" height="{img_height}" 
-        alt="{img_alt}" {xhtml}>
+        alt="{img_alt}" />
     </p>
     {!endif}
   </a>

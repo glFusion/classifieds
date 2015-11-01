@@ -174,7 +174,6 @@ function adEdit($A, $mode = 'edit', $admin=false)
         // This is an existing ad with values already in $A
 
         $T->set_var('expiration_date', $LANG_ADVT['expiration']);
-        $T->set_var('add', '&nbsp;&nbsp;-&nbsp;'. $LANG_ADVT['add']);  // "Add: X days"
         $T->set_var('days', '0');
 
         // Disable the perm_anon checkbox if it's disabled by the category.
@@ -227,7 +226,7 @@ function adEdit($A, $mode = 'edit', $admin=false)
         'gltoken_name'      => CSRF_TOKEN,
         'gltoken'           => SEC_createToken(),
         'has_delbtn'        => 'true',
-        'txt_photo'         => "{$LANG_ADVT['photo']}<br ".XHTML.">" .
+        'txt_photo'         => "{$LANG_ADVT['photo']}<br />" .
                     sprintf($LANG_ADVT['image_max'], $img_max),
         'type'              => $type,
         'action_url'        => $action_url,
@@ -288,11 +287,14 @@ function adEdit($A, $mode = 'edit', $admin=false)
     $T->set_block('adedit', 'PhotoRow', 'PRow');
     $i = 0;
     if ($photocount > 0) {
+
         while ($prow = DB_fetchArray($photo, false)) {
             $i++;
             $T->set_var(array(
-                'img_url'   => "{$_CONF_ADVT['image_url']}/{$prow['filename']}",
-                'thumb_url' => "{$_CONF_ADVT['image_url']}/thumb/{$prow['filename']}",
+               'img_url'   => LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/' . $prow['filename'],
+                            $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']),
+                'thumb_url' => LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/' . $prow['filename'],
+                            $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']),
                 'seq_no'    => $i,
                 'ad_id'     => $A['ad_id'],
                 'del_img_url'   => $action_url . 
@@ -371,11 +373,8 @@ function imgDelete($admin=false, $adTable = 'ad_ads')
 
     // Otherwise, this is the right owner for this ad, so delete the image
     // and thumbnail from the filesystem and database
-    if (file_exists("{$_CONF_ADVT['image_dir']}/{$row['filename']}"))
-            unlink("{$_CONF_ADVT['image_dir']}/{$row['filename']}");
-
-    if(file_exists("{$_CONF_ADVT['image_dir']}/thumb/{$row['filename']}"))
-            unlink("{$_CONF_ADVT['image_dir']}/thumb/{$row['filename']}");
+    if (file_exists(CLASSIFIEDS_IMGPATH . '/' . $row['filename']))
+            unlink(CLASSIFIEDS_IMGPATH . '/' . $row['filename']);
 
     DB_delete($_TABLES['ad_photo'], 'photo_id', $mid);
 

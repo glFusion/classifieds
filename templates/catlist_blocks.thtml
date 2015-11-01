@@ -12,7 +12,7 @@
     {!if cat_image}
     <div class="catImage" style="cursor:pointer;">
       <a href="{cat_url}">
-      <img class="catImage" src="{cat_image}" {xhtml}>
+      <img class="catImage" src="{cat_image}" />
       </a>
     </div>
     {!endif}

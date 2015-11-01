@@ -92,7 +92,7 @@ window.addEvent('domready',function() {
                 </a>
               </td>
               <td align="left">
-                <a href="{del_img_url}">{txt_delete}</a><br>
+                <a href="{del_img_url}">{$LANG_ADVT['delete']}</a><br />
               </td>
             </tr>
             <!-- END PhotoRow -->
@@ -113,9 +113,9 @@ window.addEvent('domready',function() {
         <td align="right"><b>{expiration_date}</b></td>
         <td align="left">
           <b>{already_expired}</b>{row_exp_date}
-          {add}
+          &nbsp;&nbsp;&nbsp;{$LANG_ADVT['add']}
           <input type="text" size="10" name="moredays" value="{days}" />
-          {txt_days}
+          {$LANG_ADVT['days']}
         </td>
       </tr>
 

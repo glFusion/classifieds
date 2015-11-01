@@ -19,7 +19,7 @@ class adCategory
 {
     private $properties;
     private $isNew;
-
+    private $imgPath;
 
     /**
     *   Constructor
@@ -29,6 +29,7 @@ class adCategory
     public function __construct($catid = 0)
     {
         $catid = (int)$catid;
+        $this->imgPath = CLASSIFIEDS_IMGPATH . '/cat/';
         if ($catid > 0) {
             $this->cat_id = $catid;
             if ($this->Read()) {
@@ -184,7 +185,7 @@ class adCategory
             $img_filename = $time . "_" . rand(1,100) . "_" .
                 $_FILES['imagefile']['name'];
             if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
-                $_CONF_ADVT['catimgpath']."/$img_filename")) {
+                $this->imgPath . $img_filename)) {
                 $retval .= CLASSIFIEDS_errorMsg("Error Moving Image", 'alert');
             }
 
@@ -192,7 +193,7 @@ class adCategory
             // then delete the old image, if any.  The DB still has the old filename
             // at this point.
             if (!$this->isNew) {
-                catDelImage($catid);
+                self::DelImage($catid);
             }
         }
 
@@ -229,7 +230,6 @@ class adCategory
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
         else 
             return '';      // no actual return if this function works ok
-
     }
 
 
@@ -292,8 +292,8 @@ class adCategory
         // Delete this category
         // First, see if there's an image to delete
         $img_name = DB_getItem($_TABLES['ad_category'], 'image', "cat_id=$id");
-        if ($img_name != '' && file_exists($_CONF_ADVT['catimgpath']."/$img_name")) {
-            unlink($_CONF_ADVT['catimgpath']."/$img_name");
+        if ($img_name != '' && file_exists($this->imgPath . $img_name)) {
+            unlink($this->imgPath . $img_name);
         }
         DB_delete($_TABLES['ad_category'], 'cat_id', $id);
 
@@ -317,8 +317,8 @@ class adCategory
 
         $img_name = DB_getItem($_TABLES['ad_category'], 'image', "cat_id=$cat_id");
         if ($img_name != '') {
-            if (file_exists("{$_CONF_ADVT['catimgpath']}/$img_name")) {
-                unlink("{$_CONF_ADVT['catimgpath']}/$img_name");
+            if (file_exists($this->imgPath . $img_name)) {
+                unlink($this->imgPath . $img_name);
             }
             DB_query("UPDATE {$_TABLES['ad_category']}
                 SET image=''
@@ -453,10 +453,8 @@ class adCategory
             'cancel_url' => CLASSIFIEDS_ADMIN_URL. '/index.php?admin=cat',
         ) );
 
-        if ($this->image != '' && 
-            file_exists("{$_CONF_ADVT['catimgpath']}/{$this->image}")) {
-            $T->set_var('existing_image',
-                $_CONF_ADVT['catimgurl'] . '/' . $this->image); 
+        if ($this->image != '') {
+            $T->set_var('existing_image', CLASSIFIEDS_thumbUrl($this->image));
         }
 
         $T->parse('output','modify');

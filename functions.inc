@@ -41,6 +41,7 @@ define('CLASSIFIEDS_ADMIN_URL',
         $_CONF['site_admin_url'] . '/plugins/' . $_CONF_ADVT['pi_name']);
 define('CLASSIFIEDS_CLASSPATH', 
     $_CONF['path'].'plugins/'.$_CONF_ADVT['pi_name'].'/classes/');
+define('CLASSIFIEDS_IMGPATH', $_CONF['path'] . '/data/classifieds/images');
 
 if (file_exists(CLASSIFIEDS_PI_PATH . '/config.php')) {
     /** Include local configuration overrides */
@@ -1243,20 +1244,8 @@ function phpblock_classifieds_random()
             LIMIT 1");
     if ($r && DB_numrows($r) == 1) {
         $prow = DB_fetchArray($r);
-        if (file_exists("{$_CONF_ADVT['image_dir']}/thumb/{$prow['filename']}")) {
-            list($s_width, $s_height, $width, $height) = CLASSIFIEDS_imgReDim(
-                    "{$_CONF_ADVT['image_dir']}/thumb/{$prow['filename']}", 
-                    $_CONF_ADVT['random_blk_width'], 
-                    0
-                    );
-            $T->set_var('img_url', 
-                $_CONF_ADVT['image_url'] . '/thumb/' . $prow['filename']);
-            $T->set_var('img_alt', 'Ad Thumbnail');
-            $T->set_var('img_width', $width);
-            $T->set_var('img_height', $height);
-        } else {
-            $T->set_var('img_url', '');
-        }
+        $T->set_var('img_url', CLASSIFIEDS_thumbUrl($prow['filename']));
+        $T->set_var('img_alt', 'Ad Thumbnail');
     }
 
     $T->parse('output','rblock');
@@ -1319,11 +1308,9 @@ function deletePhotos($ad_id='')
     if (!$photo) return 2;
 
     while ($prow = DB_fetchArray($photo)) {
-        if (file_exists("{$_CONF_ADVT['image_dir']}/{$prow['filename']}"))
-            unlink( "{$_CONF_ADVT['image_dir']}/{$prow['filename']}" );
-
-        if (file_exists("{$_CONF_ADVT['image_dir']}/thumb/{$prow['filename']}"))
-            unlink("{$_CONF_ADVT['image_dir']}/thumb/{$prow['filename']}");
+        if (file_exists(CLASSIFIEDS_IMGPATH . '/' . $prow['filename'])) {
+            unlink(CLASSIFIEDS_IMGPATH . '/' . $prow['filename']);
+        }
     }
 
     DB_delete($_TABLES['ad_photo'], 'ad_id', $ad_id);
@@ -2121,10 +2108,9 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
     while ($A = DB_fetchArray($result, false)) {
         $img_file = DB_getItem($_TABLES['ad_photo'], 'filename',
                 "ad_id='{$A['ad_id']}'");
-         if ($img_file != '' && 
-            is_file("{$_CONF_ADVT['image_dir']}/{$img_file}")) {
-            $T->set_var('img_file', $img_file);
-            $T->set_var('img_url', $_CONF_ADVT['image_url']);
+         if ($img_file != '') {
+            $T->set_var('img_url', CLASSIFIEDS_dispUrl($img_file));
+            $T->set_var('img_url', CLASSIFIEDS_thumbUrl($img_file));
         } else {
             $T->clear_var('img_url');
             $T->clear_var('img_rile');
@@ -2356,5 +2342,22 @@ function CLASSIFIEDS_commentCount($ad_id)
                     array($ad_id, 'classifieds') );
     return $count;
 }
+
+
+function CLASSIFIEDS_dispUrl($filename)
+{
+    global $_CONF_ADVT;
+    return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/' . $filename,
+                $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
+}
+
+
+function CLASSIFIEDS_thumbUrl($filename)
+{
+    global $_CONF_ADVT;
+    return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/' . $filename,
+                $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
+}
+
 
 ?>

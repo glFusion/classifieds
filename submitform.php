@@ -151,7 +151,7 @@ function CLASSIFIEDS_submitForm($mode = 'submit', $A)
                 '&id='. $A['ad_id']. 
                 '" method="post">
                 <input type="submit" name="mode" value="'.
-                $LANG_ADMIN['delete']. '"' . XHTML . '></form>');
+                $LANG_ADMIN['delete']. '"/></form>');
     }
 
     // Set some of the form variables if they're already set.

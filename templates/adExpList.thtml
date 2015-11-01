@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
-<p {xhtml}>
-{pagemenu}<p {xhtml}>
+<p />
+{pagemenu}<p />
 <table border="0" cellpadding="1" cellspacing="0" width="100%">
   <tr>
     <th width=20%></th>
@@ -31,18 +31,17 @@
       {!if img_url}
         <a href="{img_url}" rel="slimbox" target="_blank">
           <img src="{thumb_url}" border="0" 
-            alt="{$LANG_ADVT['click_to_enlarge']}" 
-            width="{thumb_width}" height="{thumb_height}" {xhtml}>
+            alt="{$LANG_ADVT['click_to_enlarge']}" />
         </a>
-        <br {xhtml}>
+        <br />
       {!else}
-        <br {xhtml}>
+        <br />
         <span style="color:#808080;size:small;">{$LANG_ADVT[no_image]}</span>
       {!endif}
     </td>
     <td valign="top" colspan="4">
       {descript}{ellipses}
-      <p {xhtml}>
+      <p />
       {!if price}
         {$LANG_ADVT['price']}: {price}
       {!endif}

@@ -44,7 +44,7 @@ function adListCat($cat = '')
 
     $img_name = $row['image'];
     if ($img_name != '') {
-        $T->set_var('catimg_url', "{$_CONF_ADVT['catimgurl']}/$img_name");
+        $T->set_var('catimg_url', CLASSIFIEDS_thumbUrl($img_name));
     }
 
     // Set the breadcrumb navigation
@@ -311,24 +311,9 @@ function adExpList($pagename='', $cat_id='', $where_clause='', $limit_clause='')
         // filesystem, then use it.  Otherwise display "not available".
         if (DB_numRows($photo) == 1) {
             $prow = DB_fetchArray($photo);
-        } else {
-            $prow = array();
-        }
-        if (isset($prow['filename']) && 
-            file_exists("{$_CONF_ADVT['image_dir']}/{$prow['filename']}") &&
-            file_exists("{$_CONF_ADVT['image_dir']}/thumb/{$prow['filename']}") 
-        ) {
-            $T->set_var('img_url', "{$_CONF_ADVT['image_url']}/{$prow['filename']}");
-            $T->set_var('thumb_url', "{$_CONF_ADVT['image_url']}/thumb/{$prow['filename']}");
+            $T->set_var('img_url', CLASSIFIEDS_dispUrl($prow['filename']));
+            $T->set_var('thumb_url', CLASSIFIEDS_thumbUrl($prow['filename']));
 
-            // Determine dimensions for thumbnail in HTML tags
-            list($s_width, $s_height, $newwidth, $newheight) = 
-                CLASSIFIEDS_imgReDim("{$_CONF_ADVT['image_dir']}/thumb/{$prow['filename']}", 
-                    $_CONF_ADVT['thumb_max_size'],
-                    $_CONF_ADVT['thumb_max_size']
-                );
-            $T->set_var('thumb_width', $newwidth);
-            $T->set_var('thumb_height', $newheight);
 
         } else {
             $T->set_var('img_url', '');
@@ -437,22 +422,16 @@ function CLASSIFIEDS_catList_normal()
         $T->set_var('cat_url', CLASSIFIEDS_makeUrl('home', $catsrow['cat_id']));
         $T->set_var('cat_name', $catsrow['cat_name']);
         $T->set_var('cat_ad_count', findTotalAds($catsrow['cat_id']));
-        if ($catsrow['image'] != '' && file_exists("{$_CONF_ADVT['catimgpath']}/{$catsrow['image']}")) {
-            $T->set_var('cat_image', "{$_CONF_ADVT['catimgurl']}/{$catsrow['image']}");
+        if ($catsrow['image'] != '') {
+            $T->set_var('cat_image', CLASSIFIEDS_thumbUrl($catsrow['image']));
         } else {
             $T->set_var('cat_image', '');
         }
 
-        $sql = "
-            SELECT 
-                * 
-            FROM 
-                {$_TABLES['ad_category']} 
-            WHERE 
-                papa_id={$catsrow['cat_id']} 
+        $sql = "SELECT * FROM {$_TABLES['ad_category']} 
+                WHERE papa_id={$catsrow['cat_id']} 
                 " . COM_getPermSQL('AND', 0, 2) . "
-            ORDER BY cat_name ASC
-        ";
+                ORDER BY cat_name ASC";
         //echo $sql;die;
         $subcats = DB_query($sql);
         if (!$subcats) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
@@ -510,16 +489,10 @@ function CLASSIFIEDS_catList_blocks()
     $T->set_var('site_admin_url', $_CONF['site_admin_url']);
 
     // Get all the root categories
-    $sql = "
-        SELECT 
-            * 
-        FROM 
-            {$_TABLES['ad_category']} 
-        WHERE 
-            papa_id=''
-            " . COM_getPermSQL('AND', 0, 2) . "
-        ORDER BY cat_name ASC
-    ";
+    $sql = "SELECT * FROM {$_TABLES['ad_category']} 
+            WHERE papa_id='' " .
+                COM_getPermSQL('AND', 0, 2) .
+            " ORDER BY cat_name ASC";
     //echo $sql;die;
     $cats = DB_query($sql);
     if (!$cats) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
@@ -558,13 +531,12 @@ function CLASSIFIEDS_catList_blocks()
         $T->set_var('cat_name', $catsrow['cat_name']);
         $T->set_var('cat_desc', $catsrow['description']);
         $T->set_var('cat_ad_count', findTotalAds($catsrow['cat_id']));
-        if ($catsrow['image'] != '' && file_exists("{$_CONF_ADVT['catimgpath']}/{$catsrow['image']}")) {
-            $T->set_var('cat_image', "{$_CONF_ADVT['catimgurl']}/{$catsrow['image']}");
+        if ($catsrow['image']) {
+            $T->set_var('cat_image', CLASSIFIEDS_thumbUrl('cat/'.$catsrow['image']));
         } else {
             $T->set_var('cat_image', '');
         }
         $T->parse('Div', 'CatDiv', true);
-
     }
 
     $T->parse('output', 'page');

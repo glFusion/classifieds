@@ -65,12 +65,12 @@ class Image extends upload
         parent::upload();
 
         // Before anything else, check the upload directory
-        if (!$this->setPath($_CONF_ADVT['image_dir'])) {
+        if (!$this->setPath(CLASSIFIEDS_IMGPATH)) {
             return;
         }
         $this->ad_id = trim($ad_id);
-        $this->pathImage = $_CONF_ADVT['image_dir'];
-        $this->pathThumb = $this->pathImage . '/thumb';
+        $this->pathImage = CLASSIFIEDS_IMGPATH;
+        //$this->pathThumb = $this->pathImage . '/thumb';     // deprecated
         $this->setAllowedMimeTypes(array(
                 'image/pjpeg' => '.jpg,.jpeg',
                 'image/jpeg'  => '.jpg,.jpeg',
@@ -106,24 +106,18 @@ class Image extends upload
             return;
 
         parent::uploadFiles();
-        // Deprecated, use LGLIB_ImageUrl() when rendering
-        //$this->MakeThumbs();
 
-        foreach ($this->goodfiles as $filename) {
-            $sql = "
-                INSERT INTO
-                    {$_TABLES['ad_photo']}
-                    (ad_id, filename)
-                VALUES (
-                    '{$this->ad_id}', '".
-                    DB_escapeString($filename)."'
-                )";
-            $result = DB_query($sql);
-            if (!$result) {
-                $this->addError("Image::uploadFiles() : Failed to insert {$filename}");
-            }
+        foreach ($this->_fileNames as $filename) {
+            $values[] =  "('{$this->ad_id}', '". DB_escapeString($filename)."')";
         }
- 
+        $value_str = implode(',', $values);
+        $sql = "INSERT INTO {$_TABLES['ad_photo']}
+                    (ad_id, filename)
+                VALUES $value_str";
+        $result = DB_query($sql);
+        if (!$result) {
+            $this->addError("Image::uploadFiles() : Failed to insert {$filename}");
+        }
     }
 
 
@@ -225,7 +219,7 @@ class Image extends upload
         }
 
         $this->_deleteOneImage($this->pathImage);
-        $this->_deleteOneImage($this->pathThumb);
+        //$this->_deleteOneImage($this->pathThumb);
     }
 
     /**

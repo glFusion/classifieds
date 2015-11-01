@@ -174,8 +174,7 @@ class Dataproxy_classifieds extends DataproxyDriver
                                 . '/index.php?mode=detail&amp;id='
                                  . urlencode($A['ad_id']));
             $retval['date']      = $A['add_date'];
-            $retval['image_uri'] = $_CONF_ADVT['image_url'] . '/' . 
-                                    urlencode($A['filename']);
+            $retval['image_uri'] = CLASSIFIEDS_dispUrl($A['filename']);
             $retval['raw_data']  = $A;
         }
 

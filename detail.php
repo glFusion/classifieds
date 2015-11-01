@@ -140,7 +140,7 @@ function adDetail($ad_id='')
         '/\n/',
     );
     $replacements = array(
-        '<br ' . XHTML . '>',
+        '<br />',
     );
     $ad['descript'] = PLG_replaceTags(COM_checkHTML($ad['descript']));
     $ad['descript'] = preg_replace($patterns,$replacements,$ad['descript']);
@@ -246,15 +246,10 @@ USES_classifieds_class_category();
     if ($photo && DB_numRows($photo) >= 1) {
         while ($prow = DB_fetchArray($photo)) {
             $img_small = LGLIB_ImageUrl(
-                    "{$_CONF_ADVT['image_dir']}/{$prow['filename']}",
+                    CLASSIFIEDS_IMGPATH . '/' . $prow['filename'],
                     $_CONF_ADVT['detail_img_width']
             );
-            $img_disp = LGLIB_ImageUrl(
-                    "{$_CONF_ADVT['image_dir']}/{$prow['filename']}",
-                    $_CONF_ADVT['img_max_width'],
-                    $_CONF_ADVT['img_max_height']
-            );
-            //if ($prow['filename'] != '' && file_exists("{$_CONF_ADVT['image_dir']}/{$prow['filename']}")) {
+            $img_disp = CLASSIFIEDS_dispUrl($prow['filename']);
             if (!empty($img_small)) {
                 $detail->set_block('detail', 'PhotoBlock', 'PBlock');
                 $detail->set_var(array(
@@ -262,8 +257,6 @@ USES_classifieds_class_category();
                     'small_url' => $img_small,
                     'disp_url' => $img_disp,
                 ) );
-                //$detail->set_var('ph_file', $prow['filename']);
-                //$detail->set_var('img_url', $_CONF_ADVT['image_url']);
                 $detail->parse('PBlock', 'PhotoBlock', true);
                 $detail->set_var('have_photo', 'true');
             }
