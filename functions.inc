@@ -595,27 +595,12 @@ function plugin_dopluginsearch_classifieds(
             a.descript as description, a.uid, a.views as hits, 
             a.add_date AS date, a.ad_type,
             CONCAT('/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=',a.ad_id,'&query=$htmlquery') as url
-        FROM 
-            {$_TABLES['ad_ads']} a
-        RIGHT JOIN
-            {$_TABLES['ad_category']} c
+        FROM {$_TABLES['ad_ads']} a
+        RIGHT JOIN {$_TABLES['ad_category']} c
             ON a.cat_id = c.cat_id
-        WHERE 
-            exp_date > UNIX_TIMESTAMP(NOW())
-    "
-    . COM_getPermSQL('AND', 0, 2, 'c'). ' '
-    . COM_getPermSQL('AND', 0, 2, 'a'). ' ';
-
-    if (!empty($datestart) && !empty($dateend)) {
-        $delim = substr($datestart, 4, 1);
-        if (!empty($delim)) {
-            $DS = explode($delim, $datestart);
-            $DE = explode($delim, $dateend);
-            $startdate = mktime(0, 0, 0, $DS[1], $DS[2], $DS[0]);
-            $enddate = mktime(23, 59, 59, $DE[1], $DE[2], $DE[0]);
-            $sql .= " AND (a.exp_date BETWEEN '$startdate' AND '$enddate') ";
-        }
-    }
+        WHERE exp_date > UNIX_TIMESTAMP(NOW()) "
+        . COM_getPermSQL('AND', 0, 2, 'c') . ' '
+        . COM_getPermSQL('AND', 0, 2, 'a') . ' ';
 
     if (!empty($author)) {
         $sql .= " AND (a.uid = '$author') ";
@@ -623,14 +608,16 @@ function plugin_dopluginsearch_classifieds(
 
     $search = new SearchCriteria($_CONF_ADVT['pi_name'], $LANG_ADVT['blocktitle']);
     $columns = array('a.subject', 'a.descript', 'a.keywords');
+    $sql .= $search->getDateRangeSQL('AND', 'a.add_date', 
+                    $datestart, $dateend);
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
     //echo $sql;die;
     $search->setSQL($sql);
-    //$search->setRank(5);
-    //$search->setURLRewrite(true);
+    $search->setFTSQL($ftsql);
+    $search->setRank(5);
+    $search->setURLRewrite(true);
 
     return $search;    
-
 }
 
 
