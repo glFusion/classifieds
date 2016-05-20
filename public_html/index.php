@@ -139,7 +139,7 @@ switch ($mode) {
         }
 
         USES_classifieds_class_userinfo();
-        $U = new adUserInfo();
+        $U = new adUserInfo($_USER['uid']);
         $U->SetVars($_POST);
         $U->Save();
         $page = $page == '' ? 'account' : $page;
@@ -178,7 +178,7 @@ switch ($mode) {
         break;
 
     case 'del_notice':
-        $cat = (int)$id;
+        $cat = (int)$_REQUEST['cat_id'];
         if ($cat > 0) {
             USES_classifieds_notify();
             catUnSubscribe($cat);

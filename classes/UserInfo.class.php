@@ -1,15 +1,15 @@
 <?php
 /**
- *  Class to handle user account info for the Classifieds plugin
- *
- *  @author     Lee Garner <lee@leegarner.com>
- *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
- *  @package    classifieds
- *  @version    1.0.0
- *  @license    http://opensource.org/licenses/gpl-2.0.php 
- *              GNU Public License v2 or later
- *  @filesource
- */
+*   Class to handle user account info for the Classifieds plugin
+*
+*   @author     Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @package    classifieds
+*   @version    1.1.0
+*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*               GNU Public License v2 or later
+*   @filesource
+*/
 
 /**
  *  Class for user account info
@@ -17,49 +17,19 @@
  */
 class adUserInfo
 {
-    /** User ID, matches glFusion uid
-     *  @var integer */
-    var $uid;
-
-    /** Telephone number
-     *  @var string */
-    var $tel;
-
-    /** Fax number
-     *  @var string */
-    var $fax;
-
-    /** Address
-     *  @var string */
-    var $address;
-
-    /** City
-     *  @var string */
-    var $city;
-
-    /** State
-     *  @var string */
-    var $state;
-
-    /** Postal Code
-     *  @var string */
-    var $postcode;
-
-    /** Last Update (Unix Timestamp)
-     *  @var integer */
-    var $lastup_date;
-
-    /** Notify of Expirations? True/False
-     *  @var boolean */
-    var $notify_exp;
-
-    /** Notify of new comments? True/False
-     *  @var boolean */
-    var $notify_cmt;
-
-    /** Account balance, ad days
-     *  @var integer */
-    var $days_balance;
+    private $properties;
+    private $fields = array(
+        'uid' => 'int',
+        'address' => 'string',
+        'city' => 'string',
+        'state' => 'string',
+        'postcode' => 'string',
+        'tel' => 'string',
+        'fax' => 'string',
+        'notify_exp' => 'bool',
+        'notify_comment' => 'bool',
+        'days_balance' => 'int',
+    );
 
     /** Max days that user can run an ad
      *  @var integer */
@@ -67,101 +37,107 @@ class adUserInfo
 
 
     /**
-     *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero, 
-     *  then a new entry is being created.
-     *  @param integer $uid Optional type ID
-     */
-    function __construct($uid=0)
+    *   Constructor.
+    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   then a new entry is being created.
+    *
+    *   @param  integer $uid    Optional User ID
+    */
+    public function __construct($uid=0)
     {
         global $_USER;
 
+        $this->properties = array();
         $uid = (int)$uid;
         if ($uid < 1) {
             $uid = (int)$_USER['uid'];
         }
-        $this->setUID($uid);
+        $this->uid = $uid;
         $this->ReadOne();
     }
 
-    function setUID($id=0) { $this->uid = (int)$id; }
-    function getUID() { return $this->uid; }
-
-    function setAddress($str='') { $this->address = trim($str); }
-    function getAddress() { return $this->address; }
-
-    function setCity($str='') { $this->city = trim($str); }
-    function getCity() { return $this->city; }
-
-    function setState($str='') { $this->state = trim($str); }
-    function getState() { return $this->state; }
-
-    function setPostCode($str='') { $this->postcode = trim($str); }
-    function getPostCode() { return $this->postcode; }
-
-    function setTel($str='') { $this->tel = trim($str); }
-    function getTel() { return $this->tel; }
-
-    function setFax($str='') { $this->fax = trim($str); }
-    function getFax() { return $this->fax; }
-
-    function setNotifyExp($val=0)
-    {   $this->notify_exp = $val == 0 ? 0 : 1;  }
-    function getNotifyExp() { return $this->notify_exp; }
-
-    function setNotifyCmt($val=0)
-    {   $this->notify_cmt = $val == 0 ? 0 : 1;  }
-    function getNotifyCmt() { return $this->notify_cmt; }
-
-    function setDaysBalance($val) { $this->days_balance = (int)$val; }
-    function getDaysBalance() { return $this->days_balance; }
 
     /** Returns the maximum number of days this user can add to an ad. */
-    function getMaxDays() { return $this->max_ad_days; }
+    public function getMaxDays() { return $this->max_ad_days; }
 
 
     /**
-     *  Sets all variables to the matching values from $rows
-     *  @param array $row Array of values, from DB or $_POST
-     */
+    *   Setter function
+    *
+    *   @param  string  $key    Variable name to set
+    *   @param  mixed   $value  Value for variable
+    */
+    public function __set($key, $value)
+    {
+        switch($key) {
+        case 'uid':
+        case 'days_balance':
+            $this->properties[$key] = (int)$value;
+            break;
+
+        case 'notify_exp':
+        case 'notify_cmt':
+            $this->properties[$key] = $value == 1 ? 1 : 0;
+            break;
+
+        case 'address':
+        case 'city':
+        case 'state':
+        case 'postcode':
+        case 'tel':
+        case 'fax':
+            $this->properties[$key] = trim($value);
+            break;
+        }
+    }
+
+
+    /**
+    *   Getter function
+    *
+    *   @param  string  $key    Name of variable to retrieve
+    *   @return mixed           Value of variable, NULL if undefined
+    */
+    public function __get($key)
+    {
+        if (isset($this->properties[$key]))
+            return $this->properties[$key];
+        else
+            return NULL;
+    }
+
+
+    /**
+    *   Sets all variables to the matching values from $rows
+    *
+    *   @param  array   $row    Array of values, from DB or $_POST
+    */
     function SetVars($A)
     {
         if (!is_array($A)) return;
 
         if (isset($A['advt_address'])) {
-            // Coming from an edit form
-            $this->setAddress($A['advt_address']);
-            $this->setCity($A['advt_city']);
-            $this->setState($A['advt_state']);
-            $this->setPostCode($A['advt_postcode']);
-            $this->setTel($A['advt_tel']);
-            $this->setFax($A['advt_fax']);
-            $this->setNotifyExp($A['advt_notify_exp']);
-            $this->setNotifyCmt($A['advt_notify_cmt']);
-            $this->setDaysBalance($A['advt_days_balance']);
+            // $_POST from a form, fields are prefixed
+            $pfx = 'advt_';
         } else {
-            $this->setAddress($A['address']);
-            $this->setCity($A['city']);
-            $this->setState($A['state']);
-            $this->setPostCode($A['postcode']);
-            $this->setTel($A['tel']);
-            $this->setFax($A['fax']);
-            $this->setNotifyExp($A['notify_exp']);
-            $this->setNotifyCmt($A['notify_comment']);
-            $this->setDaysBalance($A['days_balance']);
+            // From the database, no prefix
+            $pfx = '';
+        }
+
+        foreach ($this->fields as $fld=>$type) {
+            $this->$fld = $A[$pfx.$fld];
         }
 
         // Update the actual max number of days that this user ca
         // run an ad
         $this->setMaxDays();
-
     }
 
 
     /**
-     *  Read one user from the database
-     *  @param integer $id Optional ID.  Current ID is used if zero
-     */
+    *   Read one user from the database
+    *   @param  integer $uid    Optional User ID.  Current ID is used if zero.
+    */
     function ReadOne($uid = 0)
     {
         global $_TABLES;
@@ -173,50 +149,44 @@ class adUserInfo
         }
 
         $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']} 
-                                    WHERE uid=$uid");
+                            WHERE uid=$uid");
         if ($result) {
             $row = DB_fetchArray($result, false);
             $this->SetVars($row);
         }
-
-        // Update the actual max number of days that this user can
-        // run an ad
-        $this->setMaxDays();
-
     }
 
 
     /**
-     *  Save the current values to the database.
-     */
+    *   Save the current values to the database.
+    */
     function Save()
     {
         global $_TABLES;
 
-        $sql = "INSERT INTO
-                {$_TABLES['ad_uinfo']}
+        $sql = "INSERT INTO {$_TABLES['ad_uinfo']}
                 (uid, address, city, state, postcode,
                 tel, fax, notify_exp, notify_comment)
             VALUES (
-                '" . DB_escapeString($this->getUID()) . "',
-                '" . DB_escapeString($this->getAddress()) . "',
-                '" . DB_escapeString($this->getCity()) . "',
-                '" . DB_escapeString($this->getState()) . "',
-                '" . DB_escapeString($this->getPostCode()) . "',
-                '" . DB_escapeString($this->getTel()) . "',
-                '" . DB_escapeString($this->getFax()) . "',
-                {$this->getNotifyExp()},
-                {$this->getNotifyCmt()}
+                '{$this->uid}',
+                '" . DB_escapeString($this->address) . "',
+                '" . DB_escapeString($this->city) . "',
+                '" . DB_escapeString($this->state) . "',
+                '" . DB_escapeString($this->postcode) . "',
+                '" . DB_escapeString($this->tel) . "',
+                '" . DB_escapeString($this->fax) . "',
+                '{$this->notify_exp}',
+                '{$this->notify_cmt}'
             )
             ON DUPLICATE KEY UPDATE
-                address = '" . DB_escapeString($this->getAddress()) . "',
-                city = '" . DB_escapeString($this->getCity()) . "',
-                state = '" . DB_escapeString($this->getState()) . "',
-                postcode = '" . DB_escapeString($this->getPostCode()) . "',
-                tel = '" . DB_escapeString($this->getTel()) . "',
-                fax = '" . DB_escapeString($this->getFax()) . "',
-                notify_exp = {$this->getNotifyExp()},
-                notify_comment = {$this->getNotifyCmt()}
+                address = '" . DB_escapeString($this->address) . "',
+                city = '" . DB_escapeString($this->city) . "',
+                state = '" . DB_escapeString($this->state) . "',
+                postcode = '" . DB_escapeString($this->postcode) . "',
+                tel = '" . DB_escapeString($this->tel) . "',
+                fax = '" . DB_escapeString($this->fax) . "',
+                notify_exp = '{$this->notify_exp}',
+                notify_comment = '{$this->notify_comment}'
             ";
         //echo $sql;die;
         DB_query($sql);
@@ -224,8 +194,8 @@ class adUserInfo
 
 
     /**
-     *  Delete the current user info record from the database
-     */
+    *   Delete the current user info record from the database
+    */
     function Delete()
     {
         global $_TABLES;
@@ -238,48 +208,45 @@ class adUserInfo
 
 
     /**
-     *  Creates the edit form
-     *  @param integer $id Optional ID, current record used if zero
-     *  @return string HTML for edit form
-     */
+    *   Creates the edit form
+    *
+    *   @param  string  $type   Type of form, plugin or glFusion acct settings
+    *   @return string HTML for edit form
+    */
     function showForm($type = 'advt')
     {
-        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
-
-        $id = (int)$id;
-        if ($id > 0) $this->Read($id);
+        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER, $_SYSTEM;
 
         $base_url = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
 
         $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        $T->set_file('accountinfo', "account_settings$tpltype.thtml");
         if ($type == 'advt') {
             // Called within the plugin
-            $T->set_file('accountinfo', 'accountinfo.thtml');
+        //    $T->set_file('accountinfo', "accountinfo$tpltype.thtml");
         } else {
             // Called via glFusion account settings
-            $T->set_file('accountinfo', 'account_settings.thtml');
+            $T->set_var('profileedit', 'true');
+        //    $T->set_file('accountinfo', "account_settings$tpltype.thtml");
         }
 
         $T->set_var(array(
-            'uinfo_address'     => $this->getAddress(),
-            'uinfo_city'        => $this->getCity(),
-            'uinfo_state'       => $this->getState(),
-            'uinfo_tel'         => $this->getTel(),
-            'uinfo_fax'         => $this->getFax(),
-            'uinfo_postcode'    => $this->getPostCode(),
-            'exp_notify_checked' => $this->getNotifyExp() == 1 ? 
+            'uid'               => $this->uid,
+            'uinfo_address'     => $this->address,
+            'uinfo_city'        => $this->city,
+            'uinfo_state'       => $this->state,
+            'uinfo_tel'         => $this->tel,
+            'uinfo_fax'         => $this->fax,
+            'uinfo_postcode'    => $this->postcode,
+            'exp_notify_checked' => $this->notify_exp == 1 ? 
                         'checked="checked"' : '',
-            'cmt_notify_checked' => $this->getNotifyCmt() == 1 ? 
+            'cmt_notify_checked' => $this->notify_comment == 1 ? 
                         'checked="checked"' : '',
         ) );
 
-        $sql = "
-            SELECT 
-                cat_id, notice_id
-            FROM 
-                {$_TABLES['ad_notice']} 
-            WHERE 
-                uid='{$_USER['uid']}'";
+        $sql = "SELECT cat_id, notice_id FROM {$_TABLES['ad_notice']} 
+                WHERE uid='{$_USER['uid']}'";
         $notice = DB_query($sql);
         if (!$notice) 
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
@@ -305,10 +272,12 @@ class adUserInfo
 
  
     /**
-     *  Update the max days balance by adding a give value (positive or negative).
-     *  @param integer $value   Value to add to the current balance
-     *  @param integer $id      User ID to modify, empty to use the current one.
-     */
+    *   Update the max days balance by adding a given value
+    *   (positive or negative).
+    *
+    *   @param integer $value   Value to add to the current balance
+    *   @param integer $id      User ID to modify, empty to use the current one.
+    */
     function UpdateDaysBalance($value, $uid=0)
     {
         global $_TABLES;
@@ -316,7 +285,7 @@ class adUserInfo
         $uid = (int)$uid;
         if ($uid == 0) {
             if (is_object($this))
-                $uid = $this->getUID();
+                $uid = $this->uid;
             else
                 return;
         }

@@ -1,0 +1,102 @@
+{# begin {templatelocation} #}
+{!if profileedit}
+<div id="pe_advtinfo" class="jsenabled_hide">
+{!else}
+<form class="uk-form-horizontal" method="post" action="?page=account&mode=update_account">
+{!endif}
+  <fieldset data-uk-margin><legend>{$LANG_ADVT['fieldset1']}</legend>
+  <p>{$LANG_ADVT['public_contact_info']}
+  <span class="alert">{$LANG_ADVT['public_contact_info_warn']}</span>
+  </p>
+  <input type="hidden" name="advt_uid" value="{uid}" />
+  <div class="uk-form-row">
+    <label for="advt_address" class="uk-form-label">{$LANG_ADVT['address']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_address" name="advt_address" size="40"
+            maxlength="40" value="{uinfo_address}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_city" class="uk-form-label">{$LANG_ADVT['city']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_city" name="advt_city" size="40"
+            maxlength="40" value="{uinfo_city}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_state" class="uk-form-label">{$LANG_ADVT['state']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_state" name="advt_state" size="5"
+            maxlength="5" value="{uinfo_state}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_tel" class="uk-form-label">{$LANG_ADVT['telephone']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_tel" name="advt_tel" size="12"
+            maxlength="20" value="{uinfo_tel}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_fax" class="uk-form-label">{$LANG_ADVT['fax']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_fax" name="advt_fax" size="12"
+            maxlength="20" value="{uinfo_fax}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_postcode" class="uk-form-label">{$LANG_ADVT['postal']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_postcode" name="advt_postcode" size="20"
+            maxlength="20" value="{uinfo_postcode}" />
+    </div>
+  </div>
+
+  </fieldset>
+
+  <fieldset data-uk-margin><legend>{$LANG_ADVT['fieldset2']}</legend>
+  <div class="uk-form-row">
+    <label for="advt_notify_exp" class="uk-form-label">{$LANG_ADVT['notify_exp']}</label>
+    <div class="uk-form-controls">
+      <input type="checkbox" id="advt_notify_exp" name="advt_notify_exp"
+            value="1" {exp_notify_checked} />
+    </div>
+  </div> 
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_ADVT['auto_notify_list']}</label>
+    <div class="uk-form-controls">
+        <ul>
+        <!-- BEGIN AutoNotifyListBlk -->
+        <li>
+          <a href="{pi_url}/index.php?mode=home&cat_id={cat_id}">{cat_name}</a>
+          <a href="{pi_url}/index.php?mode=del_notice&cat_id={cat_id}&page=account">
+            <img src="{layout_url}/images/admin/delete.png" align="top" 
+                title="{$LANG_ADVT['remove']}"
+                class="gl_mootip"
+                alt="{$LANG_ADVT['remove']}" />
+          </a>
+        </li>
+        <!-- END AutoNotifyListBlk -->
+        {!if no_autonotify_list}
+          <li>{$LANG_ADVT['pls_auto_notify']}</li>
+        {!endif}
+        </ul>
+    </div>
+  </div>
+</fieldset>
+{!if profileedit}
+</div>
+{!else}
+  <div class="uk-form-controls">
+    <button type="submit" class="uk-button uk-button-success" value="{$LANG_ADVT['update_account']}">{$LANG_ADVT['update_account']}</button>
+    <button type="reset" class="uk-button uk-button-primary" value="{$LANG_ADVT['reset']}">{$LANG_ADVT['reset']}</button>
+  </div>
+</form>
+{!endif}
+{# end {templatelocation} #}

@@ -1,8 +1,14 @@
 {# begin {templatelocation} #}
+{!if profileedit}
 <div id="pe_advtinfo" class="jsenabled_hide">
+{!else}
+<form class="adForm" method="post" action="?page=account&mode=update_account">
+{!endif}
   <fieldset style="margin-top:10px;"><legend>{$LANG_ADVT['fieldset1']}</legend>
-  <p>{$LANG_ADVT['public_contact_info']}</p>
-  <p><b>{$LANG_ADVT['public_contact_info_warn']}</b></p>
+  <p>{$LANG_ADVT['public_contact_info']}
+  <span class="alert">{$LANG_ADVT['public_contact_info_warn']}</span>
+  </p>
+  <input type="hidden" name="advt_uid" value="{uid}" />
 
   <table class="adForm">
     <tr>
@@ -82,5 +88,9 @@
     </tr>
   </table>
 </fieldset>
+{!if profileedit}
 </div>
+{!else}
+</form>
+{!endif}
 {# end {templatelocation} #}
