@@ -1,195 +1,168 @@
 <?php
 /**
- *  Class to manage ad types
- *
- *  @author     Lee Garner <lee@leegarner.com>
- *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
- *  @package    classifieds
- *  @version    0.3.1
- *  @license    http://opensource.org/licenses/gpl-2.0.php 
- *  GNU Public License v2 or later
- *  @filesource
- */
+*   Class to manage ad types
+*
+*   @author     Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @package    classifieds
+*   @version    0.3.1
+*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*               GNU Public License v2 or later
+*   @filesource
+*/
 
 /**
- *  Class for ad type
- *  @package classifieds
- */
+*   Class for ad type
+*   @package classifieds
+*/
 class AdType
 {
-    /** Database ID 
-     *  @var integer */
-    var $db_id;
-
-    /** Ad Type String
-     *  @var string */
-    var $descrip;
-
-    /** Enable or Disabled indicator
-     *  @var integer */
-    var $enabled;
+    /** Properties array
+     *  @var array */
+    var $properties;
 
     /** Error string or value, to be accessible by the calling routines.
      *  @var mixed */
     public  $Error;
 
+
     /**
-     *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero, 
-     *  then a new entry is being created.
-     *  @param integer $id Optional type ID
-     */
-    function AdType($id=0)
+    *   Constructor.
+    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   then a new entry is being created.
+    *
+    *   @param integer $id Optional type ID
+    */
+    public function __construct($id=0)
     {
         $id = (int)$id;
         if ($id < 1) {
-            $this->db_id = 0;
+            $this->id = 0;
             $this->descrip = '';
             $this->enabled = 1;
         } else {
-            $this->setID($id);
+            $this->id = $id;
             $this->ReadOne();
         }
     }
 
-    function setID($id=0) { $this->db_id = (int)$id; }
-    function getID() { return $this->db_id; }
-
-    function setDescrip($str='') { $this->descrip = trim($str); }
-    function getDescrip() { return $this->descrip; }
-
-    function setEnabled($val=0) { $this->enabled = $val == 1 ? 1 : 0; }
-    function getEnabled() { return $this->enabled; }
-
-
-    /**
-     *  Sets all variables to the matching values from $rows
-     *  @param array $row Array of values, from DB or $_POST
-     */
-    function SetVars($row)
+    public function __set($key, $value)
     {
-        if (!is_array($row)) return;
+        switch ($key) {
+        case 'id':
+            $this->properties[$key] = (int)$value;
+            break;
+        case 'descrip':
+            $this->properties[$key] = trim($value);
+            break;
+        case 'enabled':
+            $this->properties[$key] = $value == 1 ? 1 : 0;
+            break;
+        }
+    }
 
-        $this->setID($row['id']);
-        $this->setDescrip($row['descrip']);
-        $this->setEnabled($row['enabled']);
+    public function __get($key)
+    {
+        if (isset($this->properties[$key]))
+            return $this->properties[$key];
+        else
+            return NULL;
     }
 
 
     /**
-     *  Read one as type from the database and populate the local values.
-     *  @param integer $id Optional ID.  Current ID is used if zero
-     */
-    function ReadOne($id = 0)
+    *   Sets all variables to the matching values from $rows
+    *
+    *   @param array $row Array of values, from DB or $_POST
+    */
+    public function SetVars($row)
+    {
+        if (!is_array($row)) return;
+
+        $this->id = $row['id'];
+        $this->descrip = $row['descrip'];
+        $this->enabled = $row['enabled'];
+    }
+
+
+    /**
+    *   Read one as type from the database and populate the local values.
+    *
+    *   @param integer $id Optional ID.  Current ID is used if zero
+    */
+    public function ReadOne($id = 0)
     {
         global $_TABLES;
 
         $id = (int)$id;
-        if ($id == 0) $id = $this->db_id;
+        if ($id == 0) $id = $this->id;
         if ($id == 0) {
             $this->error = 'Invalid ID in ReadOn()';
             return;
         }
 
-        $result = $this->dbExecute("SELECT * from {$_TABLES['ad_types']} 
-                                    WHERE id=$id");
+        $result = DB_query("SELECT * from {$_TABLES['ad_types']} 
+                            WHERE id=$id");
         $row = DB_fetchArray($result, false);
         $this->SetVars($row);
     }
 
 
     /**
-     *  Save the current values to the database.
-     */
-    function Save()
-    {
-        if ($this->db_id > 0) {
-            $this->Update();
-        } else {
-            $this->Insert();
-        }
-    }
-
-
-    /**
-     *  Helper function to execute a database query
-     *  @param string $sql SQL query to execute
-     *  @return object SQL result object
-     */
-    function dbExecute($sql)
-    {
-        if ($sql == '') return;
-
-        $result = DB_query($sql);
-        return $result;
-    }
-
-
-    /**
-     *  Delete the curret cls/div record from the database
-     */
-    function Delete()
+    *   Delete the curret cls/div record from the database
+    */
+    public function Delete()
     {
         global $_TABLES;
 
-        if ($this->db_id > 0)
+        if ($this->id > 0)
             DB_delete($_TABLES['ad_types'], 'id', $this->db_id);
 
-        $this->db_id = 0;
+        $this->id = 0;
     }
 
 
     /**
-     *  Adds the current values to the databae as a new record
-     */
-    function Insert()
+    *   Adds the current values to the databae as a new record
+    *
+    *   @param  array   $vals   Optional array of values to set
+    *   @return boolean     True on success, False on error
+    */
+    public function Save($vals = NULL)
     {
         global $_TABLES;
 
-        if (!$this->isValidRecord())
-            return;
+        if (is_array($vals)) {
+            $this->SetVars($vals);
+        }
 
-        $sql = "INSERT INTO
-                {$_TABLES['ad_types']}
-                (descrip, enabled)
-            VALUES (
-                '" . DB_escapeString($this->descrip) . "', 
-                {$this->enabled}
-            )";
+        if (!$this->isValidRecord()) {
+            return false;
+        }
 
-        $this->dbExecute($sql);
+        if ($this->id == 0) {
+            $sql1 = "INSERT INTO {$_TABLES['ad_types']} SET ";
+            $sql3 = '';
+        } else {
+            $sql1 = "UPDATE {$_TABLES['ad_types']} SET ";
+            $sql3 = "WHERE id=" . $this->id;
+        }
+        $sql2 = "descrip = '" . DB_escapeString($this->descrip) . "',
+                enabled = {$this->enabled}";
+
+        $res = DB_query($sql);
+        return DB_error() ? false : true;
     }
 
 
     /**
-     *  Updates the database for the current cls/div
-     */
-    function Update()
+    *   Determines if the current values are valid.
+    *
+    *   @return boolean True if ok, False otherwise.
+    */
+    public function isValidRecord()
     {
-        global $_TABLES;
-
-        if (!$this->isValidRecord())
-            return;
-
-        $sql = "UPDATE 
-                {$_TABLES['ad_types']}
-            SET
-                descrip='" . DB_escapeString($this->getDescrip()) . "',
-                enabled=" . $this->getEnabled(). "
-            WHERE
-                id=" . $this->getID();
-
-        $this->dbExecute($sql);
-    }
-
-
-    /**
-     *  Determines if the current values are valid.
-     *  @return boolean True if ok, False otherwise.
-     */
-    function isValidRecord()
-    {
-        if ($this->getDescrip() == '') {
+        if ($this->descrip == '') {
             return false;
         } else {
             return true;
@@ -198,100 +171,59 @@ class AdType
 
 
     /**
-     *  Creates the edit form
-     *  @param integer $id Optional ID, current record used if zero
-     *  @return string HTML for edit form
-     */
-    function showForm($id = 0)
+    *   Creates the edit form
+    *
+    *   @param  integer $id Optional ID, current record used if zero
+    *   @return string      HTML for edit form
+    */
+    public function showForm($id = 0)
     {
-        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT;
+        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $LANG_ADMIN;
 
         $id = (int)$id;
         if ($id > 0) $this->Read($id);
 
         $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
-        $T->set_file('admin','adtypeform.thtml');
-
+        if ($_CONF_ADVT['_is_uikit']) {
+            $T->set_file('admin','adtypeform.uikit.thtml');
+        } else {
+            $T->set_file('admin','adtypeform.thtml');
+        }
         $T->set_var(array(
             'pi_admin_url'  => CLASSIFIEDS_ADMIN_URL,
             'cancel_url'    => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type',
             'show_name'     => $this->showName,
-            'type_id'       => $this->getID(),
-            'descrip'       => htmlspecialchars($this->getDescrip()),
-            'ena_chk'   => $this->getEnabled() == 1 ? 'checked="checked"' : '',
+            'type_id'       => $this->id,
+            'descrip'       => htmlspecialchars($this->descrip),
+            'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
         ) );
 
-        //$T->set_var('form_action', "{$_SERVER['PHP_SELF']}");
-        //$T->set_var('actionvar','saveadtype');
-
-        // add a delete button if this division isn't used anywhere
-        if ($this->getID() > 0 && !$this->isUsed()) {
+        // add a delete button if this ad type isn't used anywhere
+        if ($this->id > 0 && !$this->isUsed()) {
             $T->set_var('show_del_btn', 'true');
         } else {
             $T->set_var('show_del_btn', '');
         }
-
         $T->parse('output','admin');
         $display .= $T->finish($T->get_var('output'));
         return $display;
-
     }   // function showForm()
 
  
     /**
-     *  Creates a dropdown selection for the specified list, with the
-     *  record corresponding to $sel selected.
-     *  @param  integer $sel    Optional item ID to select
-     *  @param  string  $sql    Optional SQL query
-     *  @return string HTML for selection dropdown
-     */
-    function makeSelection($sel=0, $sql='')
+    *   Creates a dropdown selection for the specified list, with the
+    *   record corresponding to $sel selected.
+    *
+    *   @param  integer $sel    Optional item ID to select
+    *   @param  string  $sql    Optional SQL query
+    *   @return string      HTML for selection dropdown
+    */
+    public function makeSelection($sel=0, $sql='')
     {
         global $_TABLES;
 
-        if ($sql == '') {
-            $sql = "SELECT id,descrip
-                FROM {$_TABLES['ad_types']}
-                WHERE enabled=1
-                ORDER BY descrip ASC";
-        }
-        $result = DB_query($sql);
-        if (!$result) {
-            $this->Error = 1;
-            return '';
-        }
-
-        $selection = '';
-        while ($row = DB_fetcharray($result)) {
-            $selected = '';
-            if (is_array($sel)) {
-                // Multiple selections, check if the current one is among them
-                if (in_array($row['id'], $sel)) {
-                    $selected = "selected";
-                }
-            } else {
-                if ($sel == 0) {
-                    // No selection, take the first one found.
-                    $sel = $row['id'];
-                }
-                if ($sel == $row['id']) {
-                    $selected = "selected";
-                }
-            }
-
-            if (is_object($this)) {
-                // Set the current id, only if this is an instantiated object
-                if ($selected == 'selected' && $this->getID() == 0) {
-                    $this->setID($row['id']);
-                }
-            }
-
-            $selection .= "<option value=\"{$row['id']}\" $selected>".
-                                htmlspecialchars($row['descrip']).
-                                "</option>\n";
-        }
-
-        return $selection;
+        return COM_optionList($_TABLES['ad_types'],
+                'id,descrip', $sel, 1, 'enabled=1');
 
     }   // function makeSelection()
 
@@ -303,13 +235,13 @@ class AdType
     *   @param  integer     $id     ID number of element to modify
     *   @return integer     New value (old value if failed)
     */
-    function toggleEnabled($newval, $id=0)
+    public function toggleEnabled($newval, $id=0)
     {
         global $_TABLES;
 
         if ($id == 0) {
             if (is_object($this))
-                $id = $this->getID();
+                $id = $this->id;
             else
                 return;
         }
@@ -332,14 +264,15 @@ class AdType
 
 
     /**
-     *  Determine if this ad type is used by any ads in the database.
-     *  @return boolean True if used, False if not
-     */
-    function isUsed()
+    *   Determine if this ad type is used by any ads in the database.
+    *
+    *   @return boolean True if used, False if not
+    */
+    public function isUsed()
     {
         global $_TABLES;
 
-        if (DB_count($_TABLES['ad_ads'], 'ad_type', $this->getID()) > 0) {
+        if (DB_count($_TABLES['ad_ads'], 'ad_type', $this->id) > 0) {
             return true;
         } else {
             return false;
@@ -348,13 +281,14 @@ class AdType
 
 
     /**
-     *  Returns the string corresponding to the $id parameter.
-     *  Designed to be used standalone; if this is an object,
-     *  we already have the description in a variable.
-     *  @param  integer $id     Database ID of the ad type
-     *  @return string          Ad Type Description
-     */
-    function GetDescription($id=0)
+    *   Returns the string corresponding to the $id parameter.
+    *   Designed to be used standalone; if this is an object,
+    *   we already have the description in a variable.
+    *
+    *   @param  integer $id     Database ID of the ad type
+    *   @return string          Ad Type Description
+    */
+    public static function GetDescription($id)
     {
         global $_TABLES;
 
