@@ -1,6 +1,6 @@
 {# end {templatelocation} #}
 {menu}
-<p {xhtml}>
+<p />
 <div align="center">
 <center>
   <p>{pagemenu}</p>
@@ -38,21 +38,21 @@
             type="image" src="{layout_url}/images/edit.png" 
             alt="{$LANG_ADVT['edit']}"
             title="{$LANG_ADVT['edit']}"
-            {xhtml}>
+            />
           </form>
         {!endif}
       </td>
       <td height="25" align="center" bgcolor="{bgColor}">
         <form action="{base_url}?mode={$LANG_ADMIN['delete']}&id={ad_id}">
-          <input type="hidden" name="mode" value="{$LANG_ADMIN['delete']}" {xhtml}>
-          <input type="hidden" name="id" value="{ad_id}" {xhtml}>
+          <input type="hidden" name="mode" value="{$LANG_ADMIN['delete']}" />
+          <input type="hidden" name="id" value="{ad_id}" />
           <input class="gl_mootip" style="padding:5px 0px 0px 9px;" 
             name="delbutton" alt="delbutton" type="image" 
             src="{layout_url}/images/admin/delete.png" 
             onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
             alt="{$LANG_ADVT['delete']}"
             title="{$LANG_ADVT['delete']}"
-            {xhtml}>
+            />
         </form>
       </td>
     </tr>

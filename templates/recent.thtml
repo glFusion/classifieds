@@ -29,10 +29,14 @@
       <td bgcolor="{bgColor}">
         {!if img_url}
         <a href="{img_url}" 
+{!if is_uikit}
+            data-uk-lightbox>
+{!else}
             rel="slimbox">
+{!endif}
           <img src="{thumb_url}" border="0" 
             title="{$LANG_ADVT['click_to_enlarge']}" 
-            width="{thumb_width}" height="{thumb_height}" {xhtml}>
+            width="{thumb_width}" height="{thumb_height}" /> 
         </a>
         {!else}
           {txt_no_image}

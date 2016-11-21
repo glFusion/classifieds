@@ -3,16 +3,16 @@
   <h2>Deleting the "{type_name}" Ad Type</h2>
   The ad type "{type_name}" is used by one or more ads in the database.  
   You must select a new ad type for these ads.
-  <p {xhtml}>
+  <p />
 
   <form action="{action_url}" method="POST">
-    <input type="hidden" name="mode" value="deleteadtype" {xhtml}>
-    <input type="hidden" name="id" value="{ad_id}" {xhtml}>
+    <input type="hidden" name="mode" value="deleteadtype" />
+    <input type="hidden" name="id" value="{ad_id}" />
     Select a new ad type: <select name="newadtype">
       {new_selection}
     </select>
-    <p {xhtml}>
-    <input type="submit" name="submit" value="Submit" {xhtml}>
-    <input type="submit" name="cancel" value="Cancel" {xhtml}>
+    <p />
+    <input type="submit" name="submit" value="Submit" />
+    <input type="submit" name="cancel" value="Cancel" />
   </form>
 </span>

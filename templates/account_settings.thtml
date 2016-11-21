@@ -15,42 +15,42 @@
       <td class="label">{$LANG_ADVT['address']}</td>
       <td class="input">
         <input type="text" name="advt_address" size="25" maxlength="20" 
-            value="{uinfo_address}" {xhtml}>
+            value="{uinfo_address}" />
       </td>
     </tr>
     <tr>
       <td class="label">{$LANG_ADVT['city']}</td>
       <td class="input">
         <input type="text" name="advt_city" size="20" maxlength="20" 
-            value="{uinfo_city}" {xhtml}>
+            value="{uinfo_city}" />
       </td>
     </tr>
     <tr>
       <td class="label">{$LANG_ADVT['state']}</td>
       <td class="input">
         <input type="text" name="advt_state" size="2" maxlength="20" 
-            value="{uinfo_state}" {xhtml}>
+            value="{uinfo_state}" />
       </td>
     </tr>
     <tr>
       <td class="label">{$LANG_ADVT['telephone']}</td>
       <td class="input">
         <input type="text" name="advt_tel" size="12" maxlength="20" 
-            value="{uinfo_tel}" {xhtml}>
+            value="{uinfo_tel}" />
       </td>
     </tr>
     <tr>
       <td class="label">{$LANG_ADVT['fax']}</td>
       <td class="input">
         <input type="text" name="advt_fax" size="12" maxlength="20" 
-            value="{uinfo_fax}" {xhtml}>
+            value="{uinfo_fax}" />
       </td>
     </tr>
     <tr>
       <td class="label">{$LANG_ADVT['postal']}</td>
       <td class="input">
         <input type="text" name="advt_postcode" size="20" maxlength="20" 
-            value="{uinfo_postcode}" {xhtml}>
+            value="{uinfo_postcode}" />
       </td>
     </tr>
   </table>
@@ -62,7 +62,7 @@
       <td class="label">{$LANG_ADVT['notify_exp']}</td>
       <td class="input">
         <input type=checkbox name="advt_notify_exp" value="1" 
-            {exp_notify_checked} {xhtml}>
+            {exp_notify_checked} />
       </td>
     </tr> 
     <tr>
@@ -72,11 +72,11 @@
         <!-- BEGIN AutoNotifyListBlk -->
         <li>
           <a href="{pi_url}/index.php?mode=home&cat_id={cat_id}">{cat_name}</a>
-          <a href="{pi_url}/index.php?mode=del_notice&cat_id={cat_id}&page=account">
+          <a href="{pi_url}/index.php?mode=del_notice&id={cat_id}&page=account">
             <img src="{layout_url}/images/admin/delete.png" align="top" 
                 title="{$LANG_ADVT['remove']}"
                 class="gl_mootip"
-                alt="{$LANG_ADVT['remove']}" {xhtml}>
+                alt="{$LANG_ADVT['remove']}" />
           </a>
         </li>
         <!-- END AutoNotifyListBlk -->

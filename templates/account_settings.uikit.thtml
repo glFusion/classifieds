@@ -6,7 +6,7 @@
 {!endif}
   <fieldset data-uk-margin><legend>{$LANG_ADVT['fieldset1']}</legend>
   <p>{$LANG_ADVT['public_contact_info']}
-  <span class="alert">{$LANG_ADVT['public_contact_info_warn']}</span>
+  <div class="uk-alert uk-alert-danger">{$LANG_ADVT['public_contact_info_warn']}</div>
   </p>
   <input type="hidden" name="advt_uid" value="{uid}" />
   <div class="uk-form-row">
@@ -75,7 +75,7 @@
         <!-- BEGIN AutoNotifyListBlk -->
         <li>
           <a href="{pi_url}/index.php?mode=home&cat_id={cat_id}">{cat_name}</a>
-          <a href="{pi_url}/index.php?mode=del_notice&cat_id={cat_id}&page=account">
+          <a href="{pi_url}/index.php?mode=del_notice&id={cat_id}&page=account">
             <img src="{layout_url}/images/admin/delete.png" align="top" 
                 title="{$LANG_ADVT['remove']}"
                 class="gl_mootip"

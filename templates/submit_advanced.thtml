@@ -44,18 +44,18 @@
 
   <form id="submit" enctype="multipart/form-data" method="post" 
     action="{action_url}" onsubmit='set_postcontent();'>
-    <input type="hidden" name="type" value="{type}" {xhtml}>
-    <input type="hidden" name="owner_id" value="{owner_id}" {xhtml}>
-    <input type="hidden" name="group_id" value="{group_id}" {xhtml}>
-    <input type="hidden" name="id" value="{row_ad_id}" {xhtml}>
-    <input type="hidden" name="exp_date" value="{exp_date}" {xhtml}>
-    <input type="hidden" name="add_date" value="{add_date}" {xhtml}>
-    <input type="hidden" name="perm_owner" value="{perm_owner}" {xhtml}>
-    <input type="hidden" name="perm_group" value="{perm_group}" {xhtml}>
-    <input type="hidden" name="perm_members" value="{perm_members}" {xhtml}>
-    <input type="hidden" name="MAX_FILE_SIZE" value="{max_file_size}" {xhtml}>
-    <input type="hidden" name="has_visibility" value="1" {xhtml}>
-    <input type="hidden" name="{gltoken_name}" value="{gltoken}" {xhtml}>
+    <input type="hidden" name="type" value="{type}" />
+    <input type="hidden" name="owner_id" value="{owner_id}" />
+    <input type="hidden" name="group_id" value="{group_id}" />
+    <input type="hidden" name="id" value="{row_ad_id}" />
+    <input type="hidden" name="exp_date" value="{exp_date}" />
+    <input type="hidden" name="add_date" value="{add_date}" />
+    <input type="hidden" name="perm_owner" value="{perm_owner}" />
+    <input type="hidden" name="perm_group" value="{perm_group}" />
+    <input type="hidden" name="perm_members" value="{perm_members}" />
+    <input type="hidden" name="MAX_FILE_SIZE" value="{max_file_size}" />
+    <input type="hidden" name="has_visibility" value="1" />
+    <input type="hidden" name="{gltoken_name}" value="{gltoken}" />
     <table border="0" cellpadding="0" cellspacing="5" width="100%">
 
       <tr>
@@ -81,7 +81,7 @@
         <td align="left">
           <input class="fValidate['required']" type="text" id="subject" 
             name="subject" value="{row_subject}" size="60" 
-            maxlength="200" {xhtml}>
+            maxlength="200" />
         </td>
       </tr>
 
@@ -104,7 +104,7 @@
             <option value="classifieds-toolbar1">{$LANG24[71]}</option>
             <option value="classifieds-toolbar2" selected="selected">{$LANG24[72]}</option>
             <option value="classifieds-toolbar3">{$LANG24[73]}</option>
-          </select><br {xhtml}>
+          </select><br />
           <textarea id="adv_content" class="fValidate['required']" 
             name="descript" cols="40" rows="8" 
             style="width:99%" maxlength="1000">{row_descript}</textarea>
@@ -127,14 +127,14 @@
         <td align="right"><b>{$LANG_ADVT['price']}</b></td>
         <td align="left">
           <input type="text" name="price" value="{row_price}" size="30" 
-            maxlength="30" {xhtml}>
+            maxlength="30" />
         </td>
       </tr>
       <tr>
         <td align="right"><b>{$LANG_ADVT['website']}</b></td>
         <td align="left">
           <input type="text" name="url" value="{row_url}" size="40" 
-            maxlength="200" {xhtml}>
+            maxlength="200" />
         </td>
       </tr>
 
@@ -145,12 +145,16 @@
             <!-- BEGIN PhotoRow -->
             <tr>
               <td align="left">
-                <a href="{img_url}" rel="slimbox[ad]"">
+                {!if is_uikit}
+                <a href="{img_url}" data-uk-lightbox=-"{group:'ad'}">
+                {!else}
+                <a href="{img_url}" rel="slimbox[ad]">
+                {!endif}
                   <img src="{thumb_url}">
                 </a>
               </td>
               <td align="left">
-                <a href="{del_img_url}">{$LANG_ADVT['delete']}</a><br {xhtml}>
+                <a href="{del_img_url}">{$LANG_ADVT['delete']}</a><br />
               </td>
             </tr>
             <!-- END PhotoRow -->
@@ -162,7 +166,7 @@
         <td align="right"><b>{txt_photo}</b></td>
         <td align="left">
           <!-- BEGIN UploadFld -->
-          <input type="file" name="photo[]"><br {xhtml}>
+          <input type="file" name="photo[]"><br />
           <!-- END UploadFld -->
         </td>
       </tr>
@@ -171,7 +175,7 @@
         <td align="right"><b>{$LANG_ADVT['expiration']}</b></td>
         <td align="left">
           {$LANG_ADVT['runfor']}
-          <input type="text" size="10" name="moredays" value="{days}" {xhtml}>
+          <input type="text" size="10" name="moredays" value="{days}" />
           {$LANG_ADVT['days']}
         </td>
       </tr>
@@ -180,7 +184,7 @@
         <td align="right"><b>{$LANG_ADVT['keywords']}</b></td>
         <td align="left">
           <input id="keywords" type="text" name="keywords" value="{keywords}" 
-            size="50" length="255" {xhtml}>
+            size="50" length="255" />
         </td>
       </tr>
 
@@ -199,7 +203,7 @@
         <td align="right"><b>{$LANG_ADVT['ad_visibility']}</b></td>
         <td align="left">
           <input id="perm_anon" type="checkbox" name="perm_anon" value="2" 
-            {perm_anon_chk} {vis_disabled} {xhtml}>
+            {perm_anon_chk} {vis_disabled} />
         </td>
       </tr>
 
@@ -207,19 +211,19 @@
         <td align="right"></td>
         <td height="40" align="left">
           {!if new_ad}
-          <input type="submit" name="mode" value="{$LANG12['8']}" {xhtml}>
+          <input type="submit" name="mode" value="{$LANG12['8']}" />
           {!else}
-          <input type="hidden" name="mode" value="update_ad" {xhtml}>
-          <input type="submit" name="update_ad" value="{$LANG12['8']}" {xhtml}>
+          <input type="hidden" name="mode" value="update_ad" />
+          <input type="submit" name="update_ad" value="{$LANG12['8']}" />
           {!endif}
-          <input type="reset" value="{$LANG_CONFIG['reset_form']}" {xhtml}>
+          <input type="reset" value="{$LANG_CONFIG['reset_form']}" />
           <input type="reset" value="{$LANG_ADMIN['cancel']}" name="cancel" 
                 onclick="javascript: document.location.href='{cancel_url}'"
-                {xhtml}>
+                />
           {!if has_delbtn}
             <input type="submit" name="mode" 
               value="{$LANG_ADMIN['delete']}"
-              onclick="return confirm('{$MESSAGE[76]}');" {xhtml}>
+              onclick="return confirm('{$MESSAGE[76]}');" />
           {!endif}
         </td>
       </tr>
