@@ -1,6 +1,6 @@
 <?php
 /**
-*   Common AJAX functions
+*   Common administrative AJAX functions
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
@@ -11,28 +11,32 @@
 */
 
 /**
- *  Include required glFusion common functions
- */
-require_once '../lib-common.php';
+*   Include required glFusion common functions
+*/
+require_once '../../../lib-common.php';
+
+// This is for administrators only
+if (!SEC_hasRights('classifieds.admin')) {
+    exit;
+}
 
 switch ($_GET['action']) {
-case 'catsub':
-    if (!isset($_GET['id'])) exit;
-    USES_classifieds_class_category();
-    $C = new adCategory($_GET['id']);
-    $result = array(
-        'cat_id' => $_GET['id'],
-        'newstate' => $C->Subscribe(true) ? 1 : 0,
-    );
-    break;
+case 'toggleEnabled':
+    $newval = $_REQUEST['newval'] == 1 ? 1 : 0;
 
-case 'catunsub':
-    if (!isset($_GET['id'])) exit;
-    USES_classifieds_class_category();
-    $C = new adCategory($_GET['id']);
+    switch ($_GET['type']) {
+    case 'adtype':
+        USES_classifieds_class_adtype();
+        $newval = AdType::toggleEnabled($newval, $_GET['id']);
+        break;
+
+     default:
+        exit;
+    }
+
     $result = array(
-        'cat_id' => $_GET['id'],
-        'newstate' => $C->Subscribe(false) ? 0 : 1,
+        'id' => $_GET['id'],
+        'newstate' => $newval,
     );
     break;
 }

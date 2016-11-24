@@ -1,41 +1,35 @@
-/*  Updates submission form fields based on changes in the category
- *  dropdown.
- */
+/*  Subscribe and unsubscribe from category notifications.
+*/
 var xmlHttp;
-function ADVTtoggleEnabled(ck, id, type, base_url)
+function ADVTcatSub(id, do_sub)
 {
-  if (ck.checked) {
-    newval=1;
-  } else {
-    newval=0;
-  }
-
   xmlHttp=ADVTgetXmlHttpObject();
   if (xmlHttp==null) {
     alert ("Browser does not support HTTP Request")
     return
   }
-  var url=site_admin_url + "/plugins/classifieds/ajax.php?action=toggleEnabled";
-  url=url+"&id="+id;
-  url=url+"&type="+type;
-  url=url+"&newval="+newval;
+  var action = do_sub == 1 ? "catsub" : "catunsub";
+  var url=glfusionSiteUrl + "/classifieds/ajax.php?action="+action+"&id="+id;
   url=url+"&sid="+Math.random();
-  xmlHttp.onreadystatechange=ADVTstateChanged;
+  xmlHttp.onreadystatechange=ADVTsubStateChanged;
   xmlHttp.open("GET",url,true);
   xmlHttp.send(null);
 }
 
-function ADVTstateChanged()
+function ADVTsubStateChanged()
 {
+  var newstate;
+
   if (xmlHttp.readyState==4 || xmlHttp.readyState=="complete") {
     jsonObj = JSON.parse(xmlHttp.responseText)
-    id = jsonObj.id;
 
     // Get the status and category id
     if (jsonObj.newstate == 1) {
-        document.getElementById("enabled_"+id).checked = "checked";
+        document.getElementById("sub_img").style.display = "none";
+        document.getElementById("unsub_img").style.display = "";
     } else {
-        document.getElementById("enabled_"+id).checked = "";
+        document.getElementById("sub_img").style.display = "";
+        document.getElementById("unsub_img").style.display = "none";
     }
   }
 }
@@ -53,4 +47,3 @@ function ADVTgetXmlHttpObject()
   }
   return objXMLHttp
 }
-
