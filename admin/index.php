@@ -29,15 +29,9 @@ USES_lib_admin();
 if (!SEC_hasRights('classifieds.admin')) {
     // Someone is trying to illegally access this page
     COM_errorLog("Someone has tried to illegally access the classifieds Admin page.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
-    echo CLASSIFIEDS_siteHeader();
-    echo COM_startBlock($LANG_ADVT['access_denied']);
-    echo $LANG_ADVT['access_denied_msg'];
-    echo COM_endBlock();
-    echo CLASSIFIEDS_siteFooter(true);
-    echo $display;
+    COM_404();
     exit;
 }
-
 
 /**
 *   Create the admin menu at the top of the list and form pages.
@@ -54,12 +48,12 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 
     if ($mode == 'ad') {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?edit=ad',
+            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editad',
             'text' => $LANG_ADVT['mnu_submit']);
         $help_text = 'hlp_adlist';
     } else {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=ad',
+            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?adminad',
             'text' => $LANG_ADVT['mnu_adlist']);
     }
 
@@ -104,10 +98,10 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 
 
 $action = '';
-$expected = array('edit', 'moderate', 'save', 'deletead',
-        'deleteadtype', 'saveadtype', 'editadtype',
+$expected = array('edit', 'moderate', 'save', 'deletead', 'deleteimage',
+        'deleteadtype', 'saveadtype', 'editadtype', 'editad',
         'deletecat', 'editcat', 'savecat',
-        'cancel', 'admin', 'mode');
+        'cancel', 'admin');
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
         $action = $provided;
@@ -119,21 +113,6 @@ foreach($expected as $provided) {
         break;
     }
 }
-
-// Get the mode.  No need to sanitize since it's only used in a switch
-// 'mode' is for compatibility and will be replaced eventually
-/*if ($action != '') {
-    $mode = $action;
-} else {
-    if (isset($_POST['mode'])) {
-        $mode = $_POST['mode'];
-    } elseif (isset($_GET['mode'])) {
-        $mode = $_GET['mode'];
-    } else {
-        $mode = '';
-    }
-    $action = $mode;
-}*/
 
 if (isset($_POST['ad_id'])) {
     $ad_id = COM_sanitizeID($_POST['ad_id']);
@@ -159,6 +138,14 @@ $content = '';      // initialize variable for page content
 $A = array();       // initialize array for form vars
 
 switch ($action) {
+case 'deleteimage': // delete an image
+    USES_classifieds_class_image();
+    $Image = new adImage($actionval);
+    $Image->Delete();
+    $actionval = $ad_id;
+    $view = 'editad';
+    break;
+
 case 'deletecat':   // delete a single category
     $cat_id = (int)CLASSIFIEDS_getParam('cat_id');
     if ($cat_id > 0) {
@@ -169,13 +156,15 @@ case 'deletecat':   // delete a single category
     break;
 
 case 'deletead':
+    USES_classifieds_class_ad();
     if ($type == 'submission' || $type == 'editsubmission' || 
             $type == 'moderate') {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
         adDelete($ad_id, true, 'ad_submission');
         $view = 'moderation';
     } else {
-        adDelete($ad_id, true);
+        $Ad = new Ad($ad_id);
+        $Ad->Delete();
         $view = 'admin';
         $actionval = 'ad';
     }
@@ -184,17 +173,18 @@ case 'deletead':
 case 'saveadtype':
     USES_classifieds_class_adtype();
     $type_id = CLASSIFIEDS_getParam('type_id');
-    $AdType = new AdType($type_id);
-    $AdType->SetVars($_POST);
-    $content .= $AdType->Save();
-    $view = 'admin';
-    $actionval = 'type';
+    $AdType = new adType($type_id);
+    if (!$AdType->Save($_POST)) {
+        COM_errorLog("Error saving ad type");
+        COM_errorLog("Type info:" . print_r($AdType,true));
+    }
+    COM_refresh(CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type');
     break;
 
 case 'deleteadtype':
     USES_classifieds_class_adtype();
     $type_id = CLASSIFIEDS_getParam('type_id');
-    $AdType = new AdType($type_id);
+    $AdType = new adType($type_id);
     $view = 'admin';
     $actionval = 'type';
     if ($AdType->isUsed()) {
@@ -211,6 +201,7 @@ case 'deleteadtype':
         }
     }
     $AdType->Delete();
+    COM_refresh(CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type');
     break;
 
 case 'savecat':
@@ -242,8 +233,10 @@ case 'delcatimg':
     break;
 
 case 'save':
+    USES_classifieds_class_ad();
+    $Ad = new Ad($_POST['ad_id']);
     if ($type == 'submission') {    // new submission
-        $r = adSave('submission');
+        $r = $Ad->Save($_POST);
         if ($r[0] == 0) {
             echo COM_refresh(CLASSIFIEDS_ADMIN_URL);
             exit;
@@ -280,9 +273,10 @@ default:
     $view = $action;
     break;
 }
-    
+
 // First, process any action that was requested.  If this is a specific
 // action, then after performing it set the page to the desired display.
+if (0) {
 switch ($mode) {
 
 /*    case 'deletecat':
@@ -395,12 +389,12 @@ switch ($mode) {
         }
         break;
 
-    case 'savesubmission':
+    /*case 'savesubmission':
         $r = adSave('editsubmission');
         $content .= $r[1];
         $view = 'edit';
         break;
-
+    */
     case 'update_cat':
         // Insert or update a category record from form vars
         //USES_classifieds_categories();
@@ -422,7 +416,7 @@ switch ($mode) {
         $view = 'admin';
         $actionval = 'cat';
         break;*/
-
+    /*
     case 'delsubimg':
         // Delete image from submission queue
         USES_classifieds_edit();
@@ -430,12 +424,12 @@ switch ($mode) {
         $view = 'editsubmission';
         $mode = 'editsubmission';
         break;
-
     case 'delete_img':
         USES_classifieds_edit();
         $content .= imgDelete(true);
-        $view = 'editad';
+        $view = 'edit';
         break;
+    */
 
     /*case 'delcatimg':
         // Delete a category image
@@ -449,7 +443,7 @@ switch ($mode) {
         $view = 'editcat';
         break;*/
 
-    case 'resetadperms':
+    /*case 'resetadperms':
         $perms = SEC_getPermissionValues(
             $_POST['perm_owner'], $_POST['perm_group'], 
             $_POST['perm_members'], $_POST['perm_anon']);
@@ -466,6 +460,7 @@ switch ($mode) {
         $view = 'admin';
         $actionval = 'other';
         break;
+    */
 
     case 'resetcatperms':
         $perms = SEC_getPermissionValues(
@@ -487,13 +482,13 @@ switch ($mode) {
 
     case 'toggleadtype':
         USES_classifieds_class_adtype();
-        AdType::toggleEnabled($ad_id, $_REQUEST['enabled']);
+        adType::toggleEnabled($ad_id, $_REQUEST['enabled']);
         $view = 'admintypes';
         break;
 
 /*    case 'saveadtype':
         USES_classifieds_class_adtype();
-        $AdType = new AdType($ad_id);
+        $AdType = new adType($ad_id);
         $AdType->SetVars($_POST);
         $content .= $AdType->Save();
         $view = 'admin';
@@ -509,7 +504,7 @@ switch ($mode) {
         } else {
             $type_id = 0;
         }
-        $AdType = new AdType($type_id);
+        $AdType = new adType($type_id);
         $view = 'admin';
         $actionval = 'type';
         if ($AdType->isUsed()) {
@@ -543,37 +538,25 @@ switch ($mode) {
         break;
 
 }
+}   // if (0) removing "mode" switch
 
 // Then handle the page request.  This is generally the final display
 // after any behind-the-scenes action has been performed
 switch ($view) {
 case 'editad':
-    $ad_id = (int)$actionval;
-    if ($ad_id > 0) {
-        $result = DB_query ("SELECT * FROM {$_TABLES['ad_ads']} 
-                WHERE ad_id ='$ad_id'");
-        if ($result && DB_numRows($result) == 1) {
-            USES_classifieds_edit();
-            $A = DB_fetchArray($result);
-            $content .= adEdit($A, 'update_ad');
-        } else {
-            // back to "Manage Ads", with an error message
-            $content .= COM_showMessage('08', $_CONF_ADVT['pi_name']);
-            $content .= adList(true);
-        }
-    } else {
-        // Display the edit form for a new ad submission.  If $_POST is
-        // not empty, then this is from a failed save, re-show the fields.
-        if (!empty($_POST)) $A = $_POST;
-        $content .= adEdit($A, 'edit');
+case 'edit':    // if called from submit.php
+    USES_classifieds_class_ad();
+    $Ad = new Ad($actionval);
+    if (isset($_GET['cat_id'])) {
+        $Ad->cat_id = $_GET['cat_id'];
     }
+    $content .= $Ad->Edit();
     break;
 
 case 'editadtype':
-//case 'newadtype':
     // Edit an ad type. $actionval contains the type_id value
     USES_classifieds_class_adtype();
-    $AdType = new AdType($actionval);
+    $AdType = new adType($actionval);
     $content .= CLASSIFIEDS_adminMenu('type');
     $content .= $AdType->ShowForm();
     break;
@@ -587,126 +570,6 @@ case 'editcat':
     $C = new adCategory($cat_id);
     $content .= $C->Edit();
     break;
-
-
-    case 'edit':
-        USES_classifieds_edit();
-        if ($ad_id != '' && !isset($_POST['save'])) {
-            // coming from the edit link in a list or detail view
-            $result = DB_query ("SELECT * 
-                        FROM {$_TABLES['ad_ads']} 
-                        WHERE ad_id ='$ad_id'");
-            if ($result && DB_numRows($result) == 1) {
-                $A = DB_fetchArray($result);
-                $content .= adEdit($A, 'update_ad');
-            } else {
-                // back to "Manage Ads", with an error message
-                $content .= COM_showMessage('08', $_CONF_ADVT['pi_name']);
-                $content .= adList(true);
-            }
-        } else {
-            // Display the edit form for a new ad submission.  If $_POST is
-            // not empty, then this is from a failed save, re-show the fields.
-            if (!empty($_POST)) $A = $_POST;
-            $content .= adEdit($A, 'edit');
-        }
-        break;
-
-    case 'editsubmission':
-    case 'moderate':
-        // coming from submission queue, ad ID is in var 'id'
-        USES_classifieds_edit();
-        $result = DB_query ("SELECT * 
-                    FROM {$_TABLES['ad_submission']} 
-                    WHERE ad_id ='$ad_id'");
-        if ($result && DB_numRows($result) == 1) {
-            $A = DB_fetchArray($result);
-            $content .= adEdit($A, $mode);
-        } else {
-            // Redirect back to moderation, but with a message
-            echo COM_Refresh($_CONF['site_admin_url'] . 
-                '/moderation.php?msg=08&plugin='.$_CONF_ADVT['pi_name']);
-        }
-        break;
-
-    case 'moderation':
-        // Redirect to the moderation page
-        echo COM_refresh($_CONF['site_admin_url']. '/moderation.php');
-        exit;
-        break;
-
-    case 'userindex':       // go to the user home page
-        echo COM_refresh(CLASSIFIEDS_URL . "/index.php?msg=$msgid");
-        exit;
-        break;
-
-    case 'detail':
-        // Display an ad's detail
-        USES_classifieds_detail();
-        $content .= adDetail($ad_id);
-        break;
-
-    /*case 'Xadminads':
-        // Display the list of ads, either pending or all
-        $content .= adList(true);
-        break;*/
-
-    case 'Xadmincats':
-    case 'editcat':
-        // Display the form to manage categories
-        $cat_id = isset($_REQUEST['cat_id']) ? (int)$_REQUEST['cat_id'] : 0;
-        //USES_classifieds_categories();
-        USES_classifieds_class_category();
-        $content .= CLASSIFIEDS_adminMenu('cat');
-        //$content .= CLASSIFIEDS_catEdit($cat_id);
-        $C = new adCategory($cat_id);
-        $content .= $C->Edit();
-        break;
-
-    case 'admincats':
-        USES_classifieds_admin();
-        $content .= CLASSIFIEDS_adminCategories();
-        break;
-
-    /*case 'Xadminother':
-        $T1 = new Template(CLASSIFIEDS_PI_PATH . '/templates/admin/');
-        $T1->set_file('content', 'adminother.thtml');
-        $T1->set_var('cat_list', SEC_getGroupDropdown($_CONF_ADVT['defgrpcat'], 3));
-        $T1->set_var('cat_perms', SEC_getPermissionsHTML(
-            $_CONF_ADVT['default_perm_cat'][0],
-            $_CONF_ADVT['default_perm_cat'][1],
-            $_CONF_ADVT['default_perm_cat'][2],
-            $_CONF_ADVT['default_perm_cat'][3]));
-        $T1->set_var('ad_list', SEC_getGroupDropdown($_CONF_ADVT['defgrpad'], 3));
-        $T1->set_var('ad_perms', SEC_getPermissionsHTML(
-            $_CONF_ADVT['default_permissions'][0],
-            $_CONF_ADVT['default_permissions'][1],
-            $_CONF_ADVT['default_permissions'][2],
-            $_CONF_ADVT['default_permissions'][3]));
-        $T1->parse('output1', 'content');
-        $content .= $T1->finish($T1->get_var('output1'));
-        break;*/
-
-    case 'delAdTypeForm':
-        USES_classifieds_class_adtype();
-        $AdType = new AdType($ad_id);
-        $T1 = new Template(CLASSIFIEDS_PI_PATH . '/templates/admin/');
-        $T1->set_file('deltypeform', 'deltypeform.thtml');
-        $T1->set_var('type_name', $AdType->getDescrip());
-        $T1->set_var('ad_id', $ad_id);
-        $sql = "SELECT id,descrip
-                FROM {$_TABLES['ad_types']}
-                WHERE id <> $ad_id
-                ORDER BY descrip ASC";
-        $T1->set_var('new_selection', $AdType->makeSelection(0, $sql));
-        $T1->parse('output', 'deltypeform');
-        $content .= $T1->finish($T1->get_var('output'));
-        break;
-
-    case 'admintypes':
-        USES_classifieds_admin();
-        $content .= CLASSIFIEDS_adminAdTypes();
-        break;
 
 case 'admin':
     USES_classifieds_admin();
@@ -739,12 +602,13 @@ case 'admin':
                         $_CONF_ADVT['default_perm_cat'][1],
                         $_CONF_ADVT['default_perm_cat'][2],
                         $_CONF_ADVT['default_perm_cat'][3]),
-            'ad_list' => SEC_getGroupDropdown($_CONF_ADVT['defgrpad'], 3),
+/*            'ad_list' => SEC_getGroupDropdown($_CONF_ADVT['defgrpad'], 3),
             'ad_perms' => SEC_getPermissionsHTML(
                         $_CONF_ADVT['default_permissions'][0],
                         $_CONF_ADVT['default_permissions'][1],
                         $_CONF_ADVT['default_permissions'][2],
                         $_CONF_ADVT['default_permissions'][3]),
+*/
         ) );
         $T1->parse('output1', 'content');
         $content .= $T1->finish($T1->get_var('output1'));

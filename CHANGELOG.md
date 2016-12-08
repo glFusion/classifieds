@@ -1,48 +1,41 @@
-glClassifieds - Change Log
+# glClassifieds - Change Log
 
-glClassifieds - 1.0.4 (Released 2011-09-02) [ View Issues ]
-===========================================
+## Version 1.1.0
+Compatibile with glFusion 1.4.0 or higher.
+- Refactor code into classes for different object types
+- Add uikit templates when a uikit-based theme is in use
+- Remove permissions for ads, only use category permissions
+- Remove recursion when checking access to categories
+- Use LGLIB_ImageUrl to handle image resizing and caching
+- Remove separate configurations for ad and category image locations
+
+## glClassifieds - 1.0.4
+Released 2011-09-02
 - 0000459: [General] Remove EBay link configuration (lee) - resolved.
 - 0000441: [General] All HTML tags are stripped from the ad text (lee) - resolved.
 - 0000446: [Administration] Pagination in the category administration doesn't work (lee) - resolved.
 - 0000421: [General] Paging isn't working when browsing categories (lee) - resolved.
 - 0000419: [General] Add "expires" meta tag to ad display (lee) - resolved.
-[5 issues]
 
-glClassifieds - 1.0.3 (Released 2010-07-09) [ View Issues ]
-===========================================
-
+## glClassifieds - 1.0.3
 Released 2010-07-09
-
 - 0000411: [General] URL rewrite not working (lee) - resolved.
-[1 issue]
 
-glClassifieds - 1.0.2 (Released 2010-05-02) [ View Issues ]
-===========================================
-
-Released 02 May 2010. Compatible with glFusion 1.2.0 and up only.
-
+## glClassifieds - 1.0.2
+Released 2010-05-02, Compatible with glFusion 1.2.0 and up only.
 - 0000407: [General] Dates are always formated as m/d/y (lee) - resolved.
 - 0000389: [General] Add autotag support (lee) - resolved.
 - 0000401: [Administration] Use single config variable to control block display (lee) - resolved.
 - 0000383: [General] Ad titles in what's new block keep getting shorter (lee) - resolved.
 - 0000384: [General] What's new list not correctly formatted. (lee) - resolved.
-[5 issues]
 
-glClassifieds - 1.0.1 (Released 2009-12-21) [ View Issues ]
-===========================================
-
+## glClassifieds - 1.0.1
 Released 2009-12-21
-
 - 0000367: [General] Add option to hide left & right blocks (lee) - closed.
 - 0000369: [General] Unescaped strings are passed to search function (lee) - closed.
-[2 issues]
 
-glClassifieds - 1.0.0
-=====================
-
+## glClassifieds - 1.0.0
 Miscellaneous patches to version 0.4
-
 - 0000363: [General] Add title attribute to items in What's New (lee) - resolved.
 - 0000353: [General] Category icons do not show properly in the ad listing if the image filename contains spaces (lee) - resolved.
 - 0000354: [General] IE doesn't see category blocks as links (lee) - resolved.
@@ -53,32 +46,20 @@ Miscellaneous patches to version 0.4
 - 0000344: [Administration] Disable block when plugin is disabled (lee) - resolved.
 - 0000330: [Submissions] Comments-enabled dropdown always defaults to "closed" on new submissions (lee) - resolved.
 
-
-glClassifieds - 0.4.1
-=====================
-
+## glClassifieds - 0.4.1
 Patch for extra linefeed at the end of admin.php
-
 - 0000329: [Administration] Extra linefeed in admin.php causing some sites to crash (lee) - resolved.
 
-
-glClassifieds - 0.4
-===================
-
+## glClassifieds - 0.4
 Adds support for comments and the FCKEditor
-
 - 0000304: [General] Add centerblock support (lee) - resolved.
 - 0000313: [General] Add support for comments (lee) - resolved.
 - 0000277: [Submissions] Add FCKEditor support for ad submissions (lee) - resolved.
 - 0000295: [Submissions] Make the ad type selectable from admin definitions (lee) - resolved.
 - 0000297: [Submissions] Image uploads fail strangely if they're too large. (lee) - resolved.
 
-
-glClassifieds - 0.3
-===================
-
+## glClassifieds - 0.3
 Contains several significant changes. Gets most of the display logic out of the code and into templates and stylesheets. This version also allows installation via the glFusion auto-installer in version 1.1.2.
-
 - 0000273: [Submissions] Add checks to ensure that only authorized users can submit (lee) - resolved.
 - 0000262: [General] Implement more stylesheets and templates (lee) - resolved.
 - 0000270: [General] Implement glFusion autoinstaller (lee) - resolved.
@@ -91,12 +72,8 @@ Contains several significant changes. Gets most of the display logic out of the 
 - 0000252: [Submissions] Display user contact info in the submission form. (lee) - resolved.
 - 0000245: [General] Highlight soon-to-expire ads under "My Ads" (lee) - resolved.
 
-
-glClassifieds - 0.2.3
-=====================
-
+## glClassifieds - 0.2.3
 Patch release for 0.2.2.  Can be considered "1.0rc1".
-
 - 0000240: [Administration] Deleting plugin leaves the random ad block behind (lee) - resolved.
 - 0000239: [Account Management] Make the "send message" link conditional upon configuration items (lee) - resolved.
 - 0000237: [Administration] Adding days to expired ads should start extending now, not from the old expiration date (lee) - resolved.
@@ -115,28 +92,18 @@ Patch release for 0.2.2.  Can be considered "1.0rc1".
 - 0000218: [Administration] Installation routine failes with "access denied" message when config.php is missing (lee) - resolved.
 - 0000216: [Submissions] For admin submissions, ads are created even if there's an error uploading the image. (lee) - resolved.
 
-
-
-glClassifieds - 0.2.2
-=====================
-
+## glClassifieds - 0.2.2
 Patch for 0.2.1.
-
 - 0000215: [Submissions] Logged-in users are denied access to ad submission (lee) - resolved.
 
-glClassifieds - 0.2.1
-=====================
-
+## glClassifieds - 0.2.1
 Updates to second beta
-
 - 0000214: [General] Search function not returning any matches (lee) - resolved.
 - 0000213: [Administration] Random Ad block isn't removed when uninstalling the plugin (lee) - resolved.
 - 0000212: [Administration] New Installation fails (lee) - resolved.
-glClassifieds - 0.2
-===================
 
+## glClassifieds - 0.2
 Second beta release - 2008-12-15
-
 - 0000211: [Administration] Create standalone cron task for purging and notifications (lee) - resolved.
 - 0000210: [Administration] Activate category permissions (lee) - resolved.
 - 0000208: [General] Simplify user-facing ad permissions system (lee) - resolved.
@@ -154,20 +121,12 @@ Second beta release - 2008-12-15
 - 0000201: [General] Add a "random ad" block (lee) - resolved.
 - 0000200: [Administration] Set a max time for ads and extensions (lee) - resolved.
 
-
-glClassifieds - 0.1.2
-====================
-
-Bug fixes to 0.1.1
-Released: 2008-11-30
-
+## glClassifieds - 0.1.2
+Bug fixes to 0.1.1, Released: 2008-11-30
 - 0000194: [General] Plugin not handling glFusion url_rewrite (lee) - resolved.
 - 0000193: [General] Error handling special characters (lee) - resolved.
 
-
-glClassifieds - 0.1.1
-====================
-
+## glClassifieds - 0.1.1
 Renamed plugin from "advt" to "classifieds". Also a few minor fixes. There is no upgrade from 0.1 to 0.1.1; this should be considered the new "first release".
 
 Released 2008-11-24
@@ -187,13 +146,10 @@ Released 2008-11-24
 - 0000177: [General] Missing images still show "click to enlarge" (lee) - resolved.
 - 0000176: [General] Replace text "remove" links with delete icons (lee) - resolved.
 
-glClassifieds - 0.1
-==================
-
+## glClassifieds - 0.1
 Initial redevelopment work. Many changes to get the plugin to work with GLFusion 1.1.0.
 
 Released 2008-11-12
-
 
 - 0000132: [General] Remove Register Globals requirement (lee) - closed.
 - 0000138: [General] Add tabbed menus (lee) - closed.
@@ -207,4 +163,3 @@ Released 2008-11-12
 - 0000147: [General] Add GL permissions system to viewing, searching and editing ads (lee) - closed.
 - 0000164: [Submissions] Use lightbox to display larger images (lee) - closed.
 - 0000173: [Submissions] Add a keywords field to the ad (lee) - closed.
-

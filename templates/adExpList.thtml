@@ -29,7 +29,11 @@
   <tr>
     <td width="120">
       {!if img_url}
+        {!if is_uikit}
+        <a href="{img_url}" data-uk-lightbox>
+        {!else}
         <a href="{img_url}" rel="slimbox" target="_blank">
+        {!endif}
           <img src="{thumb_url}" border="0" 
             alt="{$LANG_ADVT['click_to_enlarge']}" />
         </a>

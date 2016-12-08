@@ -55,9 +55,9 @@ window.addEvent('domready',function() {
       <td>
         <input type="file" name="imagefile" />
       </td>
-      {!if existing_image}
+      {!if img_url}
       <td>
-        <img src="{existing_image}" width="48" height="48" /><br />
+        <img src="{img_url}" width="48" height="48" />
           <a href="?mode=delcatimg&cat_id={cat_id}">{$LANG_ADVT['delete']}</a>
       </td>
       {!endif}
@@ -84,7 +84,9 @@ window.addEvent('domready',function() {
     <tr>
       <td><b>{$LANG_ACCESS['owner']}:</b></td>
       <td align="left">
-        {ownername}
+        <select id="owner" name="owner_id">
+        {owner_dropdown}
+        </select>
       </td>
     </tr>
 

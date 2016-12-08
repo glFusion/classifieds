@@ -9,7 +9,6 @@ window.addEvent('domready',function() {
 {!if show_htmleditor}
 {wysiwyg}
 {!endif}
-<h1>DEPRECATED</h1>
 
 <br />
 <div class="block-box">
@@ -27,7 +26,7 @@ window.addEvent('domready',function() {
       <tr>
         <td align="right"><b>{$LANG_ADVT['category']}</b></td>
         <td align="left">
-          <select name="catid" onchange="updateCat(this.value, '{site_url}');">
+          <select name="cat_id" onchange="updateCat(this.value, '{site_url}');">
             {sel_list_catid}
           </select>
         </td>
@@ -147,6 +146,7 @@ window.addEvent('domready',function() {
         </td>
       </tr>
 
+{!if isAdmin}
       <tr>
         <td align="right"><b>{$LANG_ACCESS['owner']}</b></td>
         <td align="left">
@@ -155,6 +155,9 @@ window.addEvent('domready',function() {
           </select>
         </td>
       </tr>
+{!else}
+      <input type="hidden" name="uid" value="{uid}" />
+{!endif}
 
       <tr>
         <td align="right"><b>{$LANG_ACCESS['group']}</b></td>

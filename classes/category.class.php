@@ -18,7 +18,7 @@
 class adCategory
 {
     private $properties;
-    private $isNew;
+    public $isNew;
     private $imgPath;
 
     /**
@@ -51,7 +51,7 @@ class adCategory
     *   @param  string  $key    Property name
     *   @param  mixed   $value  Property value
     */
-    function __set($key, $value)
+    public function __set($key, $value)
     {
         switch ($key) {
         case 'cat_id':
@@ -85,7 +85,7 @@ class adCategory
     *   @param  string  $key    Property Name
     *   @return mixed       Property value, or NULL if not set
     */
-    function __get($key)
+    public function __get($key)
     {
         if (isset($this->properties[$key]))
             return $this->properties[$key];
@@ -99,7 +99,7 @@ class adCategory
     *
     *   @param  array   $A      Array of values, from DB or $_POST
     */
-    function SetVars($A, $fromDB = false)
+    public function SetVars($A, $fromDB = false)
     {
         if (!is_array($A)) return;
 
@@ -139,7 +139,7 @@ class adCategory
     *   @param  integer $id     Optional ID.  Current ID is used if zero
     *   @return boolean         True on success, False on failure
     */
-    function Read($id = 0)
+    public function Read($id = 0)
     {
         global $_TABLES;
 
@@ -222,7 +222,7 @@ class adCategory
 
         // Propagate the permissions, if requested
         if (isset($_POST['propagate'])) {
-            CLASSIFIEDS_propagateCatPerms($catid, $vars['perms']);
+            $this->propagatePerms();
         }
 
         $result = DB_query($sql);
@@ -365,7 +365,7 @@ class adCategory
         $result = DB_query($sql);
 
         // If there are no children, just return.
-        if (!$result)
+        if (!$result || DB_numRows($result) < 1)
             return '';
 
         $cats = array();
@@ -407,39 +407,18 @@ class adCategory
             $this->Read();
         }
         $T = new Template(CLASSIFIEDS_PI_PATH . '/templates/admin');
-        $T->set_file('modify', 'catEditForm.thtml');
+        $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
+        $T->set_file('modify', "catEditForm$tpltype.thtml");
 
-        // create a dropdown list of only master categories
-        //$T->set_var('sel_parent_cat', COM_optionList($_TABLES['ad_category'], 
-        //    'cat_id,cat_name', $parentcat, 1, "cat_id <> $catid AND papa_id=0"));
-        // this code creates a complete dropdown including subcategories
-        $T->set_var('sel_parent_cat',
-            self::buildSelection($this->papa_id, 0, '', 'NOT', $this->cat_id));
-        if (!$this->isNew) {
-            // If this is an existing category, load the template with the
-            // categories values.
-            $T->set_var(array(
-                'permissions_editor' =>
-                    SEC_getPermissionsHTML($this->perm_owner, $this->perm_group,
-                        $this->perm_members, $this->perm_anon),
-                'ownername' => COM_getDisplayName($this->owner_id),
-                'owner_id'  => $this->owner_id,
-                'group_dropdown' => SEC_getGroupDropdown($this->group_id, 3),
-            ) );
-        } else {
+        if ($this->isNew) {
             // A new category gets default values
-            $T->set_var(array(
-                'txt_sub_btn'   => $LANG_ADVT['add_cat'],
-                'permissions_editor' =>
-                    SEC_getPermissionsHTML($_CONF_ADVT['default_perm_cat'][0],
-                        $_CONF_ADVT['default_perm_cat'][1],
-                        $_CONF_ADVT['default_perm_cat'][2],
-                        $_CONF_ADVT['default_perm_cat'][3]),
-                'ownername' => COM_getDisplayName($_USER['uid']),
-                'owner_id'  => $_USER['uid'],
-                'group_dropdown' =>
-                    SEC_getGroupDropdown($_CONF_ADVT['defgrpcat'], 3),
-            ) );
+            $this->owner_id = $_USER['uid'];
+            $this->group_id = $_CONF_ADVT['defgrpcat'];
+            $this->owner_id = $_USER['uid'];
+            $this->perm_owner = $_CONF_ADVT['default_perm_cat'][0];
+            $this->perm_group = $_CONF_ADVT['default_perm_cat'][1];
+            $this->perm_members = $_CONF_ADVT['default_perm_cat'][2];
+            $this->perm_anon = $_CONF_ADVT['default_perm_cat'][3];
         }
 
         $T->set_var(array(
@@ -451,10 +430,21 @@ class adCategory
             'bgcolor'   => $this->bgcolor,
             'cat_id'    => $this->cat_id,
             'cancel_url' => CLASSIFIEDS_ADMIN_URL. '/index.php?admin=cat',
+            'img_url'   => LGLIB_ImageUrl($this->imgPath . '/' . $this->image),
+            'can_delete' => $this->isUsed() ? '' : 'true',
+            'owner_dropdown' => COM_optionList($_TABLES['users'],
+                    'uid,username', $this->owner_id, 1, 'uid > 1'),
+            'group_dropdown' => SEC_getGroupDropdown($this->group_id, 3),
+            'ownername' => COM_getDisplayName($_USER['uid']),
+            'permissions_editor' => SEC_getPermissionsHTML($this->perm_owner,
+                    $this->perm_group, $this->perm_members, $this->perm_anon),
+            'sel_parent_cat' => self::buildSelection($this->papa_id, 0, '',
+                    'NOT', $this->cat_id),
+            'have_propagate' => $this->isNew ? '' : 'true',
         ) );
 
         if ($this->image != '') {
-            $T->set_var('existing_image', CLASSIFIEDS_thumbUrl($this->image));
+            $T->set_var('existing_image', self::thumbUrl($this->image));
         }
 
         $T->parse('output','modify');
@@ -520,7 +510,7 @@ class adCategory
             $str .= "<option value=\"{$row['cat_id']}\" $style $selected $disabled>";
             $str .= $txt;
             $str .= "</option>\n";
-            $str .= adCategory::buildSelection($sel, $row['cat_id'], $char.'-',
+            $str .= self::buildSelection($sel, $row['cat_id'], $char.'-',
                     $not, $items);
         }
 
@@ -573,7 +563,7 @@ class adCategory
                 $location .= $row['cat_name'];
             }
         } else {
-            $location .= adCategory::BreadCrumbs($row['papa_id'], $showlink);
+            $location .= self::BreadCrumbs($row['papa_id'], $showlink);
             if ($showlink) {
                 $location .= ' :: <a href="' .
                         CLASSIFIEDS_makeURL('home', $row['cat_id']). '">' .
@@ -632,6 +622,7 @@ class adCategory
                 array_merge($subcats[$id], $A);
             }
         }
+
         return $subcats[$master_id];
     }
 
@@ -639,24 +630,343 @@ class adCategory
     /**
     *   Find the total number of ads for a category, including subcategories
     *
-    *   @param  integer $id CategoryID
+    *   @param  integer $cat_id     CategoryID
+    *   @param  boolean $current    True to count only non-expired ads
+    *   @param  boolean $sub        True to count ads in sub-categories
     *   @return integer Total Ads
     */
-    public static function TotalAds($id)
+    public static function TotalAds($cat_id, $current = true, $sub = true)
     {
         global $_TABLES;
 
         $time = time();     // to compare to ad expiration
+        $totalAds = 0;
+        $cat_id = (int)$cat_id;
+        $current = $current == true ? true : false;
+        $sub = $sub == true ? true : false;
 
-        $sql = "SELECT cat_id FROM {$_TABLES['ad_ads']}
-                WHERE cat_id=$id
-                    AND exp_date>$time "
-                    . COM_getPermSQL('AND', 0, 2);
-        //echo $sql."<br />\n";
-        $totalAds = DB_numRows(DB_query($sql));
-
+        // find all the subcategories
+        if ($sub) {
+            $sql = "SELECT cat_id FROM {$_TABLES['ad_category']}
+                    WHERE papa_id=$cat_id";
+            $result = DB_query($sql);
+            while ($row = DB_fetchArray($result, false)) {
+                $totalAds += adCategory::TotalAds($row['cat_id'], $current, $sub);
+            }
+        }
+        // Now check the current category
+        $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']}
+            WHERE cat_id = $cat_id";
+        if ($current) {
+            $now = time();
+            $sql .= " AND exp_date > $now";
+        }
+        $res = DB_query($sql);
+        $totalAds += DB_numRows($res);
         return $totalAds;
+
     }   // function TotalAds()
 
+
+    /**
+    *   Determine if this category is associated with any ads.
+    *   Check both prod and submission tables
+    *
+    *   @return boolean     True if any ad uses this category, False if not
+    */
+    public function isUsed()
+    {
+        global $_TABLES;
+
+        $id = (int)$id;
+        foreach (array('ad_ads', 'ad_submission') as $tbl_id) {
+            if (DB_count($_TABLES[$tbl_id], 'cat_id', $this->cat_id) > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+    *   Check the current user's access to the current category
+    *
+    *   @uses   SEC_hasAccess()
+    *   @param  int     $required       Minimim required access level
+    *   @return boolean     True if the user meets the requirement, False if not.
+    */
+    public function checkAccess($required = 3)
+    {
+        if (SEC_hasRights($_CONF_ADVT['pi_name']. '.admin')) {
+            // Admin rights trump all
+            return true;
+        } elseif (SEC_hasAccess($this->owner_id, $this->group_id,
+                $this->perm_owner, $this->perm_group,
+                $this->perm_members, $this->perm_anon) >= $required) {
+            // Check category permission array
+            return true;
+        }
+        return false;   // Has no access by default
+    }
+
+
+    /**
+    *   Check if the current user has read-write access to this category
+    *
+    *   @uses   adCategory::checkAccess()
+    *   @return boolean     True if the user can edit, False if not
+    */
+    public function canEdit()
+    {
+        return $this->checkAccess(3);
+    }
+
+
+    /**
+    *   Check if the current user has read access to this category
+    *
+    *   @uses   adCategory::checkAccess()
+    *   @return boolean     True if the user can view, False if not
+    */
+    public function canView()
+    {
+        return $this->checkAccess(2);
+    }
+
+
+    /**
+    *   When no category is given, show a table of all categories
+    *   along with the count of ads for each.  
+    *   Returns the results from the category
+    *   list function, chosen based on the display mode
+    *   @return string      HTML for category listing page
+    */
+    public static function userList()
+    {
+        global $_CONF_ADVT;
+        USES_classifieds_list();
+
+        switch ($_CONF_ADVT['catlist_dispmode']) {
+        case 'blocks':
+            return CLASSIFIEDS_catList_blocks();
+            break;
+
+        default:
+            return CLASSIFIEDS_catList_normal();
+            break;
+        }
+    }
+
+
+    /**
+    *   Subscribe the current user to a specified category's notifications.
+    *
+    *   @param  integer $cat    Category ID to subscribe
+    *   @return boolean     True on success, False on failure
+    */
+    public function Subscribe($sub = true)
+    {
+        global $_USER, $_TABLES;
+
+        // only registered users can subscribe, and make sure this is an
+        // existing category
+        if (COM_isAnonUser() || $this->cat_id < 1)
+            return false;;
+
+        $sub = $sub == true ? true : false;
+
+        if ($sub === true) {
+            DB_save($_TABLES['ad_notice'],
+                'cat_id,uid',
+                "{$this->cat_id},{$_USER['uid']}");
+        } else {
+            DB_delete($_TABLES['ad_notice'], 
+                array('cat_id', 'uid'),
+                array($this->cat_id, $_USER['uid']));
+        }
+        return (DB_error()) ? false : true;
+    }   // function Subscribe
+
+
+    /**
+    *   Unscribe the current user from a specified category's notifications.
+    *
+    *   @param  integer $cat    Category ID to unsubscribe
+    *   @return boolean     True on success, False on failure
+    */
+    /*public function UnSubscribe()
+    {
+        global $_USER, $_TABLES;
+
+        if ($this->cat_id == 0) return false;
+
+        // only registered users can subscribe
+        if (COM_isAnonUser())
+            return false;
+
+        DB_delete($_TABLES['ad_notice'],
+            array('cat_id', 'uid'),
+            array($this->cat_id, $_USER['uid']));
+        return (DB_error()) ? false : true;
+    }   // function UnSubscribe()
+    */
+
+    /**
+    *   Send an email to all subscribers for the ad's category, or any
+    *   parent category.
+    *
+    *   Email is only sent if the ad is approved and a notification
+    *   hasn't already been sent.
+    *
+    *   @param int $ad_id  ID number of ad 
+    */
+    public function Notify($ad_id)
+    {
+        global $_TABLES,  $_CONF, $_CONF_ADVT;
+
+        USES_classifieds_class_ad();
+        $Ad = new Ad($ad_id);
+        if ($Ad->isNew) return;
+
+        // check approval status and whether a notification was already sent.
+        if ($Ad->sentnotify == 1)
+            return;
+
+        $cat = (int)$adinfo['cat_id'];
+        $subject = trim($adinfo['subject']);
+        $descript = trim($adinfo['descript']);
+        $price = trim($adinfo['price']);
+
+        // Collect all the parent categories into a comma-separated list, and
+        // find all the subscribers in any of the categories
+        $catlist = CLASSIFIEDS_ParentCatList($cat);
+        $sql = "SELECT uid FROM {$_TABLES['ad_notice']} 
+                WHERE cat_id IN ($catlist)";
+        $notice = DB_query($sql, 1);
+        if (!$notice)
+            return;
+
+        // send the notification to subscribers
+        while ($row = DB_fetchArray($notice)) {
+            $result = DB_query("SELECT username, email, language
+                FROM {$_TABLES['users']} 
+                WHERE uid='{$row['uid']}'");
+            if (DB_numRows($result) == 0)
+                continue;
+
+            $name = DB_fetchArray($result);
+
+            // Select the template for the message
+            $template_dir = CLASSIFIEDS_PI_PATH . 
+                    '/templates/notify/' . $name['language'];
+            if (!file_exists($template_dir . '/subscriber.thtml')) {
+                $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
+            }
+
+            // Load the recipient's language.  $LANG_ADVT is *not* global here
+            // to avoid overwriting the global language strings.
+            $LANG = plugin_loadlanguage_classifieds($name['language']);
+    
+            $T = new Template($template_dir);
+            $T->set_file('message', 'subscriber.thtml');
+
+            $ad_type = adType::GetDescription($Ad->ad_type);
+            $T->set_var(array(
+                'cat'   => self::BreadCrumbs($cat),
+                'subject' => $Ad->subject,
+                'description' => $Ad->descript,
+                'username' => COM_getDisplayName($row['uid']),
+                'ad_url' => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=$ad_id",
+                'price' => $Ad->price,
+                'ad_type' => $Ad->ad_type,
+            ), false);
+            $T->parse('output','message');
+            $message = $T->finish($T->get_var('output'));
+
+            COM_mail(
+                $name['email'],
+                "{$LANG['new_ad_listing']} {$_CONF['site_name']}",
+                $message,
+                "{$_CONF['site_name']} <{$_CONF['site_mail']}>",
+                true
+            );
+
+        }
+
+        // update the ad's flag to indicate that a notification has been sent
+        DB_query("UPDATE {$_TABLES['ad_ads']}
+                SET sentnotify=1
+                WHERE ad_id='$ad_id'");
+
+    }   // function Notify()
+
+
+    /**
+    *   Returns the string corresponding to the $id parameter.
+    *   Designed to be used standalone; if this is an object,
+    *   we already have the description in a variable.
+    *
+    *   @param  integer $id     Database ID of the ad type
+    *   @return string          Ad Type Description
+    */
+    public static function GetDescription($id)
+    {
+        global $_TABLES;
+
+        $id = (int)$id;
+        return DB_getItem($_TABLES['ad_category'], 'descrip', "id='$id'");
+    }
+
+
+    /**
+    *   Calls itself recursively to find the root category of the requested id
+    *   Finally returns a string of cat_id1,cat_id2,this_cat_id
+    *
+    *   @param int id Category ID
+    *   @return string Comma-separated category list
+    */
+    public static function ParentList($id=0, $str='')
+    {
+        global $_TABLES;
+
+        $id = (int)$id;
+        if ($id == 0)
+            return $str;
+
+        // Append our id to the string
+        $str .= $id;
+
+        // Get the papa_id of the current id
+        $sql = "SELECT cat_id, papa_id 
+            FROM {$_TABLES['ad_category']} 
+            WHERE cat_id=$id";
+        $result = DB_query($sql);
+        if (!$result) return $str;
+
+        $row = DB_fetchArray($result);
+        // If we found a parent category, call ourself to add it
+        if ((int)$row['papa_id'] > 0) {
+            $str = CLASSIFIEDS_ParentCatList($row['papa_id'], $str.',');
+        }
+
+        return trim($str, ',');
+
+    }   // ParentList()
+
+
+    /**
+    *   Shortcut functions to get resized thumbnail URLs.
+    *
+    *   @param  string  $filename   Filename to view
+    *   @return string      URL to the resized image
+    */
+    public static function thumbUrl($filename)
+    {
+        global $_CONF_ADVT;
+        return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/cat/' . $filename,
+                $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
+    }
+
 }
+
 ?>

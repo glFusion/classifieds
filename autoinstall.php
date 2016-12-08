@@ -110,8 +110,20 @@ $INSTALL_plugin['classifieds'] = array(
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id'),
 
+    array('type' => 'mkdir',
+            'dirs' => array(
+                $_CONF['path'] . 'data/' . $_CONF_ADVT['pi_name'],
+                $_CONF['path'] . 'data/' . $_CONF_ADVT['pi_name'] . '/images',
+                CLASSIFIEDS_IMGPATH . '/user',
+                CLASSIFIEDS_IMGPATH . '/cat',
+            ),
+    ),
+
     array('type' => 'sql',
             'sql' => $DEFVALUES['ad_types']),
+
+    array('type' => 'sql',
+            'sql' => $DEFVALUES['category']),
 );
 
 
@@ -125,13 +137,9 @@ function plugin_install_classifieds()
 {
     global $INSTALL_plugin, $_CONF_ADVT;
 
-    $pi_name            = $_CONF_ADVT['pi_name'];
-    $pi_display_name    = $_CONF_ADVT['pi_display_name'];
-    $pi_version         = $_CONF_ADVT['pi_version'];
+    COM_errorLog("Attempting to install the {$_CONF_ADVT['pi_display_name']} plugin", 1);
 
-    COM_errorLog("Attempting to install the $pi_display_name plugin", 1);
-
-    $ret = INSTALLER_install($INSTALL_plugin[$pi_name]);
+    $ret = INSTALLER_install($INSTALL_plugin[$_CONF_ADVT['pi_name']]);
     if ($ret > 0) {
         return false;
     }
@@ -158,5 +166,29 @@ function plugin_load_configuration_classifieds()
     return plugin_initconfig_classifieds($group_id);
 }
 
+
+/**
+*   Post-installation actions
+*   Create user information records for the plugin
+*/
+function plugin_postinstall_classifieds()
+{
+    global $_TABLES;
+
+    // Make sure there's a user information record created for each user
+    $vals = array();
+    $sql = "SELECT uid FROM {$_TABLES['users']}
+            WHERE uid > 1";
+    $res = DB_query($sql);
+    while ($user = DB_fetchArray($res, false)) {
+        $vals[] = "({$user['uid']}, UNIX_TIMESTAMP())";
+    }
+    if (!empty($vals)) {
+        $val_str = implode(',', $vals);
+        DB_query("INSERT INTO {$_TABLES['ad_uinfo']}
+                (uid, lastup_date)
+                VALUES $val_str");
+    }
+}
 
 ?>

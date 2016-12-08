@@ -1,32 +1,44 @@
 {# begin {templatelocation} #}
 <p />
-<table border=0 width=100%>
-  <tr>
-    <td width="55">
-      {!if catimg_url}
-          <img src="{catimg_url}" border="0" width="48" height="48" />
-      {!endif}
-    </td>
-    <td>
-      <span class="adBreadcrumb">{breadcrumbs}</span>
-      <div style="position:relative; float:right;">
-      {subscribe_msg}
-      {!if submit_url}
-        <a href="{submit_url}">
-          <img class="gl_mootip" alt="{$LANG_ADVT['submit_to_cat']}"
-            title="{$LANG_ADVT['submit_to_cat']}"
-            src="{layout_url}/images/admin/add.png"
-            width="16" height="16" />
-        </a>
-      {!endif}
-      </div>
-    <!--  {submit_msg}-->
-    </td>
-  </tr>
-</table>
+<div>
+<div style="flost:left;">
+  {!if catimg_url}
+   <img src="{catimg_url}" border="0" width="48" height="48" />
+  {!endif}
+  <span class="adBreadcrumb">{breadcrumbs}</span>
+</div>
+</div>
+
+<div style="position:relative; float:right;">
+{!if can_subscribe}
+  <div id="sub_div" style="margin-right:2px;float:right;">
+    <img id="sub_img" onclick="javascript:ADVTcatSub({cat_id}, 1);" 
+      src="{site_url}/classifieds/images/subscribe.png"
+      style="display:{sub_vis}"
+      class="tooltip gl_mootip"
+      title="{$LANG_ADVT['subscribe']}" />
+    <img id="unsub_img" onclick="javascript:ADVTcatSub({cat_id}, 0);" 
+      src="{site_url}/classifieds/images/unsubscribe.png"
+      style="display:{unsub_vis}"
+      class="tooltip gl_mootip"
+      title="{$LANG_ADVT['you_are_subscribed']}" />
+  </div>
+{!endif}
+{!if submit_url}
+  <div class="add_icon" style="margin-right:8px;float:right;">
+  <a href="{submit_url}">
+    <img class="gl_mootip" data-uk-tooltip alt="{$LANG_ADVT['submit_to_cat']}"
+      title="{$LANG_ADVT['submit_to_cat']}"
+      src="{layout_url}/images/admin/add.png"
+      width="16" height="16" />
+    </a>
+  </div>
+{!endif}
+<!--  {subscribe_msg}-->
+</div>
 
 <!-- BEGIN SubCat -->
-&nbsp;&nbsp;<a href={subcat_url}>{subcat_name}</a>
+&nbsp;&nbsp;<a href={subcat_url}>{subcat_name} ({subcat_count})</a>
 <!-- END SubCat -->
 
 {# end {templatelocation} #}

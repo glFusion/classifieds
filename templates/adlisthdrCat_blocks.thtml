@@ -28,7 +28,7 @@
 <!-- BEGIN SubCat -->
 <a style="color:{fgcolor};" href="{subcat_url}">
   <div class="subcatTitle" style="background-color:{bgcolor}; color:{fgcolor}; cursor:pointer;">
-  {subcat_name}
+  {subcat_name} ({subcat_count})
   </div>
 </a>
 <!-- END SubCat -->

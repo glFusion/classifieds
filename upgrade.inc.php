@@ -2,13 +2,17 @@
 /**
 *   Upgrade routines for the Classifieds plugin
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2015 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
 */
+
+if (!defined('GVERSION')) {
+    die('This file can not be used on its own.');
+}
 
 // Required to get the ADVT_DEFAULTS config values
 global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT, $_DB_dbms;
@@ -463,8 +467,10 @@ function classifieds_upgrade_1_0_4()
 
 }
 
-/** Upgrade to version 1.1.0
-    Adds config item for max image width on ad detail page
+/**
+*   Upgrade to version 1.1.0
+*   Adds config item for max image width on ad detail page
+*   Removes image path config options
 */
 function classifieds_upgrade_1_1_0()
 {
@@ -474,54 +480,107 @@ function classifieds_upgrade_1_1_0()
     $c = config::get_instance();
     $old_imgpath = pathinfo($_CONF_ADVT['image_dir']);
     $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
-    $mv_userimages = $old_imgpath['dirname'] != CLASSIFIEDS_IMGPATH ? true : false;
-    $mv_catimages = $old_imgpath['catimgpath'] != CLASSIFIEDS_IMGPATH . '/cat' ? true : false;
-    if ($_CONF_ADVT['catimgpath'] != CLASSIFIEDS_IMGPATH . '/cat') {
-        if (!is_dir(CLASSIFIEDS_IMGPATH . '/cat')) {
-            @mkdir(CLASSIFIEDS_IMGPATH, true);
+    $new_imgpath = CLASSIFIEDS_IMGPATH  . '/user';
+    $new_catpath = CLASSIFIEDS_IMGPATH . '/cat';
+    $mv_userimages = isset($_CONF_ADVT['image_dir']) && 
+            $_CONF_ADVT['image_dir'] != $new_imgpath ? true : false;
+    $mv_catimages = isset($_CONF_ADVT['catimgpath']) &&
+            $_CONF_ADVT['catimgpath'] != $new_catpath ? true : false;
+
+    if ($mv_catimages) {
+        @mkdir($new_catpath, true);
+        if (!is_dir($new_catpath)) {
+            COM_errorLog("Error creating new dir $new_catpath");
+            return 1;
         }
-        if (!is_dir(CLASSIFIEDS_IMGPATH . '/cat')) {
-            COM_errorLog("Error creating new dir " . CLASSIFIEDS_IMGPATH . "/cat");
-            return 1
+       $files = glob($_CONF_ADVT['catimgpath'] . '/*');
+        if ($files) {
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $parts = pathinfo($file);
+                    rename($file, $new_catpath . '/' . $parts['basename']);
+                }
+            }
         }
     }
+
     // Move ad images to new location
     if ($mv_userimages) {
+        @mkdir($new_imgpath, true);
+        if (!is_dir($new_imgpath)) {
+            COM_errorLog("Error creating new dir $new_imgpath");
+            return 1;
+        }
         $files = glob($_CONF_ADVT['image_dir'] . '/*');
         if ($files) {
             foreach ($files as $file) {
                 if (is_file($file)) {
                     $parts = pathinfo($file);
-                    rename($file, CLASSIFIEDS_IMGPATH . '/' . $parts['basename']);
-                }
-            }
-        }
-    }
-    // Now move category images
-    if ($mv_catimages) {
-        $files = glob($_CONF_ADVT['catimgpath'] . '/*');
-        if ($files) {
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    $parts = pathinfo($file);
-                    rename($file, CLASSIFIEDS_IMGPATH . '/cat/' . $parts['basename']);
+                    rename($file, CLASSIFIEDS_IMGPATH . '/user/' . $parts['basename']);
                 }
             }
         }
     }
 
+    // Now update configuration options.
+    // - Remove path configs for images (always using /private/data now)
+    // - Remove permissions matrix for ads
+    // - Remove help URL config item (never used)
     if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        COM_errorLog("Adding new configuration items");
+        COM_errorLog("Adding and removing configuration items");
         $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
-                'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
+                'text', 0, 0, 0, 25, true, 'classifieds');
         $c->del('catimgpath','classifieds');
         $c->del('catimgurl','classifieds');
         $c->del('image_dir','classifieds');
         $c->del('image_url','classifieds');
+        $c->del('fs_paths','classifieds');
+        $c->del('helpurl','classifieds');
+        $c->del('fs_permissions', 'classifieds');
+        $c->del('default_permissions', 'classifieds');
     }
 
-    return classifieds_do_upgrade_sql('1.1.0', $sql);
+    // Make sure there's a user information record created for each user
+    $vals = array();
+    $sql = "SELECT u.uid, i.uid AS uinfo_id FROM {$_TABLES['users']} u
+            LEFT JOIN {$_TABLES['ad_uinfo']} i
+            ON u.uid = i.uid
+            WHERE u.uid > 1";
+    $res = DB_query($sql);
+    while ($user = DB_fetchArray($res, false)) {
+        if ($user['uinfo_id'] === NULL) {
+            // No user info record exists, create one
+            $vals[] = "({$user['uid']},1)";
+        }
+    }
+    if (!empty($vals)) {
+        $val_str = implode(',', $vals);
+        $uinfo_sql = "INSERT INTO {$_TABLES['ad_uinfo']}
+                (uid, notify_exp)
+                VALUES $val_str";
+    }
 
+    $sql = array(
+        "UPDATE {$_TABLES['ad_ads']} SET uid = owner_id",
+        "ALTER TABLE {$_TABLES['ad_ads']}
+            CHANGE ad_id ad_id varchar(128) NOT NULL,
+            DROP perm_owner, DROP perm_group,
+            DROP perm_members, DROP perm_anon,
+            DROP owner_id, DROP group_id",
+        "UPDATE {$_TABLES['ad_submission']} SET uid = owner_id",
+        "ALTER TABLE {$_TABLES['ad_submission']}
+            CHANGE ad_id ad_id varchar(128) NOT NULL,
+            DROP perm_owner, DROP perm_group,
+            DROP perm_members, DROP perm_anon,
+            DROP owner_id, DROP group_id",
+        "ALTER TABLE {$_TABLES['ad_notice']}
+            DROP notice_id,
+            ADD PRIMARY KEY(cat_id, uid)",
+        "ALTER TABLE {$_TABLES['ad_uinfo']}
+            CHANGE notify_exp notify_exp tinyint(1) UNSIGNED DEFAULT 1",
+        $uinfo_sql,
+    );
+    return classifieds_do_upgrade_sql('1.1.0', $sql);
 }
 
  

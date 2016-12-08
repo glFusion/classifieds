@@ -83,7 +83,7 @@ class Dataproxy_classifieds extends DataproxyDriver
     *   'image_uri' => $image_uri (string)
     *  )
     */
-    function getChildCategories($pid = false)
+    function getChildCategories($pid = false, $alllangs = false)
     {
         global $_CONF, $_TABLES, $_CONF_ADVT;
 ;
@@ -163,6 +163,7 @@ class Dataproxy_classifieds extends DataproxyDriver
         }
 
         if (DB_numRows($result) == 1) {
+            USES_classifieds_class_image();
             $A = DB_fetchArray($result, false);
             $A = array_map('stripslashes', $A);
 
@@ -174,7 +175,7 @@ class Dataproxy_classifieds extends DataproxyDriver
                                 . '/index.php?mode=detail&amp;id='
                                  . urlencode($A['ad_id']));
             $retval['date']      = $A['add_date'];
-            $retval['image_uri'] = CLASSIFIEDS_dispUrl($A['filename']);
+            $retval['image_uri'] = adImage::dispUrl($A['filename']);
             $retval['raw_data']  = $A;
         }
 

@@ -3,19 +3,9 @@
 <form 
     action="{site_url}/admin/plugins/classifieds/index.php?mode=resetcatperms"
     method="POST">
-  {$LANG_ACCESS['group']}: {cat_list}<p {xhtml}>
-  {cat_perms}<p {xhtml}>
-  <input type="submit" name="submit" value="{$LANG12[8]}" {xhtml}>
+  {$LANG_ACCESS['group']}: {cat_list}<p />
+  {cat_perms}<p />
+  <input type="submit" name="submit" value="{$LANG12[8]}" />
 </form>
-<hr {xhtml}>
-
-<h2>{$LANG_ADVT['reset_ad_perms']}</h2>
-<form 
-    action="{site_url}/admin/plugins/classifieds/index.php?mode=resetadperms"
-    method="POST">
-  {$LANG_ACCESS['group']}: {ad_list}<p {xhtml}>
-  {ad_perms}<p {xhtml}>
-  <input type="submit" name="submit" value="{$LANG12[8]}" {xhtml}>
-</form>
-<hr>
+<hr />
 {# end {templatelocation} #}

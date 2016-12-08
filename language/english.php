@@ -33,7 +33,7 @@ $LANG_ADVT = array (
 'blocktitle'        => 'Classified Ads',
 'image_max'         => '(%d MB each, JPEG only)',
 'thumb_max'         => '10k max JPEG only',
-'added'             => 'Added:',
+'added'             => 'Added',
 'added_col'         => 'Added:',
 'add_cat'           => 'Add Category',
 'upd_cat'           => 'Update Category',
@@ -292,6 +292,7 @@ $LANG_confignames['classifieds'] = array(
     'displayblocks'  => 'Display glFusion Blocks',
     'disp_fullname' => 'Show owner full name with ads?',
     'detail_img_width' => 'Image width on ad detail pages',
+    'visible_to' => 'Visible To',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

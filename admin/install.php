@@ -18,12 +18,7 @@ require_once('../../../lib-common.php');
 if (!SEC_inGroup('Root')) {
     // Someone is trying to illegally access this page
     COM_errorLog("Someone has tried to illegally access the Classifieds install/uninstall page.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
-    echo COM_siteHeader();
-    echo COM_startBlock($LANG_ADVT['access_denied']);
-    echo $LANG_ADVT['access_denied_msg'];
-    echo COM_endBlock();
-    echo COM_siteFooter(true);
-    echo $display;
+    COM_404();
     exit;
 }
 

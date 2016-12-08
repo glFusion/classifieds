@@ -98,8 +98,12 @@ window.addEvent('domready',function() {
             <!-- BEGIN PhotoRow -->
             <tr>
               <td align="left">
-                <a href="{img_url}" rel="slimbox[ad]"">
-                  <img src="{thumb_url}">
+                {!if is_uikit}
+                <a href="{img_url}" data-uk-lightbox="{group:'ad'}">
+                {!else}
+                <a href="{img_url}" rel="slimbox[ad]">
+                {!end}
+                  <img src="{thumb_url}" />
                 </a>
               </td>
               <td align="left">
@@ -124,7 +128,7 @@ window.addEvent('domready',function() {
         <td align="right"><b>{$LANG_ADVT['expiration']}</b></td>
         <td align="left">
           {$LANG_ADVT['runfor']}
-          <input type="text" size="10" name="moredays" value="{days}" />
+          <input type="text" size="10" name="moredays" value="{moredays}" />
           {$LANG_ADVT['days']}
         </td>
       </tr>

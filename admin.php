@@ -3,10 +3,10 @@
 *   Create administration lists for ad elements
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    1.1.0
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -32,11 +32,21 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval = COM_createLink(
-            $icon_arr['edit'],
-            CLASSIFIEDS_ADMIN_URL . 
-                "/index.php?editadtype={$A['id']}"
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval = COM_createLink('',
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?editadtype={$A['id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit'
+                )
             );
+        } else {
+            $retval = COM_createLink(
+                $icon_arr['edit'],
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?editadtype={$A['id']}"
+            );
+        }
         break;
 
     case 'enabled':
@@ -52,7 +62,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
             $enabled = 0;
         }
         $fld_id = $fieldname . '_' . $A['id'];
-        $retval = 
+        $retval =
                 "<input name=\"{$fld_id}\" id=\"{$fld_id}\" " .
                 "type=\"checkbox\" $chk " .
                 "onclick='ADVTtoggleEnabled(this, \"{$A['id']}\", \"adtype\", \"{$_CONF['site_url']}\");' ".
@@ -60,41 +70,28 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        $retval .= '&nbsp;&nbsp;' . COM_createLink(
-            COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
-                'Delete this item',
-                array('title' => 'Delete this item', 
-                    'class' => 'gl_mootip',
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval .= COM_createLink('',
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?deleteadtype=x&amp;type_id={$A['id']}",
+                array(
+                    'title' => 'Delete this item',
+                    'class' => 'uk-icon uk-icon-trash advt_icon_danger',
                     'onclick' => "return confirm('Do you really want to delete this item?');",
-                )),
-            CLASSIFIEDS_ADMIN_URL . 
-                "/index.php?mode=deleteadtype&amp;type_id={$A['id']}"
+                )
             );
-
-        /*if ($A['enabled'] == 1) {
-            $img = 'on.png';
-            $title = 'Disable this item';
-            $newval = 0;
         } else {
-            $img = 'off.png';
-            $title = 'Enable this item';
-            $newval = 1;
+            $retval .= '&nbsp;&nbsp;' . COM_createLink(
+                COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
+                    'Delete this item',
+                    array('title' => 'Delete this item',
+                        'class' => 'gl_mootip',
+                        'onclick' => "return confirm('Do you really want to delete this item?');",
+                    )),
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?deleteadtype=x&amp;type_id={$A['id']}"
+            );
         }
-        $retval .= '&nbsp;&nbsp; ' . 
-                "<span id=\"ena{$A['id']}\">\n" .
-                "<img src=\"" .
-                    "{$_CONF['site_url']}/classifieds/images/{$img}\" " .
-                    "border=\"0\" width=\"16\" height=\"16\" " .
-                    "onclick='ADVTtoggleEnabled({$newval}, \"{$A['id']}\", \"adtype\", \"{$_CONF['site_url']}\");'>\n".
-                "</span>\n";
-
-/*            COM_createLink(
-            COM_createImage($_CONF['site_url'] . '/' .
-                $_CONF_ADVT['pi_name'] . '/images/'. $img,
-                'Delete this item',
-                array('title' => $title, 'class' => 'gl_mootip')),
-            "{$_CONF['site_admin_url']}/plugins/{$_CONF_ADVT['pi_name']}/index.php?mode=toggleadtype&amp;id={$A['id']}&enabled=$newval"
-            );*/
         break;
 
     default:
@@ -109,6 +106,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
 
 /**
 *   Create admin list of Ad Types
+*
 *   @return string  HTML for admin list
 */
 function CLASSIFIEDS_adminAdTypes()
@@ -118,25 +116,25 @@ function CLASSIFIEDS_adminAdTypes()
     $retval = '';
 
     $header_arr = array(      # display 'text' and use table field 'field'
-        array('text' => $LANG_ADVT['edit'], 'field' => 'edit', 
+        array('text' => $LANG_ADVT['edit'], 'field' => 'edit',
             'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['description'], 'field' => 'descrip', 
+        array('text' => $LANG_ADVT['description'], 'field' => 'descrip',
             'sort' => true),
-        array('text' => $LANG_ADVT['enabled'], 'field' => 'enabled', 
+        array('text' => $LANG_ADVT['enabled'], 'field' => 'enabled',
             'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['delete'], 'field' => 'delete', 
+        array('text' => $LANG_ADVT['delete'], 'field' => 'delete',
             'sort' => false, 'align' => 'center'),
     );
 
     $defsort_arr = array('field' => 'descrip', 'direction' => 'asc');
 
-    $text_arr = array( 
+    $text_arr = array(
         'has_extras' => true,
         'form_url' => CLASSIFIEDS_ADMIN_URL . '/index.php',
     );
 
     $query_arr = array('table' => 'ad_types',
-        'sql' => "SELECT * FROM {$_TABLES['ad_types']} ", 
+        'sql' => "SELECT * FROM {$_TABLES['ad_types']} ",
         'query_fields' => array(),
         'default_filter' => ''
     );
@@ -157,20 +155,43 @@ function plugin_getListField_AdCategories(
 
     switch($fieldname) {
     case 'edit':
-        $retval = COM_createLink(
-            $icon_arr['edit'],
-            CLASSIFIEDS_ADMIN_URL . "/index.php?editcat=x&cat_id={$A['cat_id']}"
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval = COM_createLink('',
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?editcat=x&cat_id={$A['cat_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit',
+                )
             );
+        } else {
+            $retval = COM_createLink(
+                $icon_arr['edit'],
+                CLASSIFIEDS_ADMIN_URL . "/index.php?editcat=x&cat_id={$A['cat_id']}"
+            );
+        }
         break;
 
     case 'delete':
-        $retval .= '&nbsp;&nbsp;' . COM_createLink(
-            COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
-                'Delete this item',
-                array('title' => 'Delete this item', 'class' => 'gl_mootip')),
-            CLASSIFIEDS_ADMIN_URL . 
-                "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}"
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval .= COM_createLink('',
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}",
+                array(
+                    'title' => $LANG_ADVT['del_item'],
+                    'class' => 'uk-icon uk-icon-trash advt_icon_danger',
+                    'data-uk-tooltip' => '',
+                    'onclick' => "return confirm('{$LANG_ADVT['confirm_delitem']}');",
+                )
             );
+        } else {
+            $retval .= COM_createLink(
+                COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
+                    $LANG_ADVT['del_item'],
+                    array('title' => $LANG_ADVT['del_item'], 'class' => 'gl_mootip')),
+                CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}"
+            );
+        }
         break;
 
     case 'parent':
@@ -192,7 +213,7 @@ function plugin_getListField_AdCategories(
 */
 function CLASSIFIEDS_adminCategories()
 {
-    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, 
+    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS,
             $_CONF_ADVT, $LANG_ADVT;
 
     $retval = '';
@@ -206,7 +227,7 @@ function CLASSIFIEDS_adminCategories()
 
     $defsort_arr = array('field' => 'cat_name', 'direction' => 'asc');
 
-    $text_arr = array( 
+    $text_arr = array(
         'has_extras' => true,
         'form_url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=cat',
     );
@@ -217,8 +238,8 @@ function CLASSIFIEDS_adminCategories()
         'default_filter' => ''
     );
 
-    $retval .= ADMIN_list('classifieds', 'plugin_getListField_AdCategories', 
-                $header_arr, $text_arr, $query_arr, $defsort_arr, 
+    $retval .= ADMIN_list('classifieds', 'plugin_getListField_AdCategories',
+                $header_arr, $text_arr, $query_arr, $defsort_arr,
                 '', '', '', $form_arr);
 
     return $retval;
@@ -237,20 +258,26 @@ function CLASSIFIEDS_adminAds()
     $retval = '';
 
     $header_arr = array(
-        array('text' => $LANG_ADMIN['edit'], 'field' => 'edit', 'sort' => false),
-        array('text' => $LANG_ADVT['added_on'], 'field' => 'date', 'sort' => true),
-        array('text' => $LANG_ADVT['subject'], 'field' => 'subject', 'sort' => true),
-        array('text' => $LANG_ADVT['owner'], 'field' => 'owner_id', 'sort' => true),
-        array('text' => $LANG_ADVT['delete'], 'field' => 'delete', 'sort' => false),
+        array('text' => $LANG_ADMIN['edit'], 'field' => 'edit',
+            'sort' => false),
+        array('text' => $LANG_ADVT['added_on'], 'field' => 'add_date',
+            'sort' => true),
+        array('text' => $LANG_ADVT['expires'], 'field' => 'exp_date',
+            'sort' => true),
+        array('text' => $LANG_ADVT['subject'], 'field' => 'subject',
+            'sort' => true),
+        array('text' => $LANG_ADVT['owner'], 'field' => 'owner_id',
+            'sort' => true),
+        array('text' => $LANG_ADVT['delete'], 'field' => 'delete',
+            'sort' => false),
     );
 
-    $defsort_arr = array('field' => 'date', 'direction' => 'asc');
+    $defsort_arr = array('field' => 'add_date', 'direction' => 'asc');
 
     $text_arr = array();
 
     $query_arr = array('table' => 'ad_ads',
-        'sql' => "SELECT *, from_unixtime(add_date) as date
-               FROM {$_TABLES['ad_ads']}",
+        'sql' => "SELECT * FROM {$_TABLES['ad_ads']}",
         'query_fields' => array('name', 'descript'),
         'default_filter' => ''
     );
@@ -273,29 +300,61 @@ function CLASSIFIEDS_adminAds()
 */
 function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $LANG_ACCESS;
+    global $_CONF, $_CONF_ADVT, $LANG_ACCESS, $LANG_ADVT;
+
+    static $dt = NULL;
+    if ($dt === NULL) {
+        $dt = new Date('now', $_CONF['timezone']);
+    }
 
     $retval = '';
 
     switch($fieldname) {
     case 'edit':
-        $retval =
-            COM_createLink(
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval = COM_createLink('',
+                CLASSIFIEDS_ADMIN_URL .  "/index.php?editad={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit',
+                )
+            );
+        } else {
+            $retval = COM_createLink(
                 $icon_arr['edit'], CLASSIFIEDS_ADMIN_URL .
                 "/index.php?editad={$A['ad_id']}"
             );
+        }
        break;
 
+    case 'add_date':
+    case 'exp_date':
+        $dt->setTimeStamp($fieldvalue);
+        $retval = $dt->toMySQL(true);
+        break;
+
     case 'delete':
-        $retval = COM_createLink(
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval = COM_createLink('', CLASSIFIEDS_ADMIN_URL .
+                    "/index.php?deletead={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-trash',
+                    'style' => 'color:red',
+                    'data-uk-tooltip' => '',
+                    'title' => $LANG_ADVT['del_item'],
+                    'onclick' => "return confirm('{$LANG_ADVT['confirm_delitem']}');",
+                )
+            );
+        } else {
+            $retval = COM_createLink(
                 "<img src=\"" . $_CONF['layout_url'] .
                     "/images/admin/delete.png\"
                     height=\"16\" width=\"16\" border=\"0\"
-                    onclick=\"return confirm('Do you really want to delete this item?');\"
+                    onclick=\"return confirm('{$LANG_ADVT['confirm_delitem']}');\"
                     >",
                 CLASSIFIEDS_ADMIN_URL .
-                    "/index.php?delete=ad&id={$A['ad_id']}"
+                    "/index.php?deletead={$A['ad_id']}"
             );
+        }
         break;
 
     case 'subject':
@@ -315,6 +374,5 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
 
     return $retval;
 }
-
 
 ?>

@@ -15,7 +15,7 @@
 *   Class for ad type
 *   @package classifieds
 */
-class AdType
+class adType
 {
     /** Properties array
      *  @var array */
@@ -116,7 +116,7 @@ class AdType
         global $_TABLES;
 
         if ($this->id > 0)
-            DB_delete($_TABLES['ad_types'], 'id', $this->db_id);
+            DB_delete($_TABLES['ad_types'], 'id', $this->id);
 
         $this->id = 0;
     }
@@ -149,7 +149,7 @@ class AdType
         }
         $sql2 = "descrip = '" . DB_escapeString($this->descrip) . "',
                 enabled = {$this->enabled}";
-
+        $sql = $sql1 . $sql2 . $sql3;
         $res = DB_query($sql);
         return DB_error() ? false : true;
     }
@@ -296,7 +296,7 @@ class AdType
         return DB_getItem($_TABLES['ad_types'], 'descrip', "id='$id'");
     }
 
-}   // class AdType
+}   // class adType
 
 
 ?>

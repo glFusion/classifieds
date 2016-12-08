@@ -2,11 +2,11 @@
 /**
 *   Installation defaults for the Classifieds plugin
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.0.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
-*   GNU Public License v2 or later
+*               GNU Public License v2 or later
 *   @filesource
 */
 
@@ -89,9 +89,10 @@ $_ADVT_DEFAULT['usercanedit'] = 1;
 // Use glFusion's built-in cron facility?
 $_ADVT_DEFAULT['use_gl_cron'] = 1;
 
-// Default groups for ad and category: Logged-In Users.  The ad group should
-// be overriden by the classifieds.admin group created during installation.
-$_ADVT_DEFAULT['defgrpad'] = 13;
+// Default groups for ad and category: Logged-In Users.
+// For Ads this is the group that is allowed to view ads.
+// For Categories this is the group that may submit adds to a category
+$_ADVT_DEFAULT['defgrpad'] = 1;
 $_ADVT_DEFAULT['defgrpcat'] = 13;
 
 // Category display type.  This will be a value like 'normal', 'blocks', etc.
@@ -192,18 +193,6 @@ function plugin_initconfig_classifieds($group_id = 0)
                 'select', 0, 0, 3, 220, true, $_CONF_ADVT['pi_name']);
         $c->add('displayblocks', $_ADVT_DEFAULT['displayblocks'],
                 'select', 0, 0, 13, 230, true, $_CONF_ADVT['pi_name']);
-        $c->add('helpurl', $_ADVT_DEFAULT['helpurl'],
-                'text', 0, 0, 0, 240, true, $_CONF_ADVT['pi_name']);
- 
-        $c->add('fs_paths', NULL, 'fieldset', 0, 2, NULL, 0, true, $_CONF_ADVT['pi_name']);
-        $c->add('image_dir', $_ADVT_DEFAULT['image_dir'],
-                'text', 0, 2, 0, 20, true, $_CONF_ADVT['pi_name']);
-        $c->add('image_url', $_ADVT_DEFAULT['image_url'],
-                'text', 0, 2, 0, 30, true, $_CONF_ADVT['pi_name']);
-        $c->add('catimgpath', $_ADVT_DEFAULT['catimgpath'],
-                'text', 0, 2, 0, 40, true, $_CONF_ADVT['pi_name']);
-        $c->add('catimgurl', $_ADVT_DEFAULT['catimgurl'],
-                'text', 0, 2, 0, 50, true, $_CONF_ADVT['pi_name']);
 
         $c->add('fs_permissions', NULL, 'fieldset', 0, 4, NULL, 0, true, $_CONF_ADVT['pi_name']);
         $c->add('defgrpad', $group_id,

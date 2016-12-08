@@ -2,6 +2,10 @@
   font-color: red;
 }
 
+.advt_icon_danger {
+  color: red;
+}
+
 /* Styles for the category box displays */
 .adcat {
   position:relative;
@@ -231,4 +235,3 @@ div #adDetailUserLinks {
 .adExpiredText {
     color: red;
 }
-  

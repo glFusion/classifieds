@@ -18,9 +18,10 @@
 *  @param integer $ad_id    Ad ID number
 *  @param boolean $admin    True if this is an administrator
 */
-function adDelete($ad_id = '', $admin=false, $table = 'ad_ads')
+function XadDelete($ad_id = '', $admin=false, $table = 'ad_ads')
 {
     global $_USER, $_TABLES, $_CONF_ADVT;
+echo "DEPRECATED"; die;
 
     $ad_id = COM_sanitizeID($ad_id);
     if ($ad_id == '') 
@@ -72,7 +73,7 @@ function adDelete($ad_id = '', $admin=false, $table = 'ad_ads')
 *   @param boolean $admin True if this is an administrator
 *   @return string Page Content
 */ 
-function adList($admin=0)
+function XadList($admin=0)
 {
     global $_CONF, $LANG_ADVT, $_TABLES, $_USER, $PHP_SELF, $_CONF_ADVT;
 
@@ -219,113 +220,6 @@ function adList($admin=0)
 
 
 /**
-*   Find the total number of ads for a category, including subcategories
-*
-*   @param  integer $id CategoryID
-*   @return integer Total Ads
-*/
-function findTotalAds($id)
-{
-    global $_TABLES;
-
-    $time = time();     // to compare to ad expiration
-    $totalAds = 0;
-
-    // find all the subcategories
-    $sql = "
-        SELECT
-            cat_id
-        FROM
-            {$_TABLES['ad_category']}
-        WHERE
-            papa_id=$id
-    ";
-    $result = DB_query($sql);
-    if (!$result) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-
-    // If there are subcategories, call this function recursively for each
-    // one.
-    while ($row = DB_fetchArray($result)) {
-        $totalAds += findTotalAds($row['cat_id']);
-    }
-
-    // Now add in the count for this category itself
-    $sql = "
-        SELECT
-            cat_id
-        FROM
-            {$_TABLES['ad_ads']}
-        WHERE
-            cat_id=$id
-        AND
-            exp_date>$time "
-        . COM_getPermSQL('AND', 0, 2);
-
-    //echo $sql."<br />\n";
-    $totalAds += DB_numRows(DB_query($sql));
-
-    return $totalAds;
-
-}   // function findTotalAds()
-
-
-/**
-*   Create the breadcrumb display, with links
-*   @param  integer $id ID of current category
-*   @return string      Location string ready for display
-*   @deprecated
-*/
-function X_displayLocation($id)
-{
-    global $cat, $_TABLES, $_CONF, $_CONF_ADVT;
-
-    $location = '';
-    $base_url = "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php";
-
-    $sql = "
-        SELECT
-            cat_name, cat_id, papa_id
-        FROM
-            {$_TABLES['ad_category']}
-        WHERE
-            cat_id=$id
-    ";
-    $result = DB_query($sql);
-    if (!$result) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-
-    $row = DB_fetchArray( $result );
-
-    if ($row['papa_id'] == 0) {
-        if ($row['cat_id'] == $cat) {
-             $location .= 
-                '<a href="'.
-                CLASSIFIEDS_makeURL('home'). '">Home</a> :: ' .
-                $row['cat_name'];
-        } else {
-            $location .= 
-                '<a href="'. CLASSIFIEDS_makeURL('home'). '">Home</a> :: ' .
-                '<a href="'. CLASSIFIEDS_makeURL('home', 
-                                    "cat_id={$row['cat_id']}") . 
-                '">' . $row['cat_name'] . '</a>';
-        }
-    } else {
-        $location .= displayLocation($row['papa_id']);
-        if($row['cat_id'] == $cat) {
-            $location .= " &gt; {$row['cat_name']}";
-        } else {
-            $location .= 
-                ' &gt; <a href="' . 
-                CLASSIFIEDS_makeURL('home', $row['cat_id']). '">' .
-                $row['cat_name'] . '</a>';
-        }
-
-    }
-
-    return "<b>$location</b>\n";
-}
-
-
-/**
 *  Calls itself recursively to find the root category of the requested id
 *
 *  @param   integer $id  Category ID
@@ -404,36 +298,42 @@ function currentLocation($cat_id)
 *   @param  string  $hdr    Optional text to appear in the header.
 *   @return string          HTML code for the formatted message
 */
-function CLASSIFIEDS_errorMsg($msg='', $type='info', $hdr='')
+function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
 {
-    if ($msg== '')
-        return '';
+    global $_CONF_ADVT;
 
-    if ($hdr = '')
-        $hdr = 'Error';
-
-    switch ($type) {
-        case 'alert':
-            $hdr = 'Alert';
-            $class = 'alert';
-            break;
-        case 'note':
-            $hdr = 'Note';
-            $class = 'note';
-            break;
-        case 'info':
-        default:
-            $hdr = 'Information';
-            $class = 'info';
-            break;
+    // Convert single message to array
+    if (!is_array($messages)) {
+        $messages = array($messages);
+    }
+    foreach ($messages as $msg) {
+        $msg_txt .= "<li>$msg</li>" . LB;
     }
 
-    $display = "<span class=\"$class\">";
-    $display .= COM_startBlock($hdr);
-    $display .= $msg;
-    $display .= COM_endBlock();
-    $display .= "</span>";
-    return $display;
+    if ($_CONF_ADVT['_is_uikit']) {
+        $element = 'div';
+        switch ($type) {
+        case 'alert':
+        default:
+            $class .= 'uk-alert uk-alert-danger';
+            break;
+        case 'info':
+            $class .= 'uk-alert';
+            break;
+        }
+    } else {
+        $element = 'span';
+        switch ($type) {
+        case 'info':
+        case 'alert':
+            $class = $type;
+            break;
+        default:
+            $class = 'alert';
+            break;
+        }
+    }
+    return "<$element class=\"$class\">$msg_txt</$element>\n";
 }
 
 
@@ -476,116 +376,13 @@ function displayCat($cat_id)
 
 
 /**
-*   Recurse through the category table building an option list
-*   sorted by id.
-*
-*   @param integer  $papa_id Parent category ID
-*   @param string   $char    Separator characters
-*   @param integer  $sel     Category ID to be selected in list
-*/
-/*function buildCatSelection($char='', $papa_id=0, $sel=0)
-{
-    global $_TABLES;
-
-    $str = '';
-
-    // Locate the parent category of this one
-    $sql = "
-        SELECT
-            cat_id, cat_name
-        FROM
-            {$_TABLES['ad_category']}
-        WHERE
-            papa_id = $papa_id
-        ORDER BY
-            cat_name
-                ASC
-    ";
-    $result = DB_query($sql);
-    // If there is no parent, just return.
-    if (!$result)
-        return '';
-
-    while ($row = DB_fetchArray($result)) {
-        $selected = $row['cat_id'] == $sel ? "selected" : "";
-        
-        $str .= "<option value={$row['cat_id']} $selected>
-            $char{$row['cat_name']}</option>\n";
-        $str .= buildCatSelection($char."-", $row['cat_id'], $sel);
-    }
-
-    return $str;
- 
-}   // function buildCatSelection()
-*/
-
-
-/**
-*   Get the user record for the current user
-*   @param  string  $userid   User ID to retrieve, blank for current user
-*   @return array User record from GL users table
-*   @deprecated
-*/
-function X_CLASSIFIEDS_getUser($userid = 0)
-{
-    global $_USER, $_TABLES;
-
-    if ($userid == 0)
-        $userid = $_USER['uid'];
-    $userid = (int)$userid;
-
-   $result = DB_query("
-        SELECT 
-            * 
-        FROM 
-            {$_TABLES['users']} 
-        WHERE uid='$userid'
-    ");
-    if (!$result) 
-        return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-
-    $user = DB_fetchArray($result);
-    return $user;
-}
-
-
-/**
-*   Get an array of user info from the plugin's userinfo table
-*   @param  string  $userid User ID to retrieve.  Blank for current user
-*   @return array user info from our uinfo table
-*   @deprecated
-*/
-function X_CLASSIFIEDS_getUserInfo($userid = 0)
-{
-    global $_USER, $_TABLES;
-
-    if ($userid == 0)
-        $userid = $_USER['uid'];
-    $userid = (int)$userid;
-
-    $result = DB_query("
-        SELECT 
-            * 
-        FROM 
-            {$_TABLES['ad_uinfo']} 
-        WHERE uid='$userid'
-    ");
-    if (!$result)
-        return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-
-    $userinfo = DB_fetchArray($result);
-    return $userinfo;
-}
-
-
-/**
 *   Returns the results of SEC_hasRights, 3=rw, 2=ro
 *
 *   @param  string  $id     Ad ID
 *   @param  array   $ad     Ad info, if already available
 *   @return int             Access value
 */
-function CLASSIFIEDS_checkAccess($id, $A = '')
+function XCLASSIFIEDS_checkAccess($id, $A = '')
 {
     global $_TABLES, $_CONF_ADVT;
     $id = COM_sanitizeID($id, false);
@@ -617,43 +414,13 @@ function CLASSIFIEDS_checkAccess($id, $A = '')
 }
 
 /**
-*   Displays a message indicating that the user must log in.
-*   Does not return a value, simply displays the message and exits.
-*/
-function CLASSIFIEDS_LoginRequired()
-{
-    global $_USER, $_CONF, $_CONF_ADVT, $LANG_LOGIN;
-
-    $display = COM_startBlock ($LANG_LOGIN[1], '',
-            COM_getBlockTemplate ('_msg_block', 'header'));
-    $loginreq = new Template($_CONF['path_layout'] . 'submit');
-    $loginreq->set_file('loginreq', 'submitloginrequired.thtml');
-    $loginreq->set_var('xhtml', XHTML);
-    $loginreq->set_var('site_url', $_CONF['site_url']);
-    $loginreq->set_var('site_admin_url', $_CONF['site_admin_url']);
-    $loginreq->set_var('layout_url', $_CONF['layout_url']);
-    $loginreq->set_var('login_message', $LANG_LOGIN[2]);
-    $loginreq->set_var('lang_login', $LANG_LOGIN[3]);
-    $loginreq->set_var('lang_newuser', $LANG_LOGIN[4]);
-    $loginreq->parse('errormsg', 'loginreq');
-    $display .= $loginreq->finish($loginreq->get_var('errormsg'));
-    $display .= COM_endBlock (COM_getBlockTemplate ('_msg_block', 'footer'));
-    $display .= COM_siteFooter(true);
-
-    echo $display;
-    exit;
-
-}
-
-
-/**
 *   Updates the ad with a new expiration date.  $days (in seconds)
 *   is added to the original expiration date.
 *
 *   @param integer  $id     ID number of ad to update
 *   @param integer  $days   Number of days to add
 */
-function CLASSIFIEDS_addDays($id = '', $days = 0)
+function XCLASSIFIEDS_addDays($id = '', $days = 0)
 {
     global $_USER, $_CONF, $_CONF_ADVT, $_TABLES;
 
@@ -699,7 +466,7 @@ function CLASSIFIEDS_addDays($id = '', $days = 0)
 *   @param int $rundays Number of days ad is already scheduled to run
 *   @return int Max number of days that can be added
 */
-function CLASSIFIEDS_calcMaxAddDays($rundays)
+function XCLASSIFIEDS_calcMaxAddDays($rundays)
 {
     global $_CONF_ADVT;
 
@@ -727,7 +494,7 @@ function CLASSIFIEDS_calcMaxAddDays($rundays)
 *   @param string   $items      Optional comma-separated list of items to include or exclude
 *   @return string              HTML option list, without <select> tags
 */
-function CLASSIFIEDS_buildCatSelection($sel=0, $papa_id=0, $char='', $not='', $items='')
+function XCLASSIFIEDS_buildCatSelection($sel=0, $papa_id=0, $char='', $not='', $items='')
 {
     global $_TABLES, $_GROUPS;
 
@@ -761,11 +528,12 @@ function CLASSIFIEDS_buildCatSelection($sel=0, $papa_id=0, $char='', $not='', $i
     while ($row = DB_fetchArray($result)) {
         $txt = $char. $row['cat_name'];
         $selected = $row['cat_id'] == $sel ? "selected" : "";
-        if ($row['papa_id'] == 0) {
+        /*if ($row['papa_id'] == 0) {
             $style = 'style="background-color:lightblue"';
         } else {
+        */
             $style = '';
-        }
+        //}
         if (SEC_hasAccess($row['owner_id'], $row['group_id'],
                 $row['perm_owner'], $row['perm_group'], 
                 $row['perm_members'], $row['perm_anon']) < 3) {
@@ -795,8 +563,10 @@ function CLASSIFIEDS_buildCatSelection($sel=0, $papa_id=0, $char='', $not='', $i
 *      [0] = string value of page to redirect to
 *      [1] = content of any error message or text
 */
-function adSave($savetype='edit')
+function xadSave($savetype='edit')
 {
+echo "DEPRECATED";die;
+
     global $_TABLES, $_CONF_ADVT, $_USER, $_CONF, $LANG_ADVT, $LANG12;
     global $LANG_ADMIN;
 
@@ -984,27 +754,6 @@ function CLASSIFIEDS_getTemplate($str)
     }
 
     return $tpl . '.thtml';
-
-}
-
-
-/**
-*   Strips slashes if magic_quotes_gpc is on.
-*
-*   @param  mixed   $var    Value or array of values to strip.
-*   @return mixed           Stripped value or array of values.
-*/
-function CLASSIFIEDS_stripslashes($var)
-{
-	if (get_magic_quotes_gpc()) {
-		if (is_array($var)) {
-			return array_map('CLASSIFIEDS_stripslashes', $var);
-		} else {
-			return stripslashes($var);
-		}
-	} else {
-		return $var;
-	}
 }
 
 
@@ -1013,7 +762,7 @@ function CLASSIFIEDS_stripslashes($var)
 *   Checks $_POST, then $_GET, and returns the raw value if found.
 *   Returns NULL if the parameter is not set
 */
-function CLASSIFIEDS_getParam($name)
+function CLASSIFIEDS_getParam($name, $type = 'string')
 {
     if (isset($_POST[$name])) {
         $value = $_POST[$name];
@@ -1022,7 +771,15 @@ function CLASSIFIEDS_getParam($name)
     } else {
         $value = NULL;
     }
-    return $value;
+
+    switch($type) {
+    case 'int':
+        return (int)$value;
+        break;
+    default:
+        return $value;
+        break;
+    }
 }
 
 ?>

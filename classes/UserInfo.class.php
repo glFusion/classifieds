@@ -53,7 +53,10 @@ class adUserInfo
             $uid = (int)$_USER['uid'];
         }
         $this->uid = $uid;
-        $this->ReadOne();
+        if (!$this->ReadOne()) {
+            $this->notify_exp = 1;
+            $this->notify_comment = 1;
+        }
     }
 
 
@@ -136,7 +139,9 @@ class adUserInfo
 
     /**
     *   Read one user from the database
+    *
     *   @param  integer $uid    Optional User ID.  Current ID is used if zero.
+    *   @return boolean     True if record found, False if not
     */
     function ReadOne($uid = 0)
     {
@@ -150,7 +155,7 @@ class adUserInfo
 
         $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']} 
                             WHERE uid=$uid");
-        if ($result) {
+        if ($result && DB_numRows($result) == 1) {
             $row = DB_fetchArray($result, false);
             $this->SetVars($row);
         }
@@ -215,12 +220,14 @@ class adUserInfo
     */
     function showForm($type = 'advt')
     {
-        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER, $_SYSTEM;
+        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
+
+        USES_classifieds_class_category();
 
         $base_url = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
 
         $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
-        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('accountinfo', "account_settings$tpltype.thtml");
         if ($type == 'advt') {
             // Called within the plugin
@@ -245,7 +252,7 @@ class adUserInfo
                         'checked="checked"' : '',
         ) );
 
-        $sql = "SELECT cat_id, notice_id FROM {$_TABLES['ad_notice']} 
+        $sql = "SELECT cat_id FROM {$_TABLES['ad_notice']} 
                 WHERE uid='{$_USER['uid']}'";
         $notice = DB_query($sql);
         if (!$notice) 
@@ -258,7 +265,7 @@ class adUserInfo
                 $T->set_block('accountinfo', 'AutoNotifyListBlk', 'NotifyList');
                 $T->set_var(array(
                     'cat_id'    => $row['cat_id'],
-                    'cat_name'  => CLASSIFIEDS_BreadCrumbs($row['cat_id'], false),
+                    'cat_name'  => adCategory::BreadCrumbs($row['cat_id'], false),
                     'pi_url'    => $base_url,
                 ) );
                 $T->parse('NotifyList', 'AutoNotifyListBlk', true);
