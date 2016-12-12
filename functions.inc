@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -33,13 +33,13 @@ if (!isset($_CONF_ADVT['imagecount'])) {
 /** Additional config items and table definitions are added here */
 require_once "{$_CONF['path']}plugins/classifieds/classifieds.php";
 
-define('CLASSIFIEDS_PI_PATH', 
+define('CLASSIFIEDS_PI_PATH',
         $_CONF['path'] . 'plugins/' . $_CONF_ADVT['pi_name']);
-define('CLASSIFIEDS_URL', 
+define('CLASSIFIEDS_URL',
         $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name']);
-define('CLASSIFIEDS_ADMIN_URL', 
+define('CLASSIFIEDS_ADMIN_URL',
         $_CONF['site_admin_url'] . '/plugins/' . $_CONF_ADVT['pi_name']);
-define('CLASSIFIEDS_CLASSPATH', 
+define('CLASSIFIEDS_CLASSPATH',
     $_CONF['path'].'plugins/'.$_CONF_ADVT['pi_name'].'/classes/');
 define('CLASSIFIEDS_IMGPATH', $_CONF['path'] . 'data/classifieds/images');
 
@@ -127,15 +127,16 @@ function plugin_getmenuitems_classifieds()
 
     $menuitems[$LANG_ADVT['menuitem']] = CLASSIFIEDS_URL . '/index.php';
 
-    return $menuitems; 
+    return $menuitems;
 }
+
 
 /**
 *   Check to see if this Plugin uses comments
 *
 *   @return   boolean true or false
 */
-function plugin_commentsupport_classifieds() 
+function plugin_commentsupport_classifieds()
 {
     global $_CONF_ADVT;
     return $_CONF_ADVT['commentsupport'] == 0 ? false : true;
@@ -152,7 +153,7 @@ function plugin_commentsupport_classifieds()
 *   @param   string  $postmode 'html' or 'text'
 *   @return  mixed   false for failure, HTML string (redirect?) for success
 */
-function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode) 
+function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
 {
     global $_CONF, $LANG03, $_TABLES, $LANG_ADVT, $_USER;
 
@@ -166,7 +167,7 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     $postmode = COM_applyFilter($postmode);
     $db_id = DB_escapeString($id);      // Make a DB-safe id
 
-    $ret = CMT_saveComment($title, $comment, $id, $pid, 
+    $ret = CMT_saveComment($title, $comment, $id, $pid,
             'classifieds', $postmode);
 
     if ($ret > 0) {         // failure, return to comment form
@@ -177,13 +178,13 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     }
 
     // success - update the comment counter for this ad
-    DB_query("UPDATE {$_TABLES['ad_ads']} 
+    DB_query("UPDATE {$_TABLES['ad_ads']}
                 SET comments = comments + 1
                 WHERE ad_id='$db_id'", 1);
 
     // Notify the ad's owner that a comment has been posted.  Don't notify
     // the owner of their own comments.
-    list($uid, $title) = DB_fetchArray(DB_query("SELECT uid, subject 
+    list($uid, $title) = DB_fetchArray(DB_query("SELECT uid, subject
             FROM {$_TABLES['ad_ads']}
             WHERE ad_id = '$db_id'"), false);
     $uid = (int)$uid;
@@ -205,7 +206,7 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
         }
 
     }
- 
+
     return (COM_refresh(CLASSIFIEDS_makeURL('detail', $id)));
 }
 
@@ -233,7 +234,7 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
         return $retval;
 
     $sql = "SELECT COUNT(*) AS count, uid
-            FROM {$_TABLES['ad_ads']} 
+            FROM {$_TABLES['ad_ads']}
             WHERE (ad_id = '".DB_escapeString($id)."')
             GROUP BY ad_id";
     $result = DB_query($sql);
@@ -292,7 +293,7 @@ function plugin_deletecomment_classifieds($cid, $id)
 
 /**
 *   Handle any post-processing for an edited comment.
-*   Just redirects back to the ad detail page.  The comment is actually 
+*   Just redirects back to the ad detail page.  The comment is actually
 *   saved in comment.php.
 *
 *   @param  integer $cid    Comment ID
@@ -313,21 +314,20 @@ function plugin_editcomment_classifieds($cid, $id)
 *   @param    int showsitestate   Flag to let us know which stats to get
 *   @return   string  returns formatted HTML to insert in stats page
 */
-function plugin_showstats_classifieds($showsitestats) 
+function plugin_showstats_classifieds($showsitestats)
 {
-    $retval='';
-    return $retval;
+    return '';
 }
 
 /**
-*   This will put an option for the plugin in the command and control 
+*   This will put an option for the plugin in the command and control
 *   block on moderation.php.
-*   Add the plugin name, icon and link to the command and control block 
+*   Add the plugin name, icon and link to the command and control block
 *   in moderation.php
 *
 *   @return   array   Array containing (plugin name, admin url, url of plugin icon)
 */
-function plugin_cclabel_classifieds() 
+function plugin_cclabel_classifieds()
 {
     global $LANG_ADVT, $_CONF_ADVT;
 
@@ -340,7 +340,6 @@ function plugin_cclabel_classifieds()
     } else {
         return '';
     }
-
 }
 
 
@@ -362,13 +361,13 @@ function plugin_geticon_classifieds()
 *
 *   @return   array   Array containing (plugin name, plugin admin url, # of items in plugin or '')
 */
-function plugin_getadminoption_classifieds() 
+function plugin_getadminoption_classifieds()
 {
     global $_TABLES, $LANG_ADVT;
 
     if (plugin_ismoderator_classifieds()) {
         return array(
-            $LANG_ADVT['menuitem'], 
+            $LANG_ADVT['menuitem'],
             CLASSIFIEDS_ADMIN_URL . '/index.php',
         );
     } else {
@@ -383,14 +382,14 @@ function plugin_getadminoption_classifieds()
 *
 *   @return   array   Array containing (plugin name, plugin user url, 0)
 */
-function plugin_getuseroption_classifieds() 
+function plugin_getuseroption_classifieds()
 {
     global $LANG_ADVT, $_CONF_ADVT;
 
     if (!COM_isAnonUser() && $_CONF_ADVT['hideuserfunction'] != 1) {
         return array(
-            $LANG_ADVT['blocktitle'], 
-            CLASSIFIEDS_URL . '/index.php?mode=account', 
+            $LANG_ADVT['blocktitle'],
+            CLASSIFIEDS_URL . '/index.php?mode=account',
             0
         );
     } else {
@@ -420,7 +419,7 @@ function plugin_autouninstall_classifieds()
                             'ad_types',
                         ),
         'groups'    => array($_CONF_ADVT['pi_name'] . ' Admin'),
-        'features'  => array($_CONF_ADVT['pi_name'] . '.admin', 
+        'features'  => array($_CONF_ADVT['pi_name'] . '.admin',
                             $_CONF_ADVT['pi_name'] . '.edit',
                             $_CONF_ADVT['pi_name'] . '.submit',
                         ),
@@ -429,7 +428,6 @@ function plugin_autouninstall_classifieds()
     );
 
     return $out;
-
 }
 
 
@@ -454,7 +452,7 @@ function plugin_whatsnewsupported_classifieds()
                               $_CONF_ADVT['newadsinterval'] * 86400 )
                          . '</small>'
                        );
-    } 
+    }
     return $retval;
 }
 
@@ -476,15 +474,15 @@ function plugin_getwhatsnew_classifieds($countonly = false)
 
     if ($result === NULL) {
         // Get newest ads
-        $sql = "SELECT a.ad_id, a.cat_id, a.subject 
+        $sql = "SELECT a.ad_id, a.cat_id, a.subject
             FROM {$_TABLES['ad_ads']} a
             RIGHT JOIN {$_TABLES['ad_category']} c
                 ON a.cat_id = c.cat_id
-            WHERE a.add_date >= UNIX_TIMESTAMP(DATE_SUB(NOW(), 
+            WHERE a.add_date >= UNIX_TIMESTAMP(DATE_SUB(NOW(),
                     INTERVAL {$_CONF_ADVT['newadsinterval']} DAY))
                 AND a.exp_date > UNIX_TIMESTAMP(NOW()) " .
                 COM_getPermSQL('AND', 0, 2, 'c') .
-            ' ORDER BY a.add_date DESC 
+            ' ORDER BY a.add_date DESC
             LIMIT 10';
         //echo $sql;die;
         $result = DB_query($sql);
@@ -532,7 +530,7 @@ function plugin_searchtypes_classifieds()
     global $_CONF, $_CONF_ADVT, $LANG_ADVT;
 
     if (COM_isAnonUser() &&
-    (($_CONF['loginrequired'] == 1) || 
+    (($_CONF['loginrequired'] == 1) ||
     ($_CONF_ADVT['loginrequired'] == 1))) {
         return '';
     }
@@ -545,7 +543,7 @@ function plugin_searchtypes_classifieds()
 
 /**
 *   This searches for ads matching the user query and returns an array for the
-*   header and table rows back to search.php where it will be formated 
+*   header and table rows back to search.php where it will be formated
 *   and printed
 *
 *   @param    string  $query      Keywords user is looking for
@@ -561,20 +559,20 @@ function plugin_searchtypes_classifieds()
 *
 */
 function plugin_dopluginsearch_classifieds(
-    $query, 
-    $datestart, 
-    $dateend, 
-    $topic, 
-    $type, 
-    $author, 
-    $keyType, 
-    $page, 
+    $query,
+    $datestart,
+    $dateend,
+    $topic,
+    $type,
+    $author,
+    $keyType,
+    $page,
     $perpage)
 {
     global $_CONF, $_TABLES, $LANG_LINKS_SEARCH, $LANG_ADVT, $_CONF_ADVT;
 
     if (COM_isAnonUser() &&
-    (($_CONF['loginrequired'] == 1) || 
+    (($_CONF['loginrequired'] == 1) ||
     ($_CONF_ADVT['loginrequired'] == 1))) {
         return '';
     }
@@ -585,8 +583,8 @@ function plugin_dopluginsearch_classifieds(
     $query = trim(DB_escapeString(htmlspecialchars($query)));
 
     // Start the SQL query by selecting desired fields.
-    $sql = "SELECT a.ad_id as id, a.cat_id, a.subject as title, 
-                a.descript as description, a.uid, a.views as hits, 
+    $sql = "SELECT a.ad_id as id, a.cat_id, a.subject as title,
+                a.descript as description, a.uid, a.views as hits,
                 a.add_date AS date, a.ad_type,
                 CONCAT('/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=',a.ad_id,'&query=$htmlquery') as url
             FROM {$_TABLES['ad_ads']} a
@@ -601,7 +599,7 @@ function plugin_dopluginsearch_classifieds(
 
     $search = new SearchCriteria($_CONF_ADVT['pi_name'], $LANG_ADVT['blocktitle']);
     $columns = array('a.subject', 'a.descript', 'a.keywords');
-    $sql .= $search->getDateRangeSQL('AND', 'a.add_date', 
+    $sql .= $search->getDateRangeSQL('AND', 'a.add_date',
                     $datestart, $dateend);
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
     //echo $sql;die;
@@ -610,7 +608,7 @@ function plugin_dopluginsearch_classifieds(
     $search->setRank(5);
     $search->setURLRewrite(true);
 
-    return $search;    
+    return $search;
 }
 
 
@@ -619,7 +617,7 @@ function plugin_dopluginsearch_classifieds(
 *
 *   @return string Additional Header Code
 */
-function plugin_getheadercode_classifieds() 
+function plugin_getheadercode_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $_TABLES;
 
@@ -704,7 +702,7 @@ function plugin_getheadercss_classifieds()
 *
 *   @return array Array of filenames to import
 */
-function plugin_getheaderjs_classifieds() 
+function plugin_getheaderjs_classifieds()
 {
     global $_CONF, $_CONF_ADVT;
 
@@ -746,7 +744,7 @@ function plugin_configmanager_select_grp_classifieds()
 *
 *   @return boolean True on success, code for error message otherwise
 */
-function plugin_upgrade_classifieds() 
+function plugin_upgrade_classifieds()
 {
     global $_TABLES, $_CONF_ADVT;
 
@@ -804,14 +802,14 @@ function plugin_upgrade_classifieds()
 *   @return       array        Returns array of useful moderation values
 *
 */
-function plugin_moderationvalues_classifieds() 
+function plugin_moderationvalues_classifieds()
 {
     global $_TABLES;
 
     return array(
-        'ad_id', 
-        $_TABLES['ad_ads'], 
-        'ad_id, cat_id, subject, descript, url, add_date, exp_date, 
+        'ad_id',
+        $_TABLES['ad_ads'],
+        'ad_id, cat_id, subject, descript, url, add_date, exp_date,
             uid, price, ad_type, keywords',
         $_TABLES['ad_submission']);
 }
@@ -825,7 +823,7 @@ function plugin_moderationvalues_classifieds()
 *
 *   @return        boolean       Returns true if moderator
 */
-function plugin_ismoderator_classifieds() 
+function plugin_ismoderator_classifieds()
 {
     static $isMod = NULL;
     if ($isMod === NULL) {
@@ -843,15 +841,15 @@ function plugin_ismoderator_classifieds()
 *
 *   @return       Plugin       return Plugin class containing submission data
 */
-function plugin_itemlist_classifieds() 
+function plugin_itemlist_classifieds()
 {
     global $_TABLES, $LANG_ADVT;
 
     if (plugin_ismoderator_classifieds()) {
         $plugin = new Plugin();
         $plugin->submissionlabel = $LANG_ADVT['menuitem'];
-        $plugin->getsubmissionssql = "SELECT 
-                    ad_id as id, subject, 
+        $plugin->getsubmissionssql = "SELECT
+                    ad_id as id, subject,
                     FROM_UNIXTIME(add_date) as date, price,
                     uid
                 FROM {$_TABLES['ad_submission']}";
@@ -872,7 +870,7 @@ function plugin_itemlist_classifieds()
 *   @param  integer $owner_id   Optional ad owner ID
 *   @return string              Empty string.
 */
-function plugin_moderationapprove_classifieds($id, $owner_id=0) 
+function plugin_moderationapprove_classifieds($id, $owner_id=0)
 {
     global $_TABLES, $_USER, $_CONF, $_CONF_ADVT;
 
@@ -891,7 +889,7 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
 *   @param  string  $id     ID of the ad deleted.
 *   @return string          Any wanted HTML output
 */
-function plugin_moderationdelete_classifieds($id) 
+function plugin_moderationdelete_classifieds($id)
 {
     global $_TABLES, $_CONF_ADVT;
 
@@ -921,9 +919,9 @@ function plugin_moderationdelete_classifieds($id)
 *
 *   @return       string       The HTML form
 */
-function plugin_submit_classifieds() 
+function plugin_submit_classifieds()
 {
-/*    global  $HTTP_POST_VARS, $LANG12, $_CONF, $_CONF_ADVT; 
+/*    global  $HTTP_POST_VARS, $LANG12, $_CONF, $_CONF_ADVT;
 
     // If mode = preview or editsubmission, load the ad info.
     if ($HTTP_POST_VARS['mode'] == $LANG12[32] ||
@@ -1002,7 +1000,7 @@ echo 'DEPRECATED';die;
             $ad_days = (int)$Ad->moredays;
         }
 
-        if ($_POST['mode'] == $LANG12[8] || 
+        if ($_POST['mode'] == $LANG12[8] ||
             $_POST['mode'] == $LANG_ADMIN['save']){     // mode = Submit
             // This is a user-submitted ad
             $A['ad_id'] = COM_makeSid();
@@ -1016,7 +1014,7 @@ echo 'DEPRECATED';die;
             // Get the category permissions.  Force anon visibility to zero
             // if it's zero for the category, otherwise set to the user's
             // preference.
-            /*if (DB_getItem($_TABLES['ad_category'], 
+            /*if (DB_getItem($_TABLES['ad_category'],
                     'perm_anon', "cat_id='{$A['cat_id']}'") == '0') {
                 $_POST['perm_anon'] = '0';
             }
@@ -1033,7 +1031,7 @@ echo 'DEPRECATED';die;
             // Get the category permissions.  Force anon visibility to zero
             // if it's zero for the category, otherwise set to the user's
             // preference.
-            /*if (DB_getItem($_TABLES['ad_category'], 
+            /*if (DB_getItem($_TABLES['ad_category'],
                     'perm_anon', "cat_id='{$A['cat_id']}'") == '0') {
                 $_POST['perm_anon'] = '0';
             }
@@ -1045,7 +1043,7 @@ echo 'DEPRECATED';die;
             */
         }
 
-        $errmsg .= CLASSIFIEDS_UploadPhoto($A['ad_id'], 'photo'); 
+        $errmsg .= CLASSIFIEDS_UploadPhoto($A['ad_id'], 'photo');
         if ($errmsg == '') {
             if (CLASSIFIEDS_insertAd($A, $table))
                 return false;       // Catastrophic failure
@@ -1078,7 +1076,6 @@ echo 'DEPRECATED';die;
         $display .= CLASSIFIEDS_siteFooter();
         return $display;
     }
-        
 }
 
 
@@ -1091,7 +1088,7 @@ echo 'DEPRECATED';die;
 *   @since  version 0.1.2
 *   @return int     Number of submissions awaiting moderation
 */
-function plugin_submissioncount_classifieds() 
+function plugin_submissioncount_classifieds()
 {
     global $_TABLES, $_CONF_ADVT;
 
@@ -1129,7 +1126,7 @@ function plugin_runScheduledTask_classifieds($standalone=false)
     // Check if purging is disabled
     if ($_CONF_ADVT['purge_days'] > 0) {
         $purge_exp_date = time() - ((int)$_CONF_ADVT['purge_days'] * 86400);
-        $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']} 
+        $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']}
                     WHERE exp_date < $purge_exp_date");
         if ($r) {
             USES_classifieds_advt_functions();
@@ -1139,14 +1136,13 @@ function plugin_runScheduledTask_classifieds($standalone=false)
 
             $numrows = DB_numRows($r);
             if ($numrows > 0) {
-                $msg = sprintf($LANG_ADVT['purged_ads'], $numrows) . 
+                $msg = sprintf($LANG_ADVT['purged_ads'], $numrows) .
                     date("Y-m-d H:i:s", $purge_exp_date);
                 CLASSIFIEDS_auditLog($msg);
                 if ($standalone)
                     echo $msg;
             }
         }
-
     }
 
     // Notify users of impending ad expirations
@@ -1170,7 +1166,7 @@ function plugin_user_create_classifieds($uid)
     $U->Save();
 }
 
-    
+
 /**
 *   Support merging local accounts into remote accounts
 *
@@ -1185,10 +1181,6 @@ function plugin_user_move_classifieds($origUID, $destUID)
     $destUID = (int)$destUID;
 
     DB_query("UPDATE {$_TABLES['ad_ads']}
-            SET uid = $destUID WHERE uid = $origUID", 1);
-    DB_query("UPDATE {$_TABLES['ad_ads']}
-            SET uid = $destUID WHERE uid = $origUID", 1);
-    DB_query("UPDATE {$_TABLES['ad_submission']}
             SET uid = $destUID WHERE uid = $origUID", 1);
     DB_query("UPDATE {$_TABLES['ad_submission']}
             SET uid = $destUID WHERE uid = $origUID", 1);
@@ -1219,35 +1211,30 @@ function phpblock_classifieds_random()
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON cat.cat_id = ad.cat_id
             WHERE ad.exp_date > $now "
-            . COM_getPermSQL('AND', 0, 2, 'cat');
+            . COM_getPermSQL('AND', 0, 2, 'cat')
+            . ' ORDER BY RAND() LIMIT 1';
     //echo $sql;
     $r = DB_query($sql);
     $n = DB_numRows($r);
     if ($n < 1)
         return '';
 
+    USES_classifieds_class_ad();
+
+    $id = DB_result($r, 0, 'id');
+    $Ad = new Ad($id);
+    if ($Ad->isNew) return '';
+
     USES_classifieds_class_image();
-
-    $f = rand(0,$n-1);
-    $id = DB_result($r, $f, 'id');
-
-    $link = CLASSIFIEDS_makeURL('detail', $id);
-    $subject = DB_result($r, $f, 'subject');
+    $img_filename = adImage::getFirst($Ad->ad_id);
 
     $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
     $T->set_file('rblock', 'randomblock.thtml');
-    $T->set_var('ad_url', $link);
-    $T->set_var('ad_subject', $subject);
-
-    $r = DB_query("SELECT  filename
-            FROM {$_TABLES['ad_photo']} 
-            WHERE ad_id='". DB_escapeString($id). "' 
-            LIMIT 1");
-    if ($r && DB_numrows($r) == 1) {
-        $prow = DB_fetchArray($r);
-        $T->set_var('img_url', adImage::thumbUrl($prow['filename']));
-        $T->set_var('img_alt', 'Ad Thumbnail');
-    }
+    $T->set_var(array(
+        'ad_url'    => CLASSIFIEDS_makeURL('detail', $id),
+        'ad_subject' => $Ad->subject,
+        'img_url'   => adImage::thumbUrl($img_filename),
+    ) );
 
     $T->parse('output','rblock');
     return $T->finish($T->get_var('output'));
@@ -1281,363 +1268,7 @@ function CLASSIFIEDS_makeURL($mode='home', $id='', $other = '')
     $url = COM_buildUrl($url);
 
     return $url;
-
 }
-
-
-/**
-*   Delets all photos related to the given ad from the disk
-*   and the database.
-*
-*   @param  int     $ad_id  ID of ad for which photos are to be deleted
-*/
-function XdeletePhotos($ad_id='')
-{
-    global $_TABLES, $_CONF_ADVT;
-
-    $ad_id = COM_sanitizeID($ad_id);
-    if ($ad_id == '')
-        return 1;
-
-    // Locate and delete photos
-    $sql = "SELECT filename
-        FROM {$_TABLES['ad_photo']}
-        WHERE ad_id='". DB_escapeString($ad_id). "'";
-    //echo $sql;
-    $photo= DB_query($sql);
-    if (!$photo) return 2;
-
-    while ($prow = DB_fetchArray($photo)) {
-        if (file_exists(CLASSIFIEDS_IMGPATH . '/' . $prow['filename'])) {
-            unlink(CLASSIFIEDS_IMGPATH . '/' . $prow['filename']);
-        }
-    }
-
-    DB_delete($_TABLES['ad_photo'], 'ad_id', $ad_id);
-
-    return 0;
-}
-
-
-/**
-*   Returns a comma-separated string containing the requested
-*   category and all children.
-*
-*   @param int id Category ID
-*   @return string Comma-separated category list
-*/
-function XCLASSIFIEDS_ChildCatList($id=0)
-{
-    global $_TABLES;
-
-    $str = '';
-
-    $id = (int)$id;
-    if ($id == 0)
-        return $str;
-
-    // Append our id to the string
-    $str .= $id. ',';
-
-    // Get the papa_id of the current id
-    $result = DB_query("SELECT cat_id 
-        FROM {$_TABLES['ad_category']} 
-        WHERE papa_id=$id ");
-    if (!$result) return $str;
-
-    while ($row = DB_fetchArray($result)) {
-        $str .= trim($row['cat_id']) . ',';
-    }
-
-    return trim($str, ', ');
-
-}   // CLASSIFIEDS_ChildCatList()
-
-
-/**
-*   Calls itself recursively to find the root category of the requested id
-*
-*   @param int id Category ID
-*   @return string Comma-separated category list
-*/
-function XCLASSIFIEDS_ParentCatList($id=0, $str='')
-{
-    global $_TABLES;
-
-    $id = (int)$id;
-    if ($id == 0)
-        return $str;
-
-    // Append our id to the string
-    $str .= $id;
-
-    // Get the papa_id of the current id
-    $sql = "SELECT cat_id, papa_id 
-        FROM {$_TABLES['ad_category']} 
-        WHERE cat_id=$id";
-    $result = DB_query($sql);
-    if (!$result) return $str;
-
-    $row = DB_fetchArray($result);
-    // If we found a parent category, call ourself to add it
-    if ((int)$row['papa_id'] > 0) {
-        $str = CLASSIFIEDS_ParentCatList($row['papa_id'], $str.',');
-    }
-
-    return trim($str, ', ');
-
-}   // CLASSIFIEDS_ParentCatList()
-
-
-/**
-*   Calls itself recursively to create the breadcrumb links
-*
-*   @param  integer $id         Current Category ID
-*   @param  boolean $showlink   Link to the current category?
-*   @return string              HTML for breadcrumbs
-*/
-function XCLASSIFIEDS_BreadCrumbs($id=0, $showlink=true)
-{
-    global $_TABLES, $LANG_ADVT;
-
-    $id = (int)$id;
-    if ($id == 0)
-        return '';
-
-    $result = DB_query("SELECT cat_name, cat_id, papa_id 
-                FROM {$_TABLES['ad_category']} 
-                WHERE cat_id=$id");
-    if (!$result) 
-        return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-
-    $row = DB_fetchArray($result);
-    if ($row['papa_id'] == 0) {
-        $location .= '<a href="'. CLASSIFIEDS_makeURL('home', 0) . 
-                    '">' . $LANG_ADVT['home'] . '</a> :: ';
-        if ($showlink) {
-            $location .= '<a href="'. 
-                    CLASSIFIEDS_makeURL('home', $row['cat_id']) . '">' . 
-                    $row['cat_name'] . '</a>';
-        } else {
-            $location .= $row['cat_name'];
-        }
-    } else {
-        $location .= CLASSIFIEDS_BreadCrumbs($row['papa_id'], $showlink);
-        if ($showlink) {
-            if ($row['cat_id'] == $id) {
-                $location .= " &gt; {$row['cat_name']}";
-            } else {
-                $location .=
-                    ' &gt; <a href="' .
-                    CLASSIFIEDS_makeURL('home', $row['cat_id']). '">' .
-                    $row['cat_name'] . '</a>';
-            }
-        } else {
-            $location .= " :: {$row['cat_name']}";
-        }
-    }
-
-    return "<b>$location</b>";
-}
-
-
-/**
-*   Creates a new ad record in the specified table, either submission or
-*   live.  Does not handle photo uploads.
-*
-*   @param  array   $A      Ad information, from $_POST or DB_fetchArray()
-*   @param  string  $table  Table into which the ad is to be inserted
-*/
-function XCLASSIFIEDS_insertAd($A, $table='ad_ads')
-{
-echo 'DEPRECATED';die;
-    global $_TABLES, $_USER, $_CONF_ADVT;
-
-    $A = CLASSIFIEDS_PrepareForDB($A);
-
-    $sql = "INSERT INTO {$_TABLES[$table]} (
-            ad_id, cat_id, uid, subject, descript, url, add_date, exp_date,
-             ad_type, price, uid, group_id, keywords, exp_sent,
-            comments_enabled
-        ) VALUES (
-            '{$A['ad_id']}',
-            '{$A['catid']}', 
-            '{$A['uid']}',
-            '{$A['subject']}',
-            '{$A['descript']}',
-            '{$A['url']}',
-            {$A['add_date']},
-            {$A['exp_date']},
-            {$A['ad_type']},
-            '{$A['price']}',
-            {$A['perms'][0]},{$A['perms'][1]},{$A['perms'][2]},{$A['perms'][3]},
-            {$A['uid']}, {$A['group_id']}, 
-            '{$A['keywords']}',
-            {$A['exp_sent']},
-            {$A['comments_enabled']}
-        )";
-    //echo $sql;die;
-
-    DB_query($sql);
-    CTL_clearCache($_CONF_ADVT['pi_name']);
-
-    return DB_error();
-
-}
-
-
-/**
-*  Updates a single ad record in the table with data from $A.
-*  Note 1 : Permission to update the ad must be checked before this 
-*      function is called.
-*  Note 2 : $A['ad_id'] must contain a valid ad ID
-*
-*   @param array A Ad Data, typically from $_POST
-*   @param string table Table to update (production or submission)
-*/
-function XCLASSIFIEDS_updateAd($A, $table='ad_ads')
-{
-echo 'DEPRECATED';die;
-    global $_TABLES, $_USER, $_CONF_ADVT;
-
-    $A = CLASSIFIEDS_PrepareForDB($A);
-
-    // Update the existing record
-    $sql = "UPDATE {$_TABLES[$table]} SET
-            cat_id='{$A['catid']}',
-            subject='". $A['subject']. "',
-            descript='". $A['descript']. "',
-            url='". $A['url']. "',
-            exp_date={$A['exp_date']},
-            owner_id={$A['owner_id']},
-            group_id={$A['group_id']},
-            uid={$A['uid']},
-            ad_type={$A['ad_type']},
-            price='". $A['price']. "',
-            keywords='". $A['keywords']. "',
-            exp_sent={$A['exp_sent']},
-            comments_enabled={$A['comments_enabled']}
-        WHERE ad_id='{$A['ad_id']}'";
-
-    DB_query($sql);
-    CTL_clearCache($_CONF_ADVT['pi_name']);
-}
-
-
-/**
-*   Handles the upload of one photo and the creation of the thumbnail
-*
-*   @param  string  $adid   Ad ID associated with the photo
-*   @param  array   $photo  The photo informatino from $_FILES
-*/
-function XCLASSIFIEDS_UploadPhoto($adid, $var = '')
-{
-    USES_classifieds_class_image();
-
-    $U = new Image($adid, $var);
-    $U->uploadFiles();
-
-    if ($U->areErrors() > 0) {
-        return $U->printErrors(false);
-    } else {
-        return '';
-    }
-
-}
-
-
-/**
-*   Calculates new dimensions for the $src image, preserving the aspect ratio.
-*   If either $width or $height are zero, then only the other is used.  If both
-*   are zero, then no resizing occurs.
-*
-*   Images are only sized smaller, never larger.
-*
-*   @param  string  $src    Image filespec
-*   @param  int     $width  Requested max width
-*   @param  int     $height Requested max height
-*   @return array   Original and New image dimensions
-*
-*/
-function XCLASSIFIEDS_imgReDim($src, $width=0, $height=0)
-{
-    $dimensions = getimagesize($src);
-    $s_width = $dimensions[0];
-    $s_height = $dimensions[1];
-
-    // get both sizefactors that would resize one dimension correctly
-    if ($width > 0 && $s_width > $width) 
-        $sizefactor_w = (double) ($width / $s_width);
-    else
-        $sizefactor_w = 1;
-
-    if ($height > 0 && $s_height > $height) 
-        $sizefactor_h = (double) ($height / $s_height);
-    else
-        $sizefactor_h = 1;
-
-    $sizefactor = min($sizefactor_w, $sizefactor_h);
-
-    $newwidth = (int)($s_width * $sizefactor);
-    $newheight = (int)($s_height * $sizefactor);
-
-    return array($s_width, $s_height, $newwidth, $newheight);
-}
-
-
-/**
-*   Resizes the source image into the destination directory using $filename
-*   as the new name.  Aspect ratio is preserved.
-*
-*   @param string src Complete path to source file, including name
-*   @param string filename Filename only
-*   @param string dst Destination directory, no filename
-*   @param int width Max width in pixels
-*   @param int height Max height in pixels
-*   @return string Error message or empty string
-*/
-function XCLASSIFIEDS_imgResize($src, $filename, $dst, $width, $height)
-{
-    global $_TABLES, $_CONF_ADVT, $_USER, $_CONF, $LANG_ADVT;
-
-    if (!is_writable($dst))
-        return "";
-
-    /*$dimensions = getimagesize($src);
-    $s_width = $dimensions[0];
-    $s_height = $dimensions[1];*/
-
-    list($s_width, $s_height, $newwidth, $newheight) = CLASSIFIEDS_imgReDim($src, $width, $height);
-
-    // Resizing only goes smaller, not larger.
-    if ($s_width > $width || $s_height > $height) {
-        $result = array();
-
-        // Use global image function if exist (glfusion 1.1+)
-        // or borrow Mediagallery function otherwise.
-        if (function_exists(_img_resizeImage)) {
-            $result = _img_resizeImage($src, "{$dst}{$filename}",
-                        $s_height, $s_width,
-                        $newheight, $newwidth, "image/jpeg");
-        } elseif (function_exists(_mg_resizeImage)) {
-            $result = _mg_resizeImage($src, "{$dst}{$filename}",
-                        $s_height, $s_width,
-                        $newheight, $newwidth, "image/jpeg");
-        } else {
-            $result[0] = false;
-        }
-        if ($result[0] != true)
-            return "Error creating resized image.";
-
-    } elseif ($src != $dst) {
-        // Not resizing, just copy the file
-        copy($src, $dst . $filename);
-
-    }
-
-    return "";
-
-}   // function CLASSIFIEDS_imgResize()
 
 
 // Select default group for ad access (viewing and editing)
@@ -1655,9 +1286,12 @@ function plugin_configmanager_select_defgrpcat_classifieds()
 
 
 /**
-*   Gets 
-*  @param $grplist string Comma-separated list of groups, SQL format
-*  @param $NOT string Set to "NOT" to exclude $grplist, blank to include it.
+*   Gets all the groups in the glFusion groups table to prepare a
+*   selection list.
+*
+*   @param  string  $grplist    Optional list of groups to include or exclude
+*   @param  string  $NOT        Set to "NOT" to exclude $grplist, blank to include it.
+*   @return array       Array of (grp_name=>grp_id)
 */
 function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 {
@@ -1685,66 +1319,6 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 
 
 /**
-*   Returns the results of SEC_hasRights, 3=rw, 2=ro
-*
-*   @param string $id Ad ID
-*   @param array $A Category info, if already available
-*   @param int $in_access Previously computed access.
-*   @return int Access value
-*/
-function XCLASSIFIEDS_checkCatAccess($id, $recurse=false, $A = '', $in_access = 3)
-{
-    global $_TABLES, $_CONF_ADVT;
-
-    $id = (int)$id;
-    if ($id < 1)
-        return 0;
-
-    // Admin rights trump admin-specific ones
-    if (SEC_hasRights($_CONF_ADVT['pi_name']. '.admin'))
-        return 3;
-
-    if (!is_array($A)) {
-
-        $sql = "SELECT owner_id, group_id, papa_id
-                FROM {$_TABLES['ad_category']}
-                WHERE cat_id='$id'";
-
-        $result = DB_query($sql);
-        if (!$result || DB_numRows($result) == 0) {
-            return 0;
-        }
-        $A = DB_fetchArray($result);
-
-    }
-
-    if (plugin_ismoderator_classifieds() || $A['owner_id'] == $_USER['uid']) {
-        $my_access = 3;
-    } elseif (in_array($_GROUPS, $A['group_id'])) {
-        $my_access = 1;
-    } else {
-        $my_access =  0;
-    }
-
-    // If our caclulated access is greater than the incoming access, 
-    // set my_access to the smaller number.
-    if ($my_access > $in_access)
-        $my_access = $in_access;
-
-    // If we still have access > 0, and there's a parent category, check it
-    // to see if we should reduce our access.  Check recursion first since papa_id
-    // might not be passed in with $A for simple single-level checks.
-    if ($my_access > 0 && $recurse == true) {
-        if (isset($A['papa_id']) && $A['papa_id'] > 0) {
-            $my_access = CLASSIFIEDS_checkCatAccess($A['papa_id'], $recurse, '', $my_access);
-        }
-    }
-
-    return $my_access;
-}
-
-
-/**
 *   Loads the language array. If $requested is an array, the first valid
 *   language file is loaded. If not, the $requested language file is loaded.
 *   If $requested doesn't refer to a vailid language, then $_CONF['language']
@@ -1767,7 +1341,7 @@ function plugin_loadlanguage_classifieds($requested='')
 
     // Add the requested language, which may be an array or
     // a single item.
-    if (is_array($requested)) { 
+    if (is_array($requested)) {
         $languages = $requested;
     } elseif ($requested != '') {
         // If no language requested, load the site/user default
@@ -1822,8 +1396,8 @@ function CLASSIFIEDS_canSubmit()
 
 /**
  *  Show the contest submission form in the centerblock.
- *  This shows the submission form in place of the home page for the 
- *  designated user group. 
+ *  This shows the submission form in place of the home page for the
+ *  designated user group.
  *  @param integer $where Where to show the block (only after featured story)
  *  @param integer $page Which page (Home page only)
  *  @param string $topic Which topics to show with (All)
@@ -1844,7 +1418,7 @@ function plugin_centerblock_classifieds($where = 1, $page = 1, $topic = '')
 
     $display = '';
 
-    // if the centerblock value is greater than or equal to the 
+    // if the centerblock value is greater than or equal to the
     // user ID, replace the homepage
     if ($cb_enable) {
         echo COM_Refresh(CLASSIFIEDS_URL . '/index.php');
@@ -1929,7 +1503,7 @@ function plugin_userchanged_classifieds($uid=0)
 *
 *   @param  int $uid    User ID that is being deleted
 */
-function plugin_user_delete_paypal($uid)
+function plugin_user_delete_classifieds($uid)
 {
     global $_TABLES;
 
@@ -2058,7 +1632,7 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
     $where = '1=1';
     $order = '';
     $limit = "LIMIT $limit";
- 
+
     switch ($autotag['parm1']) {
     case 'ad':      // Show an ad
         if (empty($ad_id)) return $content;   // must have a valid ad ID
@@ -2069,7 +1643,7 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
         if (!$result || DB_numRows($result) < 1) return $content;
         break;
     }
-    
+
     $sql = "SELECT ad.ad_id,
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} c
@@ -2077,7 +1651,7 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             WHERE $where " . COM_getPermSQL('AND', 0, 2, 'c') .
             " $order $limit";
     $result = DB_query($sql);
-    if (!$result || DB_numRows($result) < 1) return ''; 
+    if (!$result || DB_numRows($result) < 1) return '';
 
     $T->set_file('autotag', $template);
     $T->set_block('autotag', 'tag_data', 'TAG');
@@ -2107,7 +1681,7 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             'exp_date'  => COM_getUserDateTimeFormat($A['exp_date']),
             'ad_type'   => htmlspecialchars($A['type']),
             'pi_url'    => CLASSIFIEDS_URL,
-            'ad_url'    => COM_buildUrl(CLASSIFIEDS_URL 
+            'ad_url'    => COM_buildUrl(CLASSIFIEDS_URL
                         . '/index.php?mode=detail&id=' . urlencode($ad_id)),
 
         ) );
@@ -2118,46 +1692,6 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
     $tag_data = $T->finish($T->get_var('output'));
     $content = str_replace($autotag['tagstr'], $tag_data, $content);
     return $content;
-}
-
-
-/**
-*   Prepare variables to be saved in the database.
-*
-*   @param  array   $A  Array of variables.
-*   @return array       Array with modified variables
-*/
-function XCLASSIFIEDS_PrepareForDB($A)
-{
-    global $_CONF, $_CONF_ADVT;
-
-    $spamcheck = "<p>{$A['subject']}</p>
-        <p>{$A['descrip']}</p>
-        <p>{$A['price']}</p>
-        <p>{$A['keywords']}</p>
-        <p>{$A['url']}</p>";
-    $result = PLG_checkforSpam($spamcheck, $_CONF['spamx']);
-    if ($result > 0) {
-        COM_updateSpeedlimit($_CONF_ADVT['pi_name']);
-        COM_displayMessageAndAbort($result, 'spamx', 403, 'Forbidden');
-    }
-
-    $A['ad_id'] = COM_sanitizeID($A['ad_id'], false);
-    $A['subject'] = DB_escapeString(COM_checkWords(COM_checkHTML($A['subject'])));
-    $A['descript'] = DB_escapeString(COM_checkWords($A['descript']));
-    $A['price'] = DB_escapeString(COM_checkWords(COM_checkHTML($A['price'])));
-    $A['keywords'] = DB_escapeString(COM_checkWords(COM_checkHTML($A['keywords'])));
-    $A['url'] = COM_sanitizeURL(COM_checkWords(COM_checkHTML($A['url'])));
-    $A['cat_id'] = (int)$A['cat_id'];
-    $A['ad_type'] = (int)$A['ad_type'];
-    $A['uid'] = (int)$A['uid'];
-    $A['add_date'] = (int)$A['add_date'];
-    $A['exp_date'] = (int)$A['exp_date'];
-    $A['group_id'] = (int)$A['group_id'];
-    $A['exp_sent'] = (int)$A['exp_sent'];
-    $A['comments_enabled'] = (int)$A['comments_enabled'];
-
-    return $A;
 }
 
 
@@ -2174,7 +1708,7 @@ function CLASSIFIEDS_getDocURL($file='', $doclang='english')
 {
     global $_CONF, $_CONF_ADVT;
 
-    $doc_path = $_CONF['path_html'] . $_CONF_ADVT['pi_name'] . 
+    $doc_path = $_CONF['path_html'] . $_CONF_ADVT['pi_name'] .
                 "/docs/$doclang/";
     $doc_url = '';
 
@@ -2280,7 +1814,7 @@ function CLASSIFIEDS_auditLog($logentry = '')
 
     // A little sanitizing
     $logentry = str_replace(
-            array('<?', '?>'), 
+            array('<?', '?>'),
             array('(@', '@)'),
             $logentry);
 
@@ -2294,8 +1828,8 @@ function CLASSIFIEDS_auditLog($logentry = '')
 
     // Get the user name if it's not anonymous
     if (!COM_isAnonUser()) {
-        $byuser = $_USER['uid'] . '-'. 
-                COM_getDisplayName($_USER['uid'], 
+        $byuser = $_USER['uid'] . '-'.
+                COM_getDisplayName($_USER['uid'],
                     $_USER['username'], $_USER['fullname']);
     } else {
         $byuser = 'anon';
@@ -2325,31 +1859,32 @@ function CLASSIFIEDS_commentCount($ad_id)
 
 
 /**
-*   Shortcut functions to get resized image URLs.
+*   Get a form or URL parameter.
+*   Checks $_POST, then $_GET, and returns the raw value if found.
+*   Returns NULL if the parameter is not set
 *
-*   @param  string  $filename   Filename to view
-*   @return string      URL to the resized image
+*   @param  string  $name   Name of parameter
+*   @param  string  $type   Type of parameter, default "string"
+*   @return mixed       Value of parameter, or NULL if not found
 */
-function XCLASSIFIEDS_dispUrl($filename)
+function CLASSIFIEDS_getParam($name, $type = 'string')
 {
-    global $_CONF_ADVT;
-    return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/user/' . $filename,
-                $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
+    if (isset($_POST[$name])) {
+        $value = $_POST[$name];
+    } elseif (isset($_GET[$name])) {
+        $value = $_GET[$name];
+    } else {
+        return NULL;
+    }
+
+    switch($type) {
+    case 'int':
+        return (int)$value;
+        break;
+    default:
+        return $value;
+        break;
+    }
 }
-
-
-/**
-*   Shortcut functions to get resized thumbnail URLs.
-*
-*   @param  string  $filename   Filename to view
-*   @return string      URL to the resized image
-*/
-function XCLASSIFIEDS_thumbUrl($filename)
-{
-    global $_CONF_ADVT;
-    return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/user/' . $filename,
-                $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
-}
-
 
 ?>
