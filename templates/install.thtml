@@ -1,7 +1,0 @@
-{# begin {templatelocation} #}
-<h1>{install_header}</h1>
-<p>{installmsg1}</p>
-<p>{installmsg2}</p>
-<p><a href="{admin_url}">{configure}</a></p>
-<p>{readme}<a href="install.html">{installdoc}</a>
-{# end {templatelocation} #}
