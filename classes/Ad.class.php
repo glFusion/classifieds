@@ -199,7 +199,9 @@ class Ad
 
         USES_classifieds_class_upload();
         $Image = new adUpload($this->ad_id);
-        $Image->uploadFiles();
+        if ($Image->havefiles) {
+            $Image->uploadFiles();
+        }
 
         if ($this->isNew) {
             if (!$this->isAdmin && $_CONF_ADVT['submission']) {
@@ -231,10 +233,50 @@ class Ad
         DB_query($sql, 1);
         if (DB_error()) {
             COM_errorLog("Error executing $sql");
-            return array(1, 'Database error saving ad');
+            LGLIB_storeMessage('Database error saving ad');
+            return false;
         } else {
-            return array(0, 'OK');
+            return true;
         }
+    }
+
+
+    /**
+    *   Duplicate an ad
+    *   Creates a new ad and image records based on the current ad.
+    *   image records.
+    *
+    *   @return string  ID of new ad
+    */
+    public function Duplicate()
+    {
+        global $_TABLES;
+
+        // Must have an existing ad loaded
+        if ($this->isNew) return NULL;
+
+        // Grab the image records before the ad_id changes
+        USES_classifieds_class_image();
+        $photos = adImage::getAll($this->ad_id);
+
+        // Clear the ad id and save to get a new ID
+        $this->ad_id = '';
+        $this->isNew = true;
+        $this->Save();
+
+        // Now duplicate all the image records
+        $values = array();
+        foreach ($photos as $id=>$filename) {
+            $values[] = "('{$this->ad_id}', '$filename')";
+        }
+        if (!empty($values)) {
+            $value_str = implode(',', $values);
+            $sql = "INSERT INTO {$_TABLES['ad_photo']} (ad_id, filename)
+                    VALUES $value_str";
+            $r = DB_query($sql);
+            if (DB_error()) return NULL;
+        }
+        return $this->ad_id;
     }
 
 
@@ -258,8 +300,8 @@ class Ad
         }
 
         // After the cleanup stuff, delete the ad record itself. 
-        DB_delete($this->table, 'ad_id', $this->ad_id);
-        CLASSIFIEDS_auditLog("Ad {$this->$ad_id} deleted.");
+        DB_delete($_TABLES[$table], 'ad_id', $ad_id);
+        CLASSIFIEDS_auditLog("Ad {$ad_id} deleted.");
         if (DB_error()) {
             COM_errorLog(DB_error());
             return 4;
@@ -336,7 +378,7 @@ class Ad
             'has_delbtn'        => 'true',
             'txt_photo'         => "{$LANG_ADVT['photo']}<br />" .
                     sprintf($LANG_ADVT['image_max'], $img_max),
-            'type'              => 'submission',
+            'type'              => $this->table == 'ad_submission' ? 'submission' : 'prod',
             'action_url'        => $action_url,
             'max_file_size'     => $_CONF['max_image_size'],
             'subject'       => $this->subject,
@@ -466,10 +508,10 @@ class Ad
         $tpl_type = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('detail', "detail$tpl_type.thtml");
 
-        if ($admin) {
+        if ($this->isAdmin) {
             $base_url = CLASSIFIEDS_ADMIN_URL . '/index.php';
-            $del_link = $base_url . '?delete=ad&ad_id=' . $this->ad_id;
-            $edit_link = $base_url . '?edit=ad&ad_id=' . $this->ad_id;
+            $del_link = $base_url . '?deletead=x&ad_id=' . $this->ad_id;
+            $edit_link = $base_url . '?editad=x&ad_id=' . $this->ad_id;
         } else {
             $base_url = CLASSIFIEDS_URL . '/index.php';
             $del_link = $base_url . '?mode=delete&id=' . $this->ad_id;
@@ -589,7 +631,8 @@ class Ad
                 $T->set_var(array(
                     'hot_title' => $hotrow['subject'],
                     'hot_url'   => CLASSIFIEDS_makeURL('detail', $hotrow['ad_id']),
-                    'hot_cat'   => displayCat($hotrow['cat_id']),
+                    'hot_cat_url' => CLASSIFIEDS_makeURL('home', $this->Cat->cat_id),
+                    'hot_cat'   => $this->Cat->cat_name,
                 ) );
             }
             $T->parse('HBlock', 'HotBlock', true);

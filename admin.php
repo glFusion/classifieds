@@ -259,7 +259,9 @@ function CLASSIFIEDS_adminAds()
 
     $header_arr = array(
         array('text' => $LANG_ADMIN['edit'], 'field' => 'edit',
-            'sort' => false),
+            'sort' => false, 'align' => 'center'),
+        array('text' => $LANG_ADVT['duplicate'], 'field' => 'copy',
+            'sort' => false, 'align' => 'center'),
         array('text' => $LANG_ADVT['added_on'], 'field' => 'add_date',
             'sort' => true),
         array('text' => $LANG_ADVT['expires'], 'field' => 'exp_date',
@@ -269,21 +271,25 @@ function CLASSIFIEDS_adminAds()
         array('text' => $LANG_ADVT['owner'], 'field' => 'owner_id',
             'sort' => true),
         array('text' => $LANG_ADVT['delete'], 'field' => 'delete',
-            'sort' => false),
+            'sort' => false, 'align' => 'center'),
     );
 
     $defsort_arr = array('field' => 'add_date', 'direction' => 'asc');
 
-    $text_arr = array();
+    $text_arr = array(
+        'has_extras' => true,
+        'form_url' => CLASSIFIEDS_ADMIN_URL . '/index.php',
+    );
+    $options = array('chkdelete' => true, 'chkfield' => 'ad_id');
 
     $query_arr = array('table' => 'ad_ads',
         'sql' => "SELECT * FROM {$_TABLES['ad_ads']}",
-        'query_fields' => array('name', 'descript'),
-        'default_filter' => ''
+        'query_fields' => array('subject', 'descript', 'keywords'),
+        'default_filter' => 'WHERE 1=1'
     );
 
     $retval .= ADMIN_list('classifieds', 'CLASSIFIEDS_getField_ad', $header_arr,
-                    $text_arr, $query_arr, $defsort_arr, '', '', '', $form_arr);
+                    $text_arr, $query_arr, $defsort_arr, '', '', $options, $form_arr);
 
     return $retval;
 }
@@ -313,7 +319,7 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .  "/index.php?editad={$A['ad_id']}",
+                CLASSIFIEDS_ADMIN_URL .  "/index.php?editad=x&ad_id={$A['ad_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-edit',
                 )
@@ -321,7 +327,23 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
         } else {
             $retval = COM_createLink(
                 $icon_arr['edit'], CLASSIFIEDS_ADMIN_URL .
-                "/index.php?editad={$A['ad_id']}"
+                "/index.php?editad=x&ad_id={$A['ad_id']}"
+            );
+        }
+       break;
+
+    case 'copy':
+        if ($_CONF_ADVT['_is_uikit']) {
+            $retval = COM_createLink('',
+                CLASSIFIEDS_ADMIN_URL .  "/index.php?dupad={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-copy',
+                )
+            );
+        } else {
+            $retval = COM_createLink(
+                $icon_arr['copy'], CLASSIFIEDS_ADMIN_URL .
+                "/index.php?dupad={$A['ad_id']}"
             );
         }
        break;

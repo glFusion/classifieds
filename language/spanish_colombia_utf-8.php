@@ -247,6 +247,10 @@ $PLG_classifieds_MESSAGE07 = 'Error uploading photos';
 $PLG_classifieds_MESSAGE08 = 'Unable to locate the requested item.';
 $PLG_classifieds_MESSAGE09 = 'Permissions globally reset to defaults.';
 $PLG_classifieds_MESSAGE10 = 'Missing Required Fields';
+$PLG_classifieds_MESSAGE11 = 'The requested ad has been deleted';
+$PLG_classifieds_MESSAGE12 = 'There was an error saving your ad';
+$PLG_classifieds_MESSAGE13 = 'There was an error copying your ad';
+$PLG_classifieds_MESSAGE14 = 'The selected ad has been duplicated';
 
 // Localization of the Admin Configuration UI
 $LANG_configsections['classifieds'] = array(

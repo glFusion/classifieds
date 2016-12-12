@@ -179,7 +179,7 @@ img.RandBlock {
 
 #adDetailData {
     float: left;
-    width: 70%;
+    min-width: 50%;
 }
 
 #adDetailData img {
@@ -234,4 +234,35 @@ div #adDetailUserLinks {
 
 .adExpiredText {
     color: red;
+}
+
+div.adContact,div.adWhatsHot {
+    clear: both;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+div.adWhatsHot {
+    margin-bottom: 20px;
+}
+
+div.adContactItem,div.adWhatsHotItem {
+    clear: both;
+}
+
+div.adContactItem div.label, div.adWhatsHotItem div.label {
+    margin-left: 5px;
+    float: left;
+    width: 50%;
+    display: inline;
+}
+
+div.adContactItem div.data, div.adWhatsHOtItem div.label {
+    float: left;
+    display: inline;
+}
+
+div.adContactItem div.label {
+    width: 30%;
+    font-weight: bold;
 }

@@ -37,7 +37,7 @@ class adUpload extends upload
 
     /** Indicate that we actually have one or more files to upload
      *  @var boolean */
-    var $havefiles;
+    public $havefiles;
 
 
     /**

@@ -244,6 +244,10 @@ $PLG_classifieds_MESSAGE07 = 'Fehler beim Hochladen von Fotos.';
 $PLG_classifieds_MESSAGE08 = 'Der gewünschte Eintrag kann nicht gefunden werden.';
 $PLG_classifieds_MESSAGE09 = 'Berechtigungen global auf die Standardwerte zurücksetzen.';
 $PLG_classifieds_MESSAGE10 = 'Fehlende Pflichtangaben';
+$PLG_classifieds_MESSAGE11 = 'The requested ad has been deleted';
+$PLG_classifieds_MESSAGE12 = 'There was an error saving your ad';
+$PLG_classifieds_MESSAGE13 = 'There was an error copying your ad';
+$PLG_classifieds_MESSAGE14 = 'The selected ad has been duplicated';
 
 // Localization of the Admin Configuration UI
 $LANG_configsections['classifieds'] = array(

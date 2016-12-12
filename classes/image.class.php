@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -56,7 +56,7 @@ class adImage
     {
         global $_TABLES;
 
-        // If we're deleting from disk also, get the filename and 
+        // If we're deleting from disk also, get the filename and
         // delete it and its thumbnail from disk.
         if ($this->filename == '') {
             return;
@@ -64,7 +64,7 @@ class adImage
 
         DB_delete($_TABLES['ad_photo'], 'photo_id', $this->photo_id);
 
-        if (file_exists($imgpath . '/' . $this->filename))
+        if (self::UsedCount() == 1 && file_exists($imgpath . '/' . $this->filename))
             unlink($imgpath . '/' . $this->filename);
     }
 
@@ -97,6 +97,24 @@ class adImage
 
 
     /**
+    *   Get the first image in the database for a given ad
+    *
+    *   @param  string  $ad_id      Ad ID
+    *   @return string              Filename of first image
+    */
+    public static function getFirst($ad_id)
+    {
+        $images = self::getAll($ad_id, 1);
+        if (!empty($images)) {
+            reset($images);
+            return current($images);
+        } else {
+            return '';
+        }
+    }
+
+
+    /**
     *   Delets all photos related to the given ad from the disk
     *   and the database.
     *
@@ -108,6 +126,8 @@ class adImage
 
         $images = self::getAll($ad_id);
         foreach ($images as $id=>$filename) {
+            // Only delete the file if it's the last record.
+            if (self::UsedCount($filename) > 1) continue;
             if (file_exists(CLASSIFIEDS_IMGPATH . '/' . $filename)) {
                 unlink(CLASSIFIEDS_IMGPATH . '/' . $filename);
             }
@@ -116,6 +136,21 @@ class adImage
         DB_delete($_TABLES['ad_photo'], 'ad_id', $ad_id);
 
         return 0;
+    }
+
+
+    /**
+    *   Get the number of records for this image.
+    *   Used to determine if an image file can be removed from disk.
+    *
+    *   @param  string  $filename   Image filename
+    *   @return integer     Number of records in database
+    */
+    public static function UsedCount($filename)
+    {
+        global $_TABLES;
+
+        return DB_count($_TABLES['ad_photo'], 'filename', $filename);
     }
 
 

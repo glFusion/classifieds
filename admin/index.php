@@ -99,8 +99,8 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 
 $action = '';
 $expected = array('edit', 'moderate', 'save', 'deletead', 'deleteimage',
-        'deleteadtype', 'saveadtype', 'editadtype', 'editad',
-        'deletecat', 'editcat', 'savecat',
+        'deleteadtype', 'saveadtype', 'editadtype', 'editad', 'dupad',
+        'deletecat', 'editcat', 'savecat', 'delbutton_x',
         'cancel', 'admin');
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -114,26 +114,18 @@ foreach($expected as $provided) {
     }
 }
 
-if (isset($_POST['ad_id'])) {
-    $ad_id = COM_sanitizeID($_POST['ad_id']);
-} elseif (isset($_GET['ad_id'])) {
-    $ad_id = COM_sanitizeID($_GET['ad_id']);
-} elseif (isset($_GET['id'])) {
-    $ad_id = COM_sanitizeID($_GET['id']);
-} else {
-    $ad_id = '';
+$ad_id = CLASSIFIEDS_getParam('ad_id', 'string');
+if ($ad_id === NULL) {
+    $ad_id = CLASSIFIEDS_getParam('id', 'string');
 }
 
 // Set the view to be displayed.  May be overridden during execution of $action
-if (isset($_POST['page'])) {
-    $view = COM_applyFilter($_POST['page']);
-} elseif (isset($_GET['page'])) {
-    $view = COM_applyFilter($_GET['page']);
-} else {
+$view = CLASSIFIEDS_getParam('page');
+if ($view === NULL) {
     $view = $action;
 }
 
-$type = (isset($_POST['type'])) ? COM_applyFilter($_POST['type']) : '';
+$type = CLASSIFIEDS_getParam('type');
 $content = '';      // initialize variable for page content
 $A = array();       // initialize array for form vars
 
@@ -147,7 +139,7 @@ case 'deleteimage': // delete an image
     break;
 
 case 'deletecat':   // delete a single category
-    $cat_id = (int)CLASSIFIEDS_getParam('cat_id');
+    $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     if ($cat_id > 0) {
         USES_classifieds_class_category();
         adCategory::Delete($_REQUEST['cat_id']);
@@ -155,16 +147,23 @@ case 'deletecat':   // delete a single category
     }
     break;
 
+case 'delbutton_x':
+    USES_classifieds_class_ad();
+    foreach ($_POST['delitem'] as $ad_id) {
+        Ad::Delete($ad_id);
+    }
+    COM_refresh(CLASSIFIEDS_ADMIN_URL . '/index.php?admin=ad');
+    break;
+
 case 'deletead':
     USES_classifieds_class_ad();
     if ($type == 'submission' || $type == 'editsubmission' || 
             $type == 'moderate') {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
-        adDelete($ad_id, true, 'ad_submission');
+        Ad::Delete($ad_id, 'ad_submission');
         $view = 'moderation';
     } else {
-        $Ad = new Ad($ad_id);
-        $Ad->Delete();
+        Ad::Delete($ad_id);
         $view = 'admin';
         $actionval = 'ad';
     }
@@ -172,7 +171,7 @@ case 'deletead':
 
 case 'saveadtype':
     USES_classifieds_class_adtype();
-    $type_id = CLASSIFIEDS_getParam('type_id');
+    $type_id = CLASSIFIEDS_getParam('type_id', 'int');
     $AdType = new adType($type_id);
     if (!$AdType->Save($_POST)) {
         COM_errorLog("Error saving ad type");
@@ -183,7 +182,7 @@ case 'saveadtype':
 
 case 'deleteadtype':
     USES_classifieds_class_adtype();
-    $type_id = CLASSIFIEDS_getParam('type_id');
+    $type_id = CLASSIFIEDS_getParam('type_id', 'int');
     $AdType = new adType($type_id);
     $view = 'admin';
     $actionval = 'type';
@@ -207,7 +206,7 @@ case 'deleteadtype':
 case 'savecat':
     // Insert or update a category record from form vars
     USES_classifieds_class_category();
-    $cat_id = (int)CLASSIFIEDS_getParam('cat_id');
+    $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $C = new adCategory($cat_id);
     $C->Save($_POST);
     $view = 'admin';
@@ -224,7 +223,7 @@ case 'delcat':
 
 case 'delcatimg':
     // Delete a category image
-    $cat_id = CLASSIFIEDS_getParam('cat_id');
+    $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     if ($cat_id > 0) {
         USES_classifieds_class_category();
         adCategory::DelImage($cat_id);
@@ -235,37 +234,23 @@ case 'delcatimg':
 case 'save':
     USES_classifieds_class_ad();
     $Ad = new Ad($_POST['ad_id']);
-    if ($type == 'submission') {    // new submission
-        $r = $Ad->Save($_POST);
-        if ($r[0] == 0) {
-            echo COM_refresh(CLASSIFIEDS_ADMIN_URL);
-            exit;
-            /*$content .= COM_showMessage($r[1], $_CONF_ADVT['pi_name']);
-            $view = 'admin';
-            $actionval = 'ad';*/
-        } else {
-            $content .= $r[1];
-            $view = 'edit';
-        }
-    } elseif ($type == 'editsubmission' || $type == 'moderate') {  // saving from the queue
-        $r = adSave($type);
-        if ($r[0] == 0) {
-            $msgid = $r[1];
-            $view = 'moderation';
-        } else {
-            $content .= $r[1];
-            $view = 'edit';
-            $A = $_POST;
-        }
+    if ($Ad->Save($_POST)) {
+        echo COM_refresh(CLASSIFIEDS_ADMIN_URL);
+        exit;
     } else {
-        $r = adSave('adminupdate');
-        if ($r[0] == 0)
-            $content .= COM_showMessage($r[1], $_CONF_ADVT['pi_name']);
-        else
-            $content .= $r[1];
-        $view = 'admin';
-        $actionval = 'ad';
+        $view = 'edit';
     }
+    break;
+
+case 'dupad':
+    USES_classifieds_class_ad();
+    $Ad = new Ad($actionval);
+    $msg = 14;
+    if (!$Ad->Duplicate()) {
+        $msg = 13;
+    }
+    echo COM_refresh(CLASSIFIEDS_ADMIN_URL . '?msg=' . $msg);
+    exit;
     break;
 
 default:
@@ -274,282 +259,15 @@ default:
     break;
 }
 
-// First, process any action that was requested.  If this is a specific
-// action, then after performing it set the page to the desired display.
-if (0) {
-switch ($mode) {
-
-/*    case 'deletecat':
-        if (isset($_POST['cat_id'])) {
-            $cat_id = (int)$_POST['cat_id'];
-        } elseif (isset($_GET['cat_id'])) {
-            $cat_id = (int)$_GET['cat_id'];
-        } else {
-            $cat_id = 0;
-        }
-        if ($cat_id > 0) {
-            //USES_classifieds_categories();
-            //catDelete($_REQUEST['cat_id']);
-            USES_classifieds_class_category();
-            adCategory::Delete($_REQUEST['cat_id']);
-            $view = 'admin';
-        }
-        break;*/
-
-    case $LANG_ADMIN['delete']:
-    case 'delete':
-        if ($mode == $LANG_ADMIN['delete'] && !isset($LANG_ADMIN['delete']))
-            break;
-        switch ($actionval) {
-        case 'cat':
-            if (isset($_POST['cat_id'])) {
-                $cat_id = (int)$_POST['cat_id'];
-            } elseif (isset($_GET['cat_id'])) {
-                $cat_id = (int)$_GET['cat_id'];
-            } else {
-                $cat_id = 0;
-            }
-            if ($cat_id > 0) {
-                //USES_classifieds_categories();
-                //catDelete($_REQUEST['cat_id']);
-                USES_classifieds_class_category();
-                adCategory::Delete($_REQUEST['cat_id']);
-                $view = 'admin';
-            }
-            break;
-
-        case 'ad':
-        default:
-            if ($type == 'submission' || $type == 'editsubmission' || 
-                $type == 'moderate') {
-                CLASSIFIEDS_auditLog("Deleting submission $ad_id");
-                adDelete($ad_id, true, 'ad_submission');
-                $view = 'moderation';
-            } else {
-                adDelete($ad_id, true);
-                $view = 'admin';
-                $actionval = 'ad';
-            }
-            break;
-        } 
-        break;
-
-    case 'delete_ad':
-        // Delete a specific ad
-        adDelete($ad_id, true);
-        $view = 'admin';
-        $actionval = 'ad';
-        break;
-
-    case 'deletesubmission':        // DEPRECATE
-        // Delete a specific ad
-        adDelete($ad_id, true, 'ad_submission');
-        $view = 'moderation';
-        break;
-
-    case 'update_ad':        // DEPRECATE
-    case 'updatesubmission':
-        $r = adSave('adminupdate');
-        $content .= $r[1];
-        $view = 'admin';
-        $actionval = 'ad';
-        break;
-
-    case 'save':
-        if ($type == 'submission') {    // new submission
-            $r = adSave('submission');
-            if ($r[0] == 0) {
-                echo COM_refresh(CLASSIFIEDS_ADMIN_URL);
-                exit;
-                /*$content .= COM_showMessage($r[1], $_CONF_ADVT['pi_name']);
-                $view = 'admin';
-                $actionval = 'ad';*/
-            } else {
-                $content .= $r[1];
-                $view = 'edit';
-            }
-        } elseif ($type == 'editsubmission' || $type == 'moderate') {  // saving from the queue
-            $r = adSave($type);
-            if ($r[0] == 0) {
-                $msgid = $r[1];
-                $view = 'moderation';
-            } else {
-                $content .= $r[1];
-                $view = 'edit';
-                $A = $_POST;
-            }
-        } else {
-            $r = adSave('adminupdate');
-            if ($r[0] == 0)
-                $content .= COM_showMessage($r[1], $_CONF_ADVT['pi_name']);
-            else
-                $content .= $r[1];
-            $view = 'admin';
-            $actionval = 'ad';
-        }
-        break;
-
-    /*case 'savesubmission':
-        $r = adSave('editsubmission');
-        $content .= $r[1];
-        $view = 'edit';
-        break;
-    */
-    case 'update_cat':
-        // Insert or update a category record from form vars
-        //USES_classifieds_categories();
-        USES_classifieds_class_category();
-        $cat = isset($_REQUEST['catid']) ? intval($_REQUEST['catid']) : 0;
-        $C = new adCategory($_REQUEST['catid']);
-        $C->Save($_POST);
-        //catSave($cat);
-        $view = 'admin';
-        $actionval = 'cat';
-        break;
-
-    /*case 'delcat':
-        // Insert or update a category record from form vars
-        //USES_classifieds_categories();
-        //catDeleteMulti();
-        USES_classifieds_class_category();
-        adCategory::DeleteMulti($_POST['c']);
-        $view = 'admin';
-        $actionval = 'cat';
-        break;*/
-    /*
-    case 'delsubimg':
-        // Delete image from submission queue
-        USES_classifieds_edit();
-        $content .= imgDelete(true, 'ad_submission');
-        $view = 'editsubmission';
-        $mode = 'editsubmission';
-        break;
-    case 'delete_img':
-        USES_classifieds_edit();
-        $content .= imgDelete(true);
-        $view = 'edit';
-        break;
-    */
-
-    /*case 'delcatimg':
-        // Delete a category image
-        //USES_classifieds_categories();
-        USES_classifieds_class_category();
-        $cat_id = isset($_REQUEST['cat_id']) ? (int)$_REQUEST['cat_id'] : 0;
-        if ($cat_id > 0) {
-            //catDelImage($cat_id);
-            adCategory::DelImage($cat_id);
-        }
-        $view = 'editcat';
-        break;*/
-
-    /*case 'resetadperms':
-        $perms = SEC_getPermissionValues(
-            $_POST['perm_owner'], $_POST['perm_group'], 
-            $_POST['perm_members'], $_POST['perm_anon']);
-        $sql = "UPDATE
-                {$_TABLES['ad_ads']}
-            SET
-                perm_owner={$perms[0]},
-                perm_group={$perms[1]},
-                perm_members={$perms[2]},
-                perm_anon={$perms[3]},
-                group_id=". COM_applyFilter($_POST['group_id'],true);
-        DB_query($sql);
-        $content .= COM_showMessage('09', $_CONF_ADVT['pi_name']);
-        $view = 'admin';
-        $actionval = 'other';
-        break;
-    */
-
-    case 'resetcatperms':
-        $perms = SEC_getPermissionValues(
-            $_POST['perm_owner'], $_POST['perm_group'], 
-            $_POST['perm_members'], $_POST['perm_anon']);
-        $sql = "UPDATE
-                {$_TABLES['ad_category']}
-            SET
-                perm_owner={$perms[0]},
-                perm_group={$perms[1]},
-                perm_members={$perms[2]},
-                perm_anon={$perms[3]},
-                group_id=". COM_applyFilter($_POST['group_id'],true);
-        DB_query($sql);
-        $content .= COM_showMessage('09', $_CONF_ADVT['pi_name']);
-        $view = 'admin';
-        $actionval = 'other';
-        break;
-
-    case 'toggleadtype':
-        USES_classifieds_class_adtype();
-        adType::toggleEnabled($ad_id, $_REQUEST['enabled']);
-        $view = 'admintypes';
-        break;
-
-/*    case 'saveadtype':
-        USES_classifieds_class_adtype();
-        $AdType = new adType($ad_id);
-        $AdType->SetVars($_POST);
-        $content .= $AdType->Save();
-        $view = 'admin';
-        $actionval = 'type';
-        break;
-*/
-    case 'deleteadtype':
-        USES_classifieds_class_adtype();
-        if (isset($_POST['type_id'])) {
-            $type_id = $_POST['type_id'];
-        } elseif (isset($_GET['type_id'])) {
-            $type_id = $_GET['type_id'];
-        } else {
-            $type_id = 0;
-        }
-        $AdType = new adType($type_id);
-        $view = 'admin';
-        $actionval = 'type';
-        if ($AdType->isUsed()) {
-            if (!isset($_POST['newadtype'])) {
-                $view = 'delAdTypeForm';
-                break;
-            } elseif (isset($_POST['submit'])) {
-                $new_type = (int)$_POST['newadtype'];
-                DB_query("UPDATE {$_TABLES['ad_ads']}
-                        SET ad_type=$new_type
-                        WHERE ad_type=$ad_id");
-            } else {
-                break;
-            }
-        }
-        $AdType->Delete();
-        break;
-
-    case 'cancel':
-        if ($type == 'submission') {
-            echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
-            exit;
-        } else {
-            echo COM_refresh(CLASSIFIEDS_URL);
-            exit;
-        }
-        exit;
-
-    default:
-        // There's no default mode
-        break;
-
-}
-}   // if (0) removing "mode" switch
-
 // Then handle the page request.  This is generally the final display
 // after any behind-the-scenes action has been performed
 switch ($view) {
 case 'editad':
 case 'edit':    // if called from submit.php
     USES_classifieds_class_ad();
-    $Ad = new Ad($actionval);
-    if (isset($_GET['cat_id'])) {
-        $Ad->cat_id = $_GET['cat_id'];
-    }
+    $Ad = new Ad(CLASSIFIEDS_getParam('ad_id'));
+    // TODO: What was this for?
+    //$Ad->cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $content .= $Ad->Edit();
     break;
 
@@ -565,7 +283,7 @@ case 'editcat':
     // Display the form to edit a category.
     // $actionval contains the category ID
     USES_classifieds_class_category();
-    $cat_id = CLASSIFIEDS_getParam('cat_id');
+    $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $content .= CLASSIFIEDS_adminMenu('cat');
     $C = new adCategory($cat_id);
     $content .= $C->Edit();
@@ -635,6 +353,5 @@ $T->set_var(array(
 $T->parse('output','admin');
 echo $T->finish($T->get_var('output'));
 echo CLASSIFIEDS_siteFooter();
-
 
 ?>
