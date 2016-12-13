@@ -88,19 +88,23 @@ class Ad
             break;
 
         case 'subject':
-        case 'descript':
         case 'url':
         case 'keywords':
         case 'price':
-            // String values
-            $this->properties[$key] = trim($value);
+            // String values, strip html
+            $this->properties[$key] = strip_tags(trim($value));
+            break;
+
+        case 'descript':
+            // String values, html ok
+            $this->properties[$key] = COM_checkHTML(trim($value));
             break;
 
         case 'sentnotify':
         case 'exp_sent':
         case 'comments_enabled':
             // Boolean values
-            $this->properties[$key] = $valuye == 1 ? 1 : 0;
+            $this->properties[$key] = $value == 1 ? 1 : 0;
             break;
 
         case 'views':
