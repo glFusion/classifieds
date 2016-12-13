@@ -75,6 +75,7 @@ $LANG_ADVT = array (
 'days'              => ' días',
 'delete'            => 'Borrar',
 'del_item'          => 'Borrar este Clasificado',
+'del_item_confirm'  => 'Do you really want to delete this item?',
 'del_sel_cat'            => 'Borrar las Categorías Seleccionadas',
 'disabled'            => 'Desabilitado',
 'edit_submission'   => 'Edit an Ad Submission',

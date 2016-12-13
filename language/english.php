@@ -75,6 +75,7 @@ $LANG_ADVT = array (
 'days'              => ' days',
 'delete'            => 'Delete',
 'del_item'          => 'Delete this item',
+'del_item_confirm'  => 'Do you really want to delete this item?',
 'del_sel_cat'            => 'Delete Selected Categories',
 'disabled'            => 'Disabled',
 'duplicate'         => 'Duplicate',

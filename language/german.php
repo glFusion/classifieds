@@ -76,6 +76,7 @@ $LANG_ADVT = array (
 'days'                  => ' Tage',
 'delete'                => 'löschen',
 'del_item'              => 'diesen Eintrag löschen',
+'del_item_confirm'  => 'Do you really want to delete this item?',
 'del_sel_cat'           => 'dies ausgewählte Kategorie löschen',
 'disabled'              => 'deaktiviert',
 'edit_submission'       => 'Einreichung bearbeiten',

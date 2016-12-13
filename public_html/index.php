@@ -3,10 +3,10 @@
 *   Public entry point for the Classifieds plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.4
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    1.1.0
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -31,9 +31,9 @@ if (GVERSION < '1.3.0') {
 // Determine if this is an anonymous user, and override the plugin's
 // loginrequired configuration if the global loginrequired is set.
 $isAnon = COM_isAnonUser();
-if ($_CONF['loginrequired'] == 1)
+if ($_CONF['loginrequired'] == 1) {
     $_CONF_ADVT['loginrequired'] = 1;
-
+}
 if ($isAnon && $_CONF_ADVT['loginrequired'] == 1) {
     $display = CLASSIFIEDS_siteHeader();
     $display .= SEC_loginForm();
@@ -105,10 +105,17 @@ case 'edit':
     break;
 
 case 'delete':
-    if ($id > 0) {
+case 'deletead':
+    if ($id != '') {
         USES_classifieds_class_ad();
         $Ad = new Ad($id);
-        $Ad->Delete();
+        if ($Ad->canEdit()) {
+            Ad::Delete($id);
+            $msg = '&msg=11';
+        } else {
+            $msg = '';
+        }
+        COM_refresh(CLASSIFIEDS_URL . '?mode=manage' . $msg);
     }
     $view = 'manage';
     break;
@@ -116,8 +123,8 @@ case 'delete':
 case 'update_account':
     // only valid users allowed
     if ($isAnon) {
-        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'], 
-                    'alert', 
+        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'],
+                    'alert',
                     $LANG_ADVT['access_denied']);
         break;
     }
@@ -130,6 +137,7 @@ case 'update_account':
     break;
 
 case 'update_ad':
+echo 'update_ad DEPRECATED'; die;
     $r = adSave($mode);
     $content .= $r[1];
     $view = 'manage';
@@ -138,13 +146,10 @@ case 'update_ad':
 case 'save':
     USES_classifieds_class_ad();
     $Ad = new Ad();
-    $r = $Ad->Save($_POST);
-    if ($r[0] == 0) {
+    if ($Ad->Save($_POST)) {
         COM_refresh(CLASSIFIEDS_URL . '?msg=01');
     } else {
-        // store custom message amd redirect
-        LGLIB_storeMessage($r[1]);
-        COM_refresh(CLASSIFIEDS_URL);
+        COM_refresh(CLASSIFIEDS_URL . '?msg=12');
     }
     break;
 
@@ -156,26 +161,6 @@ case 'delete_img':
     $view = 'editad';
     break;
 
-/*case 'add_notice':
-    $cat = (int)$id;
-    if ($cat > 0) {
-        USES_classifieds_notify();
-        catSubscribe($cat);
-    }
-    $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-    echo COM_refresh(CLASSIFIEDS_URL . '/index.php?mode=' . $page . '&id=' . $cat);
-    break;
-
-case 'del_notice':
-    $cat = (int)$id;
-    if ($cat > 0) {
-        USES_classifieds_notify();
-        catUnSubscribe($cat);
-    }
-    $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-    echo COM_refresh(CLASSIFIEDS_URL . '/index.php?mode=' . $page . '&id=' . $cat);
-    break;
-*/
 case 'moredays':
     USES_classifieds_class_ad();
     $Ad = new Ad($id);
@@ -188,8 +173,6 @@ case 'recent':
     USES_classifieds_class_adlist();
     $L = new AdListRecent();
     $content .= $L->Render();
-//
-//    $content .= adListRecent();
     $T->set_var('header', $LANG_ADVT['recent_listed']);
     $menu_opt = $LANG_ADVT['mnu_recent'];
     break;
@@ -209,8 +192,8 @@ case 'account':
     // Update the user's account info
     // only valid users allowed
     if ($isAnon) {
-        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'], 
-                    'alert', 
+        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'],
+                    'alert',
                     $LANG_ADVT['access_denied']);
         break;
     }
@@ -230,7 +213,7 @@ case 'detail':
     break;
 
 case 'editad':
-    // Edit an ad.  
+    // Edit an ad.
     USES_classifieds_class_ad();
     $Ad = new Ad($id);
     $content .= $Ad->Edit();
@@ -241,11 +224,6 @@ case 'byposter':
     USES_classifieds_class_adlist();
     $L = new AdListPoster($_GET['uid']);
     $content .= $L->Render();
-    /*$uid = isset($_REQUEST['uid']) ? (int)$_REQUEST['uid'] : 0;
-    if ($uid > 1) {
-        USES_classifieds_list();
-        $content .= adListPoster($uid);
-    }*/
     $T->set_var('header', $LANG_ADVT['ads_by']. ' '. COM_getDisplayName($uid));
     $menu_opt = $LANG_ADVT['mnu_home'];
     break;
@@ -258,9 +236,7 @@ default:
         USES_classifieds_class_adlist();
         $L = new AdListCat($id);
         $content .= $L->Render();
-        //$content .= adListCat($id);
-        $pageTitle = DB_getItem($_TABLES['ad_category'], 'cat_name', 
-                        "cat_id='$id'");
+        $pageTitle = $L->Cat->cat_name;
     } else {
         USES_classifieds_class_catlist();
         $content .= CatList::Render();
@@ -305,7 +281,7 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_URL . 
+                CLASSIFIEDS_URL .
                     "/index.php?mode=editad&amp;id={$A['ad_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-edit',
@@ -316,7 +292,7 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
         } else {
             $retval = COM_createLink(
                 $icon_arr['edit'],
-                CLASSIFIEDS_URL . 
+                CLASSIFIEDS_URL .
                 "/index.php?mode=editad&amp;id={$A['id']}"
             );
         }
@@ -330,31 +306,31 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'subject':
         $retval = COM_createLink($fieldvalue,
-                CLASSIFIEDS_URL . 
+                CLASSIFIEDS_URL .
                     "/index.php?mode=detail&amp;id={$A['ad_id']}");
         break;
 
     case 'delete':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_URL . 
+                CLASSIFIEDS_URL .
                     "/index.php?mode=deletead&amp;id={$A['ad_id']}",
                 array('title' => $LANG_ADVT['del_item'],
                     'class' => 'uk-icon uk-icon-trash',
                     'style' => 'color:red;',
                     'data-uk-tooltip' => '',
-                    'onclick' => "return confirm('Do you really want to delete this item?');",
+                    'onclick' => "return confirm('{$LANG_ADVT['del_item_confirm']}');",
                 )
             );
         } else {
             $retval .= '&nbsp;&nbsp;' . COM_createLink(
                 COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
-                    'Delete this item',
-                    array('title' => 'Delete this item', 
+                    $LANG_ADVT['del_item'],
+                    array('title' => $LANG_ADVT['del_item'],
                         'class' => 'gl_mootip',
-                        'onclick' => "return confirm('Do you really want to delete this item?');",
+                        'onclick' => "return confirm('${LANG_ADVT['del_item_confirm']}');",
                     )),
-                CLASSIFIEDS_URL . 
+                CLASSIFIEDS_URL .
                     "/index.php?mode=deletead&amp;id=={$A['ad_id']}"
             );
         }
@@ -369,7 +345,6 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
 }
 
 
-
 /**
 *   Create admin list of Ad Types
 *   @return string  HTML for admin list
@@ -382,27 +357,27 @@ function CLASSIFIEDS_ManageAds()
     $retval = '';
 
     $header_arr = array(      # display 'text' and use table field 'field'
-        array('text' => $LANG_ADVT['edit'], 'field' => 'edit', 
+        array('text' => $LANG_ADVT['edit'], 'field' => 'edit',
             'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['description'], 'field' => 'subject', 
+        array('text' => $LANG_ADVT['description'], 'field' => 'subject',
             'sort' => true),
-        array('text' => $LANG_ADVT['added'], 'field' => 'add_date', 
+        array('text' => $LANG_ADVT['added'], 'field' => 'add_date',
             'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['expires'], 'field' => 'exp_date', 
+        array('text' => $LANG_ADVT['expires'], 'field' => 'exp_date',
             'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['delete'], 'field' => 'delete', 
+        array('text' => $LANG_ADVT['delete'], 'field' => 'delete',
             'sort' => false, 'align' => 'center'),
     );
 
     $defsort_arr = array('field' => 'add_date', 'direction' => 'asc');
 
-    $text_arr = array( 
+    $text_arr = array(
         'has_extras' => true,
         'form_url' => CLASSIFIEDS_URL . '/index.php',
     );
 
     $query_arr = array('table' => 'ad_ads',
-        'sql' => "SELECT * FROM {$_TABLES['ad_ads']} WHERE uid = {$_USER['uid']}", 
+        'sql' => "SELECT * FROM {$_TABLES['ad_ads']} WHERE uid = {$_USER['uid']}",
         'query_fields' => array(),
         'default_filter' => ''
     );

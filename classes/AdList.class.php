@@ -142,10 +142,10 @@ class AdList
 
             $T->set_var('descript', substr(strip_tags($row['descript']), 0, 300));
             if (strlen($row['descript']) > 300)
-                $T->set_var('ellipses', "... ...");
+                $T->set_var('ellipses', '...');
 
             if ($row['price'] != '')
-                $T->set_var('price', COM_stripslashes($row['price']));
+                $T->set_var('price', strip_tags($row['price']));
             else
                 $T->set_var('price', '');
 
@@ -168,7 +168,6 @@ class AdList
         return $T->finish($T->get_var('output'));
 
     }   // function Render()
-
 }
 
 
@@ -220,6 +219,8 @@ class AdListPoster extends AdList
 */
 class AdListCat extends AdList
 {
+    public $Cat;    // Category Object
+
     /**
     *   Constructor. Set the category ID
     *
@@ -228,6 +229,8 @@ class AdListCat extends AdList
     public function __construct($cat_id = 0)
     {
         $this->cat_id = (int)$cat_id;
+        USES_classifieds_class_category();
+        $this->Cat = new adCategory($this->cat_id);
     }
 
     /**
@@ -243,9 +246,7 @@ class AdListCat extends AdList
         if ($this->cat_id == 0)
             return;
 
-        USES_classifieds_class_category();
-        $Cat = new adCategory($this->cat_id);
-        if (!$Cat->canView()) {
+        if (!$this->Cat->canView()) {
             return CLASSIFIEDS_errorMsg($LANG_ADVT['cat_unavailable'], 'alert');
         }
 
@@ -254,7 +255,7 @@ class AdListCat extends AdList
         $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
         $T->set_file('header', 'adlisthdrCat.thtml');
         $T->set_var('pi_url', $_CONF['site_url'].'/'.$_CONF_ADVT['pi_name']);
-        $T->set_var('catimg_url', adImage::thumbUrl($Cat->image));
+        $T->set_var('catimg_url', adImage::thumbUrl($this->Cat->image));
 
         // Set the breadcrumb navigation
         $T->set_var('breadcrumbs', adCategory::BreadCrumbs($this->cat_id), true);
@@ -282,13 +283,13 @@ class AdListCat extends AdList
                 $submit_url = $_CONF['site_admin_url'] . 
                         '/plugins/'. $_CONF_ADVT['pi_name'] . 
                         '/index.php?editad=x&cat_id='.$this->cat_id;
-            } elseif ($Cat->checkAccess(3)) {
+            } elseif ($this->Cat->canEdit()) {
                 $submit_url = $_CONF['site_url']. '/' . $_CONF_ADVT['pi_name'] . 
                     '/index.php?mode=edit&cat_id=' . $this->cat_id;
             }
             $T->set_var(array(
                 'subscribe_img' => CLASSIFIEDS_URL.'/images/'.$sub_img,
-                'cat_id'        => $Cat->cat_id,
+                'cat_id'        => $this->Cat->cat_id,
                 'sub_vis'       => $sub_vis,
                 'unsub_vis'     => $unsub_vis,
                 'can_subscribe' => 'true',
