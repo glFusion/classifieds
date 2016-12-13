@@ -38,7 +38,7 @@ $_TABLES['ad_trans']    = $_AD_table_prefix . 'classified_trans';
 
 $_CONF_ADVT['pi_name'] = 'classifieds';
 $_CONF_ADVT['pi_version'] = '1.1.0';
-$_CONF_ADVT['gl_version'] = '1.4.0';
+$_CONF_ADVT['gl_version'] = '1.6.0';
 $_CONF_ADVT['pi_url'] = 'http://www.leegarner.com';
 $_CONF_ADVT['pi_display_name'] = 'Classified Ads';
 

@@ -1,10 +1,10 @@
-# glClassifieds - Change Log
+# Classifieds Plugin for glFusion - Change Log
 
 ## Version 1.1.0
-Compatibile with glFusion 1.4.0 or higher.
+Compatibile with glFusion 1.6.0 or higher.
 - Refactor code into classes for different object types
 - Add uikit templates when a uikit-based theme is in use
-- Remove permissions for ads, only use category permissions
+- Remove permissions for ads, only use ad owner and category permissions
 - Remove recursion when checking access to categories
 - Use LGLIB_ImageUrl to handle image resizing and caching
 - Remove separate configurations for ad and category image locations
