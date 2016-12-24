@@ -876,7 +876,10 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
 
     // Notify subscribers.
     USES_classifieds_class_notify();
-    adNotify::Approval($id, true);
+    USES_classifieds_class_ad();
+    $Ad = new Ad($id):
+    adNotify::Approval($Ad, true);
+    adNotify::Subscribers($Ad);
     return '';
 }
 
@@ -885,6 +888,7 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
 *   Performs plugin exclusive work for items deleted by moderation.
 *   The ad submission record is already deleted.
 *   Delete uploaded images, notify submitter of denial.
+*   Can't notify the submitter since the data has already been deleted.
 *
 *   @param  string  $id     ID of the ad deleted.
 *   @return string          Any wanted HTML output
@@ -908,7 +912,6 @@ function plugin_moderationdelete_classifieds($id)
 
     // Delete uploaded photos from filesystem
     adImage::DeleteAll($id);
-    adNotify::Approval($id, false);
 
     return '';
 }
@@ -1129,12 +1132,12 @@ function plugin_runScheduledTask_classifieds($standalone=false)
         $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']}
                     WHERE exp_date < $purge_exp_date");
         if ($r) {
-            USES_classifieds_advt_functions();
+            $numrows = DB_numRows($r);
+            USES_classifieds_class_ad();
             while ($row = DB_fetchArray($r)) {
-                adDelete($row['ad_id'], true);
+                Ad::Delete($row['ad_id']);
             }
 
-            $numrows = DB_numRows($r);
             if ($numrows > 0) {
                 $msg = sprintf($LANG_ADVT['purged_ads'], $numrows) .
                     date("Y-m-d H:i:s", $purge_exp_date);

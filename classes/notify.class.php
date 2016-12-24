@@ -6,11 +6,10 @@
 *   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 
 /**
 *   Class for category objects
@@ -24,61 +23,57 @@ class adNotify
     *   Email is only sent if the ad is approved and a notification
     *   hasn't already been sent.
     *
-    *   @param int $ad_id  ID number of ad 
+    *   @param  object  $Ad     Ad object
+    *   @return boolean         True on notification, False on error
     */
-    public static function Subscribers($ad_id)
+    public static function Subscribers($Ad)
     {
         global $_TABLES,  $_CONF, $_CONF_ADVT;
 
-        USES_classifieds_class_ad();
-        $Ad = new Ad($ad_id);
-        if ($Ad->isNew) return;
+        if ($Ad->isNew)
+            return false;
 
         // check approval status and whether a notification was already sent.
         if ($Ad->sentnotify == 1)
-            return;
-
-        $cat = (int)$adinfo['cat_id'];
-        $subject = trim($adinfo['subject']);
-        $descript = trim($adinfo['descript']);
-        $price = trim($adinfo['price']);
+            return true;
 
         // Collect all the parent categories into a comma-separated list, and
         // find all the subscribers in any of the categories
-        $catlist = CLASSIFIEDS_ParentCatList($cat);
-        $sql = "SELECT uid FROM {$_TABLES['ad_notice']} 
+        USES_classifieds_class_category();
+        $catlist = adCategory::ParentList($Ad->cat_id);
+        $sql = "SELECT uid FROM {$_TABLES['ad_notice']}
                 WHERE cat_id IN ($catlist)";
         $notice = DB_query($sql, 1);
         if (!$notice)
-            return;
+            return false;
 
         // send the notification to subscribers
-        while ($row = DB_fetchArray($notice)) {
+        while ($row = DB_fetchArray($notice, false)) {
             $result = DB_query("SELECT username, email, language
-                FROM {$_TABLES['users']} 
+                FROM {$_TABLES['users']}
                 WHERE uid='{$row['uid']}'");
             if (DB_numRows($result) == 0)
                 continue;
 
-            $name = DB_fetchArray($result);
+            $user = DB_fetchArray($result, false);
 
             // Select the template for the message
-            $template_dir = CLASSIFIEDS_PI_PATH . 
-                    '/templates/notify/' . $name['language'];
+            $template_dir = CLASSIFIEDS_PI_PATH .
+                    '/templates/notify/' . $user['language'];
             if (!file_exists($template_dir . '/subscriber.thtml')) {
                 $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
             }
 
             // Load the recipient's language.  $LANG_ADVT is *not* global here
             // to avoid overwriting the global language strings.
-            $LANG = plugin_loadlanguage_classifieds($name['language']);
-    
+            $LANG = plugin_loadlanguage_classifieds($user['language']);
+
             $T = new Template($template_dir);
             $T->set_file('message', 'subscriber.thtml');
 
             $ad_type = adType::GetDescription($Ad->ad_type);
             $T->set_var(array(
-                'cat'   => CLASSIFIEDS_BreadCrumbs($cat),
+                'cat'   => adCategory::BreadCrumbs($Ad->cat_id),
                 'subject' => $Ad->subject,
                 'description' => $Ad->descript,
                 'username' => COM_getDisplayName($row['uid']),
@@ -90,32 +85,31 @@ class adNotify
             $message = $T->finish($T->get_var('output'));
 
             COM_mail(
-                array($name['email']),
+                array($user['email']),
                 "{$LANG['new_ad_listing']} {$_CONF['site_name']}",
                 $message,
                 '',
                 true
             );
-
         }
 
         // update the ad's flag to indicate that a notification has been sent
         DB_query("UPDATE {$_TABLES['ad_ads']}
                 SET sentnotify=1
                 WHERE ad_id='$ad_id'");
-
     }   // function Subscribers()
 
 
     /**
     *   Sends an email to the owner of an ad indicating acceptance or rejection.
+    *   Note: Rejection notification is not currently supported.
     *   The language file is determined based on the owner's configured language,
     *   defaulting to English.
     *
-    *   @param  string  $ad_id      ID of ad for which to send notification
-    *   @param  boolean $approved   TRUE if ad is approved, FALSE if rejected
+    *   @param  object  $Ad         Approved or rejected Ad object.
+    *   @param  boolean $approved   True if ad is approved, False if rejected
     */
-    public static function Approval($ad_id, $approved=TRUE)
+    public static function Approval($Ad, $approved=true)
     {
         global $_TABLES, $_CONF, $_CONF_ADVT;
 
@@ -123,20 +117,13 @@ class adNotify
         if (
             $_CONF_ADVT['emailusers'] == 0       // Never notify
             ||
-            ($_CONF_ADVT['emailusers'] == 2 && $approved==FALSE)  // approval only
-            ||
-            ($_CONF_ADVT['emailusers'] == 3 && $approved==TRUE)   // rejection only
+            ($_CONF_ADVT['emailusers'] == 2 && !$approved)  // approval only
         )
             return;
 
         USES_classifieds_class_ad();
         USES_classifieds_class_adtype();
         USES_classifiecs_class_category();
-
-        // If approved, then the ad has already been moved to the main table.
-        // Otherwise, the data is still in the submission table.
-        $table = $approved == true ? $_TABLES['ad_ads'] : $_TABLES['ad_submission'];
-        $Ad = new Ad($ad_id, $table);
 
         // Sanitizing this since it gets used in another query.
         $username = COM_getDisplayName($Ad->uid);
@@ -148,7 +135,7 @@ class adNotify
 
         // If approved, then the ad has already been moved to the main table.
         // Otherwise, the data is still in the submission table.
-        if ($approved == true) {
+        if ($approved) {
             $template_file = 'approved.thtml';
             $subject = $LANG['subj_approved'];
         } else {
@@ -186,7 +173,6 @@ class adNotify
             '',
             true
         );
-
     }
 
 
@@ -201,12 +187,15 @@ class adNotify
         $interval = intval($_CONF_ADVT['exp_notify_days']) * 3600 * 24;
         $exp_dt = time() + $interval;
 
-        $sql = "SELECT ad.ad_id, ad.uid, u.notify_exp
+        $sql = "SELECT ad.ad_id, ad.uid, u.notify_exp, us.email, us.language
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_uinfo']} u
-            ON u.uid = ad.uid
+                ON u.uid = ad.uid
+            LEFT JOINE {$_TABLES['users']} us
+                ON ad.uid = us.uid
             WHERE exp_sent = 0
                 AND u.notify_exp = 1
+                AND us.uid IS NOT NULL
                 AND exp_date < $exp_dt";
         $r = DB_query($sql, 1);
         if (!$r)
@@ -217,19 +206,27 @@ class adNotify
         $ads = array();
         while ($row = DB_fetchArray($r)) {
             $ads[] = $row['ad_id'];
-            $users[$row['uid']] += 1;
+            if (!isset($users[$row['uid']])) {
+                $users[$row['uid']] = array(
+                    'ad_count'  => 1,
+                    'email'     => $row['email'],
+                    'language'  => $row['language'],
+                );
+            } else {
+                $users[$row['uid']]['ad_count'] += 1;
+            }
         }
 
         $template_base = CLASSIFIEDS_PI_PATH . '/templates/notify';
 
-        foreach ($users as $user_id=>$count) {
+        foreach ($users as $user_id=>$info) {
 
             $username = COM_getDisplayName($user_id);
-            $email = DB_getItem($_TABLES['users'], 'email', "uid=$user_id");
-            $language = DB_getItem($_TABLES['users'], 'language', "uid=$user_id");
+            //$email = DB_getItem($_TABLES['users'], 'email', "uid=$user_id");
+            //$language = DB_getItem($_TABLES['users'], 'language', "uid=$user_id");
 
             // Include the owner's language, if possible.  Fallback to site language.
-            $LANG = plugin_loadlanguage_classifieds(array($language, $_CONF['language']));
+            $LANG = plugin_loadlanguage_classifieds(array($info['language'], $_CONF['language']));
 
             if (file_exists("$template_base/$language/expiration.thtml")) {
                 $template_dir = "$template_base/$language";
@@ -240,7 +237,7 @@ class adNotify
             $T = new Template($template_dir);
             $T->set_file('message', 'expiration.thtml');
             $T->set_var(array(
-                'num_ads'   => $count,
+                'num_ads'   => $info['ad_count'],
                 'username'  => $username,
                 'pi_name'   => $_CONF_ADVT['pi_name'],
             ) );
@@ -248,35 +245,42 @@ class adNotify
             $message = $T->finish($T->get_var('output'));
 
             COM_mail(
-                array($email, $username),
+                array($info['email'], $username),
                 $LANG['ad_exp_notice'],
                 $message,
                 '',
                 true
             );
-        }    
+        }
 
         // Mark that the expiration notification has been sent.
-        foreach ($ads as $ad) {
+        $ad_str = "'" . implode("','", $ads) . "'";
+        DB_query("UPDATE {$_TABLES['ad_ads']} SET exp_sent=1 WHERE ad_id IN ($ad_str)");
+        /*foreach ($ads as $ad) {
             //DB_query("UPDATE {$_TABLES['ad_ads']} SET exp_sent=1 WHERE ad_id='$ad'");
-        }
+        }*/
     }
 
 
     /**
     *   Notify the site adminstrator that an ad has been submitted.
     *
-    *   @param  array   $A  All ad data, such as from $_POST
+    *   @param  object  $Ad     Ad object
     */
-    public static function Submission($A)
+    public static function Submission($Ad)
     {
         global $_TABLES, $LANG_ADVT, $_CONF, $_CONF_ADVT;
 
+        // First, determine if we even notify users of this condition
+        if ($_CONF_ADVT['emailadmin'] == 0)     // Never notify
+            return true;
+
         // require a valid ad ID
-        if ($A['ad_id'] == '')
-            return;
+        if ($A->ad_id == '')
+            return false;
 
         USES_classifieds_class_adtype();
+        USES_classifieds_class_category();
 
         COM_clearSpeedlimit(300,'advtnotify');
         $last = COM_checkSpeedlimit ('advtnotify');
@@ -285,7 +289,7 @@ class adNotify
         }
 
         // Select the template for the message
-        $template_dir = CLASSIFIEDS_PI_PATH . 
+        $template_dir = CLASSIFIEDS_PI_PATH .
                 '/templates/notify/' . $_CONF['language'];
         if (!file_exists($template_dir . '/admin.thtml')) {
             $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
@@ -293,12 +297,12 @@ class adNotify
         $T = new Template($template_dir);
         $T->set_file('message', 'admin.thtml');
         $T->set_var(array(
-            'cat'   => CLASSIFIEDS_BreadCrumbs($A['catid']),
-            'subject'  => $A['subject'],
-            'description' => $A['descript'],
+            'cat'   => adCategory::BreadCrumbs($Ad->catid),
+            'subject'  => $Ad->subject,
+            'description' => $Ad->descript,
             'username'  => COM_getDisplayName(2),
-            'price'     => $A['price'],
-            'ad_type'   => adType::GetDescription($A['ad_type']),
+            'price'     => $Ad->price,
+            'ad_type'   => adType::GetDescription($A->ad_type),
         ) );
         $T->parse('output','message');
         $message = $T->finish($T->get_var('output'));
@@ -306,21 +310,21 @@ class adNotify
         $group_id = DB_getItem($_TABLES['groups'],'grp_id',"grp_name='classifieds Admin'");
         $groups = self::_getGroupList($group_id);
         if (empty($groups))
-            return;
+            return true;        // Fake success if nobody to notify
 
         $groupList = implode(',',$groups);
 
-        $sql = "SELECT DISTINCT {$_TABLES['users']}.uid,username,fullname,email 
-                FROM {$_TABLES['group_assignments']}, {$_TABLES['users']} 
-                WHERE {$_TABLES['users']}.uid > 1 
-                AND  {$_TABLES['users']}.uid = {$_TABLES['group_assignments']}.ug_uid 
+        $sql = "SELECT DISTINCT {$_TABLES['users']}.uid,username,fullname,email
+                FROM {$_TABLES['group_assignments']}, {$_TABLES['users']}
+                WHERE {$_TABLES['users']}.uid > 1
+                AND  {$_TABLES['users']}.uid = {$_TABLES['group_assignments']}.ug_uid
                 AND {$_TABLES['group_assignments']}.ug_main_grp_id IN ({$groupList})";
         $result = DB_query($sql, 1);
         if (!$result) return;
 
         while ($row = DB_fetchArray($result, false)) {
             if ($row['email'] != '') {
-                COM_errorLog("Classifieds Submit: Sending notification email to: " . 
+                COM_errorLog("Classifieds Submit: Sending notification email to: " .
                         $row['email'] . " - " . $row['username']);
                 COM_mail(
                     array($row['email'], $row['username']),
@@ -334,7 +338,6 @@ class adNotify
         }   // foreach administrator
 
         COM_updateSpeedlimit('advtnotify');
-
     }   // function Submission()
 
 
@@ -356,8 +359,8 @@ class adNotify
         while (sizeof($to_check) > 0) {
             $thisgroup = array_pop($to_check);
             if ($thisgroup > 0) {
-                $result = DB_query("SELECT ug_grp_id 
-                    FROM {$_TABLES['group_assignments']} 
+                $result = DB_query("SELECT ug_grp_id
+                    FROM {$_TABLES['group_assignments']}
                     WHERE ug_main_grp_id = $thisgroup");
                 if (!$result) return $checked;
                 while ($A = DB_fetchArray($result, false)) {

@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -41,7 +41,7 @@ class Ad
         'price' => 'string',
         'ad_type' => 'int',
         'sentnotify' => 'int',
-        'keywords' => 'string', 
+        'keywords' => 'string',
         'exp_sent' => 'int',
         'comments' => 'int',
         'comments_enabled' => 'int',
@@ -50,7 +50,7 @@ class Ad
 
     /**
     *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   Reads in the specified class, if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
     *   @param  string  $id     Optional Ad ID
@@ -190,10 +190,21 @@ class Ad
         }
 
         if ($this->isNew) {
+            if (!$this->isAdmin && $_CONF_ADVT['submission']) {
+                // If using the queue and not an admin, then switch
+                // to the submission table for new items.
+                $this->setTable('ad_submission');
+            }
             // Set the date added for new records
             $this->add_date = time();
-        } elseif (!$this->canEdit()) {
-            return false;
+            $sql1 = "INSERT INTO {$this->table} SET ";
+            $sql3 = '';
+        } else {
+            if (!$this->canEdit()) {
+                return false;
+            }
+            $sql1 = "UPDATE {$this->table} SET ";
+            $sql3 = " WHERE ad_id = '{$this->ad_id}'";
         }
 
         $this->_calcExpDate($A['moredays']);
@@ -205,19 +216,6 @@ class Ad
         $Image = new adUpload($this->ad_id);
         if ($Image->havefiles) {
             $Image->uploadFiles();
-        }
-
-        if ($this->isNew) {
-            if (!$this->isAdmin && $_CONF_ADVT['submission']) {
-                // If using the queue and not an admin, then switch
-                // to the submission table for new items.
-                $this->setTable('ad_submission');
-            }
-            $sql1 = "INSERT INTO {$this->table} SET ";
-            $sql3 = '';
-        } else {
-            $sql1 = "UPDATE {$this->table} SET ";
-            $sql3 = " WHERE ad_id = '{$this->ad_id}'";
         }
 
         $fld_array = array();
@@ -240,6 +238,16 @@ class Ad
             LGLIB_storeMessage('Database error saving ad');
             return false;
         } else {
+            USES_classifieds_class_notify();
+            if ($this->isNew) {
+                if ($this->table = 'ad_ads') {
+                    // Saved directly to prod, notify subscribers
+                    adNotify::Subscribers($this);
+                } else {
+                    // Submission, notify moderators
+                    adNotify::Submission($this);
+                }
+            }
             return true;
         }
     }
@@ -294,7 +302,7 @@ class Ad
         USES_classifieds_class_image();
 
         // If we've gotten this far, then the current user has access
-        // to delete this ad. 
+        // to delete this ad.
         if ($table == 'ad_submission') {
             // Do the normal plugin rejection stuff
             plugin_moderationdelete_classifieds($ad_id);
@@ -303,7 +311,7 @@ class Ad
             adImage::DeleteAll($ad_id);
         }
 
-        // After the cleanup stuff, delete the ad record itself. 
+        // After the cleanup stuff, delete the ad record itself.
         DB_delete($_TABLES[$table], 'ad_id', $ad_id);
         CLASSIFIEDS_auditLog("Ad {$ad_id} deleted.");
         if (DB_error()) {
@@ -366,7 +374,7 @@ class Ad
             // Don't add more days automatically for each edit
             $moredays = 0;
         }
- 
+
         $T->set_var(array(
             'isNew'         => $this->isNew ? 'true' : '',
             'isAdmin'       => $this->isAdmin ? 'true' : '',
@@ -408,18 +416,18 @@ class Ad
             $photocount = 0;
         } else {
             // get the photo information
-            $sql = "SELECT photo_id, filename 
-                    FROM {$_TABLES['ad_photo']} 
+            $sql = "SELECT photo_id, filename
+                    FROM {$_TABLES['ad_photo']}
                     WHERE ad_id='{$this->ad_id}'";
             $photo = DB_query($sql, 1);
 
             // save the count of photos for later use
             if ($photo)
-                $photocount = DB_numRows($photo); 
+                $photocount = DB_numRows($photo);
             else
                 $photocount = 0;
         }
- 
+
         $T->set_block('adedit', 'PhotoRow', 'PRow');
         $i = 0;
         if ($photocount > 0) {
@@ -432,7 +440,7 @@ class Ad
                             $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']),
                     'seq_no'    => $i,
                     'ad_id'     => $this->ad_id,
-                    'del_img_url'   => $action_url . 
+                    'del_img_url'   => $action_url .
                         "?deleteimage={$prow['photo_id']}" .
                         "&ad_id={$this->ad_id}",
                 ) );
@@ -453,7 +461,7 @@ class Ad
 
     }   // function Edit()
 
- 
+
     /**
     *   Display the ad
     *
@@ -655,71 +663,7 @@ class Ad
         $T->parse('output','detail');
         $display = $T->finish($T->get_var('output'));
         return $display;
-
     }   // Detail()
-
-
-    /**
-     *  Creates a dropdown selection for the specified list, with the
-     *  record corresponding to $sel selected.
-     *  @param  integer $sel    Optional item ID to select
-     *  @param  string  $sql    Optional SQL query
-     *  @return string HTML for selection dropdown
-     */
-    function makeSelection($sel=0, $sql='')
-    {
-        global $_TABLES;
-        return COM_optionList($_TABLES['ad_types'],
-                'id,descrip', $sel, 1, 'enabled=1');
-        
-        /*global $_TABLES;
-
-        if ($sql == '') {
-            $sql = "SELECT id,descrip
-                FROM {$_TABLES['ad_types']}
-                WHERE enabled=1
-                ORDER BY descrip ASC";
-        }
-        $result = DB_query($sql);
-        if (!$result) {
-            $this->Error = 1;
-            return '';
-        }
-
-        $selection = '';
-        while ($row = DB_fetcharray($result)) {
-            $selected = '';
-            if (is_array($sel)) {
-                // Multiple selections, check if the current one is among them
-                if (in_array($row['id'], $sel)) {
-                    $selected = "selected";
-                }
-            } else {
-                if ($sel == 0) {
-                    // No selection, take the first one found.
-                    $sel = $row['id'];
-                }
-                if ($sel == $row['id']) {
-                    $selected = "selected";
-                }
-            }
-
-            if (is_object($this)) {
-                // Set the current id, only if this is an instantiated object
-                if ($selected == 'selected' && $this->ad_id == 0) {
-                    $this->ad_id = $row['id'];
-                }
-            }
-
-            $selection .= "<option value=\"{$row['id']}\" $selected>".
-                                htmlspecialchars($row['descrip']).
-                                "</option>\n";
-        }
-
-        return $selection;
-        */
-
-    }   // function makeSelection()
 
 
     /**
@@ -777,33 +721,29 @@ class Ad
     {
         global $_CONF_ADVT;
 
+        if ($moredays < 1) {
+            return;
+        }
 
-        if ($moredays > 0) {
-            $moretime = $moredays * 86400;
-            $save_exp_date = $this->exp_date;
-            if ($this->exp_date < time())
-                $basetime = time();
-            else
-                $basetime = $this->exp_date;
+        $moretime = $moredays * 86400;
+        $save_exp_date = $this->exp_date;
+        $basetime = $this->exp_date < time() ? time() : $this->exp_date;
+        $this->exp_date = min(
+            $basetime + $moretime,
+            $this->add_date + ((int)$_CONF_ADVT['max_total_duration'] * 86400)
+        );
 
-            $this->exp_date = min(
-                $basetime + $moretime,
-                $this->add_date + ((int)$_CONF_ADVT['max_total_duration'] * 86400)
-            );
+        // Figure out the number of days added to this ad, and subtract
+        // it from the user's account.
+        $days_used = (int)(($this->exp_date - $save_exp_date) / 86400);
+        if ($_CONF_ADVT['purchase_enabled'] && !$this->isAdmin) {
+            $User->UpdateDaysBalance($days_used * -1);
+        }
 
-            // Figure out the number of days added to this ad, and subtract
-            // it from the user's account.
-            $days_used = (int)(($this->exp_date - $save_exp_date) / 86400);
-            if ($_CONF_ADVT['purchase_enabled'] && !$admin) {
-                $User->UpdateDaysBalance($days_used * -1);
-            }
-
-            // Reset the "expiration notice sent" flag if the new date
-            // is at least one more day from the old one.
-            //if ($A['exp_date'] - $save_exp_date >= 86400) {
-            if ($days_used > 0) {
-                $this->exp_sent = 0;
-            }
+        // Reset the "expiration notice sent" flag if the new date
+        // is at least one more day from the old one.
+        if ($days_used > 0) {
+            $this->exp_sent = 0;
         }
     }
 
@@ -813,8 +753,8 @@ class Ad
     *   Considers the configured maximum runtime and the time the ad
     *   has already run.
     *
-    *   @param int $rundays Number of days ad is already scheduled to run
-    *   @return int Max number of days that can be added
+    *   @param  int     $rundays    Number of days ad is already scheduled to run
+    *   @return int                 Max number of days that can be added
     */
     private static function calcMaxAddDays($rundays)
     {
@@ -826,9 +766,9 @@ class Ad
 
         $max_add_days = intval($_CONF_ADVT['max_total_duration']);
 
-        if ($max_add_days < $run_days) 
+        if ($max_add_days < $run_days)
             return 0;
-        else 
+        else
             return ($max_add_days - $run_days);
     }
 
@@ -860,6 +800,9 @@ class Ad
     }   // function userDropdown()
 
 
+    /**
+    *   Update the ad hit counter
+    */
     public function updateHits()
     {
         // Increment the views counter
@@ -902,34 +845,6 @@ class Ad
 
 
     /**
-    *   Check the current user's access to this ad.
-    *
-    *   @param  int $required   Required level (3 = write, 2 = read)
-    *   @return boolean     True if user has access, False if not
-    */
-    public function XcheckAccess($required=2)
-    {
-        global $_USER, $_CONF_ADVT;
-
-        if ($this->isAdmin)
-            return true;    // Always has all access
-
-        switch ($required) {
-        case 3:
-            if ($this->uid == $_USER['uid'] &&
-               $_CONF_ADVT['usercanedit'] == 1) {
-                return true;    // Owner may edit
-            }
-            break;
-        case 2:
-            if ($this->uid == $_USER['uid'])
-                return true;    // Owner may view
-        }
-        return false;   // Has no access
-    }
-
-
-    /**
     *   Check if the current user can edit this ad.
     *
     *   @return boolean     True if access allows edit, False if not
@@ -938,7 +853,7 @@ class Ad
     {
         global $_CONF_ADVT, $_USER;
         if ($this->isAdmin ||
-            ($this->uid == $_USER['uid'] && 
+            ($this->uid == $_USER['uid'] &&
             $_CONF_ADVT['usercanedit'] == 1) ) {
             return true;
         }
@@ -956,6 +871,8 @@ class Ad
     */
     public function canView()
     {
+        global $_USER;
+
         if ($this->uid == $_USER['uid']) {
             return true;
         } else {
@@ -1039,6 +956,5 @@ class Ad
     }
 
 }   // class Ad
-
 
 ?>
