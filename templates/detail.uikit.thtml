@@ -17,7 +17,7 @@
     <p />
     {!if have_photo}
     <!-- BEGIN PhotoBlock -->
-    <a data-lightbox-type="image" data-uk-lightbox="{group\'a\'}" href="{disp_url}" target="_blank">
+    <a data-lightbox-type="image" data-uk-lightbox="{group:'ad'}" href="{disp_url}" target="_blank">
       <img src="{small_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" />
     </a>
     <br />

@@ -172,9 +172,11 @@ img.RandBlock {
 
 #adDetailWrapper .adImage {
     float: left;
-    margin-right: 10px;
-    max-width: 200px;
-    width: 200px;
+    margin-right: 20px;
+}
+
+#adDetailWrapper .adImage img {
+    padding-bottom: 5px;
 }
 
 #adDetailData {
