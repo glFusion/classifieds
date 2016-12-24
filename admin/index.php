@@ -49,36 +49,44 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
     if ($mode == 'ad') {
         $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editad',
-            'text' => $LANG_ADVT['mnu_submit']);
+            'text' => '<span class="adMenuActive">' . $LANG_ADVT['mnu_submit']
+                    . '</span>',
+            );
         $help_text = 'hlp_adlist';
     } else {
         $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?adminad',
-            'text' => $LANG_ADVT['mnu_adlist']);
+            'text' => $LANG_ADVT['mnu_adlist'],
+        );
     }
 
     if ($mode == 'type') {
         $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editadtype=0',
-            'text' => $LANG_ADVT['mnu_newtype']);
+            'text' => '<span class="adMenuActive">' . $LANG_ADVT['mnu_newtype']
+                    . '</span>',
+        );
         $help_text = 'hlp_adtypes';
     } else {
         $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type',
-            'text' => $LANG_ADVT['mnu_types']);
+            'text' => $LANG_ADVT['mnu_types'],
+        );
     }
 
     if ($mode == 'cat') {
         $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editcat=x&cat_id=0',
-            'text' => $LANG_ADVT['mnu_newcat']);
+            'text' => '<span class="adMenuActive">' .$LANG_ADVT['mnu_newcat']
+                    . '</span>',
+            );
         $help_text = 'hlp_cats';
     } else {
         $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=cat',
-            'text' => $LANG_ADVT['mnu_cats']);
+            'text' => $LANG_ADVT['mnu_cats'],
+        );
     }
-
 
     $menu_arr[] = array(
             'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=other',
@@ -93,7 +101,6 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
     $retval = ADMIN_createMenu($menu_arr, $LANG_ADVT[$help_text],
                     plugin_geticon_classifieds());
     return $retval;
-
 }
 
 
@@ -320,13 +327,6 @@ case 'admin':
                         $_CONF_ADVT['default_perm_cat'][1],
                         $_CONF_ADVT['default_perm_cat'][2],
                         $_CONF_ADVT['default_perm_cat'][3]),
-/*            'ad_list' => SEC_getGroupDropdown($_CONF_ADVT['defgrpad'], 3),
-            'ad_perms' => SEC_getPermissionsHTML(
-                        $_CONF_ADVT['default_permissions'][0],
-                        $_CONF_ADVT['default_permissions'][1],
-                        $_CONF_ADVT['default_permissions'][2],
-                        $_CONF_ADVT['default_permissions'][3]),
-*/
         ) );
         $T1->parse('output1', 'content');
         $content .= $T1->finish($T1->get_var('output1'));

@@ -266,3 +266,9 @@ div.adContactItem div.label {
     width: 30%;
     font-weight: bold;
 }
+
+.adMenuActive {
+    font-style: italic;
+    color: red;
+}
+
