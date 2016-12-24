@@ -57,7 +57,7 @@ $_ADVT_DEFAULT['catimgurl'] = $_CONF['site_url'] . '/classifieds/images/cat';
  */
 $_ADVT_DEFAULT['emailadmin']   = 2;
 
-// Email users upon acceptance or rejection?  Default: Never
+// Email users upon acceptance?  1=Yes, 0=No, Default No
 $_ADVT_DEFAULLT['emailusers'] = 0;
 
 $_ADVT_DEFAULT['hideuserfunction'] = 1;     // 1 = hide from User Functions menu
@@ -164,7 +164,7 @@ function plugin_initconfig_classifieds($group_id = 0)
         $c->add('emailadmin', $_ADVT_DEFAULT['emailadmin'], 
                 'select', 0, 0, 9, 90, true, $_CONF_ADVT['pi_name']);
         $c->add('emailusers', $_ADVT_DEFAULT['emailusers'], 
-                'select', 0, 0, 10, 95, true, $_CONF_ADVT['pi_name']);
+                'select', 0, 0, 3, 95, true, $_CONF_ADVT['pi_name']);
         $c->add('hideuserfunction', $_ADVT_DEFAULT['hideuserfunction'], 
                 'select', 0, 0, 3, 100, true, $_CONF_ADVT['pi_name']);
         $c->add('maxads_pg_exp', $_ADVT_DEFAULT['maxads_pg_exp'], 

@@ -5,7 +5,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -148,10 +148,10 @@ function classifieds_upgrade_0_2()
         ADD exp_sent TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
         DROP approved";
 
-    $sql[] = "ALTER TABLE {$_TABLES['ad_photo']} 
+    $sql[] = "ALTER TABLE {$_TABLES['ad_photo']}
         CHANGE ad_id ad_id VARCHAR(20) NOT NULL DEFAULT ''";
 
-    $sql[] = "ALTER TABLE {$_TABLES['ad_uinfo']} 
+    $sql[] = "ALTER TABLE {$_TABLES['ad_uinfo']}
         ADD notify_exp TINYINT(1) NOT NULL DEFAULT 0";
 
     // Create random ad block
@@ -164,14 +164,14 @@ function classifieds_upgrade_0_2()
             'Random Ad','all',0,0,
             'phpblock_classifieds_random',2,2,3,3,2,2)";
 
-    // Convert from numeric ID's to glFusion format sid's 
+    // Convert from numeric ID's to glFusion format sid's
     $adsql = "SELECT ad_id FROM {$_TABLES['ad_ads']}";
     $result = DB_query($adsql);
     if (!$result)
         return 1;
     while ($row = DB_fetchArray($result)) {
         $new_ad_id = COM_makesid();
-        $sql[] = "UPDATE 
+        $sql[] = "UPDATE
                 {$_TABLES['ad_ads']}
             SET
                 ad_id='$new_ad_id'
@@ -187,30 +187,30 @@ function classifieds_upgrade_0_2()
     }
 
     // Add the new classifieds.submit feature
-    DB_query("INSERT INTO 
-            {$_TABLES['features']} 
-            (ft_name, ft_descr) 
+    DB_query("INSERT INTO
+            {$_TABLES['features']}
+            (ft_name, ft_descr)
         VALUES (
             'classifieds.submit',
             'Bypass Classifieds Submission Queue'
     )",1);
     $feat_id = DB_insertId();
     $group_id = DB_getItem($_TABLES['vars'], 'value', "name='classifieds_gid'");
-    DB_query("INSERT INTO 
+    DB_query("INSERT INTO
             {$_TABLES['access']} (
-            acc_ft_id, 
+            acc_ft_id,
             acc_grp_id
         ) VALUES (
-            $feat_id, 
+            $feat_id,
             $group_id
     )");
 
     // Add new configuration items
     $c = config::get_instance();
     if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        $c->add('maxads_pg_exp', $_ADVT_DEFAULT['maxads_pg_exp'], 
+        $c->add('maxads_pg_exp', $_ADVT_DEFAULT['maxads_pg_exp'],
                 'text', 0, 0, 2, 120, true, $_CONF_ADVT['pi_name']);
-        $c->add('maxads_pg_list', $_ADVT_DEFAULT['maxads_pg_list'], 
+        $c->add('maxads_pg_list', $_ADVT_DEFAULT['maxads_pg_list'],
                 'text', 0, 0, 2, 130, true, $_CONF_ADVT['pi_name']);
         $c->add('max_total_duration', $_ADVT_DEFAULT['max_total_duration'],
                 'text', 0, 0, 2, 140, true, $_CONF_ADVT['pi_name']);
@@ -218,11 +218,11 @@ function classifieds_upgrade_0_2()
                 'text', 0, 0, 2, 150, true, $_CONF_ADVT['pi_name']);
         $c->add('exp_notify_days', $_ADVT_DEFAULT['exp_notify_days'],
                 'text', 0, 0, 2, 160, true, $_CONF_ADVT['pi_name']);
-        $c->add('loginrequired', $_ADVT_DEFAULT['loginrequired'], 
+        $c->add('loginrequired', $_ADVT_DEFAULT['loginrequired'],
                 'select', 0, 0, 3, 170, true, $_CONF_ADVT['pi_name']);
-        $c->add('usercanedit', $_ADVT_DEFAULT['usercanedit'], 
+        $c->add('usercanedit', $_ADVT_DEFAULT['usercanedit'],
                 'select', 0, 0, 3, 180, true, $_CONF_ADVT['pi_name']);
-        $c->add('use_gl_cron', $_ADVT_DEFAULT['use_gl_cron'], 
+        $c->add('use_gl_cron', $_ADVT_DEFAULT['use_gl_cron'],
                 'select', 0, 0, 3, 190, true, $_CONF_ADVT['pi_name']);
     }
 
@@ -240,7 +240,7 @@ function classifieds_upgrade_0_2_2()
     $ft_id = DB_getItem($_TABLES['features'], 'ft_id', "ft_name='".
         $_CONF_ADVT['pi_name'] . ".edit'");
     if ($ft_id > 0) {
-        DB_delete($_TABLES['access'], 
+        DB_delete($_TABLES['access'],
                 array('acc_ft_id', 'acc_grp_id'),
                 array($ft_id, 13));
     }
@@ -270,7 +270,7 @@ function classifieds_upgrade_0_2_3()
                 'select', 0, 4, 0, 90, true, $_CONF_ADVT['pi_name']);
 
         // Add option to email users upon acceptance/rejection
-        $c->add('emailusers', $_ADVT_DEFAULT['emailusers'], 
+        $c->add('emailusers', $_ADVT_DEFAULT['emailusers'],
                 'select', 0, 0, 10, 95, true, $_CONF_ADVT['pi_name']);
 
         // Add new fieldset for category defaults
@@ -315,12 +315,12 @@ function classifieds_upgrade_0_3()
 
     }
 
-    $sql[] = "ALTER TABLE {$_TABLES['ad_category']} 
+    $sql[] = "ALTER TABLE {$_TABLES['ad_category']}
         CHANGE cat_name cat_name varchar(40)";
 
-    $sql[] = "ALTER TABLE {$_TABLES['ad_category']} 
+    $sql[] = "ALTER TABLE {$_TABLES['ad_category']}
         ADD description TEXT AFTER cat_name,
-        ADD fgcolor varchar(10), 
+        ADD fgcolor varchar(10),
         ADD bgcolor varchar(10)";
 
     return classifieds_do_upgrade_sql('0.3', $sql);
@@ -421,14 +421,14 @@ function classifieds_upgrade_1_0_2()
         if ($_CONF_ADVT['leftblocks'] == 1) $displayblocks += 1;
         if ($_CONF_ADVT['rightblocks'] == 1) $displayblocks += 2;
 
-        $c->del('leftblocks','classifieds');
-        $c->del('rightblocks','classifieds');
+        $c->del('leftblocks', $_CONF_ADVT['pi_name']);
+        $c->del('rightblocks', $_CONF_ADVT['pi_name']);
         $c->add('displayblocks', $displayblocks,
                 'select', 0, 0, 13, 230, true, $_CONF_ADVT['pi_name']);
     }
 
     // Alter What's New config to not show an empty section, if desired
-    $sql[] = "UPDATE {$_TABLES['conf_values']} 
+    $sql[] = "UPDATE {$_TABLES['conf_values']}
             SET selectionArray=14
             WHERE name='hidenewads' AND group_name='{$_CONF_ADVT['pi_name']}'";
 
@@ -442,7 +442,7 @@ function classifieds_upgrade_1_0_4()
 {
     global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
 
-    $sql = array("ALTER TABLE {$_TABLES['ad_uinfo']} ADD notify_comment 
+    $sql = array("ALTER TABLE {$_TABLES['ad_uinfo']} ADD notify_comment
             tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER notify_exp,
             DROP ebayid",
         "ALTER TABLE {$_TABLES['ad_submission']}
@@ -459,7 +459,7 @@ function classifieds_upgrade_1_0_4()
         $c->add('helpurl', $_ADVT_DEFAULT['helpurl'],
                 'text', 0, 0, 0, 240, true, $_CONF_ADVT['pi_name']);
         $c->del('ebaylink', $_CONF_ADVT['pi_name']);
-        $c->add('disp_fullname', $_ADVT_DEFAULT['disp_fullname'], 
+        $c->add('disp_fullname', $_ADVT_DEFAULT['disp_fullname'],
                 'select', 0, 0, 3, 175, true, $_CONF_ADVT['pi_name']);
     }
 
@@ -482,7 +482,7 @@ function classifieds_upgrade_1_1_0()
     $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
     $new_imgpath = CLASSIFIEDS_IMGPATH  . '/user';
     $new_catpath = CLASSIFIEDS_IMGPATH . '/cat';
-    $mv_userimages = isset($_CONF_ADVT['image_dir']) && 
+    $mv_userimages = isset($_CONF_ADVT['image_dir']) &&
             $_CONF_ADVT['image_dir'] != $new_imgpath ? true : false;
     $mv_catimages = isset($_CONF_ADVT['catimgpath']) &&
             $_CONF_ADVT['catimgpath'] != $new_catpath ? true : false;
@@ -529,15 +529,15 @@ function classifieds_upgrade_1_1_0()
     if ($c->group_exists($_CONF_ADVT['pi_name'])) {
         COM_errorLog("Adding and removing configuration items");
         $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
-                'text', 0, 0, 0, 25, true, 'classifieds');
-        $c->del('catimgpath','classifieds');
-        $c->del('catimgurl','classifieds');
-        $c->del('image_dir','classifieds');
-        $c->del('image_url','classifieds');
-        $c->del('fs_paths','classifieds');
-        $c->del('helpurl','classifieds');
-        $c->del('fs_permissions', 'classifieds');
-        $c->del('default_permissions', 'classifieds');
+                'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
+        $c->del('catimgpath', $_CONF_ADVT['pi_name']);
+        $c->del('catimgurl', $_CONF_ADVT['pi_name']);
+        $c->del('image_dir', $_CONF_ADVT['pi_name']);
+        $c->del('image_url', $_CONF_ADVT['pi_name']);
+        $c->del('fs_paths', $_CONF_ADVT['pi_name']);
+        $c->del('helpurl', $_CONF_ADVT['pi_name']);
+        $c->del('fs_permissions', $_CONF_ADVT['pi_name']);
+        $c->del('default_permissions', $_CONF_ADVT['pi_name']);
     }
 
     // Make sure there's a user information record created for each user
@@ -560,6 +560,9 @@ function classifieds_upgrade_1_1_0()
                 VALUES $val_str";
     }
 
+    // Get new values for conf_values table
+    $emailusers_default = 'i:0;'
+    $emailusers_value = $_CONF_ADVT['emailusers'] == 0 ? 'i:0;' : 'i:1;';
     $sql = array(
         "UPDATE {$_TABLES['ad_ads']} SET uid = owner_id",
         "ALTER TABLE {$_TABLES['ad_ads']}
@@ -578,10 +581,13 @@ function classifieds_upgrade_1_1_0()
             ADD PRIMARY KEY(cat_id, uid)",
         "ALTER TABLE {$_TABLES['ad_uinfo']}
             CHANGE notify_exp notify_exp tinyint(1) UNSIGNED DEFAULT 1",
+        "UPDATE {$_TABLES['conf_values']} SET
+            selectionArray = 3, default_value = '$emailusers_default',
+            value = '$emailusers_value'
+            WHERE name='emailusers' AND group_name = '{$_CONF_ADVT['pi_name']}'",
         $uinfo_sql,
     );
     return classifieds_do_upgrade_sql('1.1.0', $sql);
 }
 
- 
 ?>
