@@ -296,7 +296,7 @@ function classifieds_upgrade_0_3()
     $filepath = $_CONF['path'].'/plugins/'.$_CONF_ADVT['pi_name'];
     // Back up the current config.php
     if (file_exists($filepath.'/config.php')) {
-        if (!rename($filepath.'/config.php', $filepath.'/config.03.php')) {
+        if (!@rename($filepath.'/config.php', $filepath.'/config.03.php')) {
             COM_errorLog("v03 upgrade: Failed to back up config.php");
             return "Failed to rename old config.php.";
         }
@@ -474,7 +474,7 @@ function classifieds_upgrade_1_0_4()
 */
 function classifieds_upgrade_1_1_0()
 {
-    global $_ADVT_DEFAULT, $_CONF_ADVT;
+    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
 
     // Add new configuration items
     $c = config::get_instance();
@@ -488,17 +488,19 @@ function classifieds_upgrade_1_1_0()
             $_CONF_ADVT['catimgpath'] != $new_catpath ? true : false;
 
     if ($mv_catimages) {
-        @mkdir($new_catpath, true);
+        @mkdir($new_catpath, 755, true);
         if (!is_dir($new_catpath)) {
             COM_errorLog("Error creating new dir $new_catpath");
             return 1;
         }
-       $files = glob($_CONF_ADVT['catimgpath'] . '/*');
+        $files = glob($_CONF_ADVT['catimgpath'] . '/*');
         if ($files) {
             foreach ($files as $file) {
                 if (is_file($file)) {
                     $parts = pathinfo($file);
-                    rename($file, $new_catpath . '/' . $parts['basename']);
+                    if ($parts['basename'] != 'index.html') {
+                        @rename($file, $new_catpath . '/' . $parts['basename']);
+                    }
                 }
             }
         }
@@ -506,7 +508,7 @@ function classifieds_upgrade_1_1_0()
 
     // Move ad images to new location
     if ($mv_userimages) {
-        @mkdir($new_imgpath, true);
+        @mkdir($new_imgpath, 755, true);
         if (!is_dir($new_imgpath)) {
             COM_errorLog("Error creating new dir $new_imgpath");
             return 1;
@@ -516,7 +518,9 @@ function classifieds_upgrade_1_1_0()
             foreach ($files as $file) {
                 if (is_file($file)) {
                     $parts = pathinfo($file);
-                    rename($file, CLASSIFIEDS_IMGPATH . '/user/' . $parts['basename']);
+                    if ($parts['basename'] != 'index.html') {
+                        @rename($file, $new_imgpath . '/' . $parts['basename']);
+                    }
                 }
             }
         }
@@ -561,7 +565,7 @@ function classifieds_upgrade_1_1_0()
     }
 
     // Get new values for conf_values table
-    $emailusers_default = 'i:0;'
+    $emailusers_default = 'i:0;';
     $emailusers_value = $_CONF_ADVT['emailusers'] == 0 ? 'i:0;' : 'i:1;';
     $sql = array(
         "UPDATE {$_TABLES['ad_ads']} SET uid = owner_id",
