@@ -877,7 +877,7 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
     // Notify subscribers.
     USES_classifieds_class_notify();
     USES_classifieds_class_ad();
-    $Ad = new Ad($id):
+    $Ad = new Ad($id);
     adNotify::Approval($Ad, true);
     adNotify::Subscribers($Ad);
     return '';

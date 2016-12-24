@@ -3,10 +3,10 @@
 *   Class to manage ad types
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    0.3.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    1.1.0
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -28,7 +28,7 @@ class adType
 
     /**
     *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   Reads in the specified class, if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
     *   @param integer $id Optional type ID
@@ -101,7 +101,7 @@ class adType
             return;
         }
 
-        $result = DB_query("SELECT * from {$_TABLES['ad_types']} 
+        $result = DB_query("SELECT * from {$_TABLES['ad_types']}
                             WHERE id=$id");
         $row = DB_fetchArray($result, false);
         $this->SetVars($row);
@@ -209,22 +209,20 @@ class adType
         return $display;
     }   // function showForm()
 
- 
+
     /**
     *   Creates a dropdown selection for the specified list, with the
     *   record corresponding to $sel selected.
     *
     *   @param  integer $sel    Optional item ID to select
-    *   @param  string  $sql    Optional SQL query
     *   @return string      HTML for selection dropdown
     */
-    public function makeSelection($sel=0, $sql='')
+    public function makeSelection($sel=0)
     {
         global $_TABLES;
 
         return COM_optionList($_TABLES['ad_types'],
                 'id,descrip', $sel, 1, 'enabled=1');
-
     }   // function makeSelection()
 
 
@@ -297,6 +295,5 @@ class adType
     }
 
 }   // class adType
-
 
 ?>

@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2012 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.0.5
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -228,7 +228,7 @@ class adCategory
         $result = DB_query($sql);
         if (!$result)
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-        else 
+        else
             return '';      // no actual return if this function works ok
     }
 
@@ -265,7 +265,7 @@ class adCategory
 
         $id = (int)$id;
         // find all sub-categories of this one and delete them.
-        $sql = "SELECT cat_id FROM {$_TABLES['ad_category']} 
+        $sql = "SELECT cat_id FROM {$_TABLES['ad_category']}
                 WHERE papa_id=$id";
         $result = DB_query($sql);
 
@@ -277,7 +277,7 @@ class adCategory
         }
 
         // now delete any ads associated with this category
-        $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']} 
+        $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']}
              WHERE cat_id=$id";
         $result = DB_query($sql);
 
@@ -397,7 +397,7 @@ class adCategory
     *   @return string      HTML for edit form
     */
     public function Edit($cat_id = 0)
-    {    
+    {
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT, $LANG_ACCESS, $_USER;
 
         $cat_id = (int)$cat_id;
@@ -542,21 +542,21 @@ class adCategory
             $breadcrumbs[$id] = array(true => '', false => '');
         }
 
-        $sql = "SELECT cat_name, cat_id, papa_id 
-                FROM {$_TABLES['ad_category']} 
+        $sql = "SELECT cat_name, cat_id, papa_id
+                FROM {$_TABLES['ad_category']}
                 WHERE cat_id=$id";
         $result = DB_query($sql);
-        if (!$result) 
+        if (!$result)
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
 
         $location = '';
         $row = DB_fetchArray($result, false);
         if ($row['papa_id'] == 0) {
             if ($showlink) {
-                $location .= '<a href="'. CLASSIFIEDS_makeURL('home', 0) . 
+                $location .= '<a href="'. CLASSIFIEDS_makeURL('home', 0) .
                         '">' . $LANG_ADVT['home'] . '</a> :: ';
-                $location .= '<a href="'. 
-                    CLASSIFIEDS_makeURL('home', $row['cat_id']) . '">' . 
+                $location .= '<a href="'.
+                    CLASSIFIEDS_makeURL('home', $row['cat_id']) . '">' .
                     $row['cat_name'] . '</a>';
             } else {
                 $location .= $LANG_ADVT['home'] . ' :: ';
@@ -605,11 +605,11 @@ class adCategory
         }
 
         $sql = "SELECT cat_name, cat_id, fgcolor, bgcolor, papa_id
-                FROM {$_TABLES['ad_category']} 
+                FROM {$_TABLES['ad_category']}
                 WHERE papa_id=$id";
         //echo $sql;die;
         $result = DB_query($sql);
-        if (!$result) 
+        if (!$result)
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
 
         while ($row = DB_fetchArray($result, false)) {
@@ -736,7 +736,7 @@ class adCategory
 
     /**
     *   When no category is given, show a table of all categories
-    *   along with the count of ads for each.  
+    *   along with the count of ads for each.
     *   Returns the results from the category
     *   list function, chosen based on the display mode
     *   @return string      HTML for category listing page
@@ -780,7 +780,7 @@ class adCategory
                 'cat_id,uid',
                 "{$this->cat_id},{$_USER['uid']}");
         } else {
-            DB_delete($_TABLES['ad_notice'], 
+            DB_delete($_TABLES['ad_notice'],
                 array('cat_id', 'uid'),
                 array($this->cat_id, $_USER['uid']));
         }
@@ -789,36 +789,13 @@ class adCategory
 
 
     /**
-    *   Unscribe the current user from a specified category's notifications.
-    *
-    *   @param  integer $cat    Category ID to unsubscribe
-    *   @return boolean     True on success, False on failure
-    */
-    /*public function UnSubscribe()
-    {
-        global $_USER, $_TABLES;
-
-        if ($this->cat_id == 0) return false;
-
-        // only registered users can subscribe
-        if (COM_isAnonUser())
-            return false;
-
-        DB_delete($_TABLES['ad_notice'],
-            array('cat_id', 'uid'),
-            array($this->cat_id, $_USER['uid']));
-        return (DB_error()) ? false : true;
-    }   // function UnSubscribe()
-    */
-
-    /**
     *   Send an email to all subscribers for the ad's category, or any
     *   parent category.
     *
     *   Email is only sent if the ad is approved and a notification
     *   hasn't already been sent.
     *
-    *   @param int $ad_id  ID number of ad 
+    *   @param int $ad_id  ID number of ad
     */
     public function Notify($ad_id)
     {
@@ -839,8 +816,8 @@ class adCategory
 
         // Collect all the parent categories into a comma-separated list, and
         // find all the subscribers in any of the categories
-        $catlist = CLASSIFIEDS_ParentCatList($cat);
-        $sql = "SELECT uid FROM {$_TABLES['ad_notice']} 
+        $catlist = self::ParentList($cat);
+        $sql = "SELECT uid FROM {$_TABLES['ad_notice']}
                 WHERE cat_id IN ($catlist)";
         $notice = DB_query($sql, 1);
         if (!$notice)
@@ -849,7 +826,7 @@ class adCategory
         // send the notification to subscribers
         while ($row = DB_fetchArray($notice)) {
             $result = DB_query("SELECT username, email, language
-                FROM {$_TABLES['users']} 
+                FROM {$_TABLES['users']}
                 WHERE uid='{$row['uid']}'");
             if (DB_numRows($result) == 0)
                 continue;
@@ -857,7 +834,7 @@ class adCategory
             $name = DB_fetchArray($result);
 
             // Select the template for the message
-            $template_dir = CLASSIFIEDS_PI_PATH . 
+            $template_dir = CLASSIFIEDS_PI_PATH .
                     '/templates/notify/' . $name['language'];
             if (!file_exists($template_dir . '/subscriber.thtml')) {
                 $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
@@ -866,7 +843,7 @@ class adCategory
             // Load the recipient's language.  $LANG_ADVT is *not* global here
             // to avoid overwriting the global language strings.
             $LANG = plugin_loadlanguage_classifieds($name['language']);
-    
+
             $T = new Template($template_dir);
             $T->set_file('message', 'subscriber.thtml');
 
@@ -937,8 +914,8 @@ class adCategory
         $str .= $id;
 
         // Get the papa_id of the current id
-        $sql = "SELECT cat_id, papa_id 
-            FROM {$_TABLES['ad_category']} 
+        $sql = "SELECT cat_id, papa_id
+            FROM {$_TABLES['ad_category']}
             WHERE cat_id=$id";
         $result = DB_query($sql);
         if (!$result) return $str;
@@ -946,7 +923,7 @@ class adCategory
         $row = DB_fetchArray($result);
         // If we found a parent category, call ourself to add it
         if ((int)$row['papa_id'] > 0) {
-            $str = CLASSIFIEDS_ParentCatList($row['papa_id'], $str.',');
+            $str = self::ParentList($row['papa_id'], $str.',');
         }
 
         return trim($str, ',');
