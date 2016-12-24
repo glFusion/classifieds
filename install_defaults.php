@@ -30,7 +30,7 @@ $_ADVT_DEFAULT = array();
 $_ADVT_DEFAULT['img_max_height'] = 600;
 $_ADVT_DEFAULT['img_max_width'] = 800;
 // Max image width for ad detail page, typically larger than thumbnail
-$_CONF_ADVT['detail_img_width'] = 200;
+$_ADVT_DEFAULT['detail_img_width'] = 150;
 $_ADVT_DEFAULT['random_blk_width'] = 100;   // Max width for random ad block
 $_ADVT_DEFAULT['thumb_max_size'] = 100; // Max dimension for thumbnails
 $_ADVT_DEFAULT['imagecount']    = 3;    // max number of user images

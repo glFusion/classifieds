@@ -180,6 +180,7 @@ img.RandBlock {
 #adDetailData {
     float: left;
     min-width: 50%;
+    margin-left: 20px;
 }
 
 #adDetailData img {
