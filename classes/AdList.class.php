@@ -258,7 +258,7 @@ class AdListCat extends AdList
         $T->set_var('catimg_url', adImage::thumbUrl($this->Cat->image));
 
         // Set the breadcrumb navigation
-        $T->set_var('breadcrumbs', adCategory::BreadCrumbs($this->cat_id), true);
+        $T->set_var('breadcrumbs', $this->Cat->BreadCrumbs(true));
 
         // if non-anonymous, allow the user to subscribe to this category
         if (!COM_isAnonUser()) {

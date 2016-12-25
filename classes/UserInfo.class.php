@@ -252,8 +252,11 @@ class adUserInfo
                         'checked="checked"' : '',
         ) );
 
-        $sql = "SELECT cat_id FROM {$_TABLES['ad_notice']} 
-                WHERE uid='{$_USER['uid']}'";
+        $sql = "SELECT c.cat_id, c.cat_name, c.parent_map
+                FROM {$_TABLES['ad_notice']} n
+                LEFT JOIN {$_TABLES['ad_category']} c
+                    ON c.cat_id = n.cat_id
+                WHERE n.uid='{$_USER['uid']}'";
         $notice = DB_query($sql);
         if (!$notice) 
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
@@ -261,11 +264,18 @@ class adUserInfo
         if (0 == DB_numRows($notice)) {
             $T->set_var('no_autonotify_list', 'true');
         } else {
-            while ($row = DB_fetchArray($notice)) {
+            while ($row = DB_fetchArray($notice, false)) {
+                // Get parent map for categories. Update the category
+                // if its map isn't set
+                if ($row['parent_map'] === NULL) {
+                    $Cat = new adCategory($row['cat_id']);
+                    $Cat->Save();
+                    $row['parent_map'] = $Cat->parent_map;
+                }
                 $T->set_block('accountinfo', 'AutoNotifyListBlk', 'NotifyList');
                 $T->set_var(array(
                     'cat_id'    => $row['cat_id'],
-                    'cat_name'  => adCategory::BreadCrumbs($row['cat_id'], false),
+                    'cat_name'  => adCategory::showBreadCrumbs($row['parent_map'], false),
                     'pi_url'    => $base_url,
                 ) );
                 $T->parse('NotifyList', 'AutoNotifyListBlk', true);

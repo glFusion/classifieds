@@ -332,7 +332,7 @@ class Ad
     {
         if ($this->subject == '' ||
             $this->descript == '' ||
-             $this->catid == '') {
+             $this->cat_id == '') {
             return false;
         }
         return true;
@@ -533,8 +533,8 @@ class Ad
         // Set up the "add days" form if this user is the owner
         // or an admin
         if ($this->canEdit()) {
-            // How many days has the ad run?
-            $max_add_days = self::calcMaxAddDays(($this->exp_date - $this->add_date) / 86400);
+            // How many days can be added to the ad.
+            $max_add_days = $this->calcMaxAddDays();
             if ($max_add_days > 0) {
                 $T->set_var('max_add_days', $max_add_days);
             }
@@ -552,7 +552,7 @@ class Ad
             'base_url'      => $base_url,
             'edit_link'     => $edit_link,
             'del_link'      => $del_link,
-            'curr_loc'      => adCategory::BreadCrumbs($this->cat_id, true),
+            'curr_loc'      => $this->Cat->BreadCrumbs(true),
             'subject'       => $subject,
             'add_date'      => $add_date->format($_CONF['shortdate'], true),
             'exp_date'      => $exp_date->format($_CONF['shortdate'], true),
@@ -753,19 +753,17 @@ class Ad
     *   Considers the configured maximum runtime and the time the ad
     *   has already run.
     *
-    *   @param  int     $rundays    Number of days ad is already scheduled to run
-    *   @return int                 Max number of days that can be added
+    *   @return integer     Max number of days that can be added
     */
-    private static function calcMaxAddDays($rundays)
+    public function calcMaxAddDays()
     {
         global $_CONF_ADVT;
 
         // How many days has the ad run?
-        $run_days = (int)$rundays;
+        $run_days = ($this->exp_date - $this->add_date)/86400;
         if ($run_days < 0) $rundays = 0;
 
         $max_add_days = intval($_CONF_ADVT['max_total_duration']);
-
         if ($max_add_days < $run_days)
             return 0;
         else
@@ -817,21 +815,21 @@ class Ad
     *   Updates the ad with a new expiration date.  $days (in seconds)
     *   is added to the original expiration date.
     *
-    *   @param integer  $id     ID number of ad to update
-    *   @param integer  $days   Number of days to add
+    *   @param  integer  $days   Number of days to add
+    *   @return integer     New maximum
     */
     public function addDays($days = 0)
     {
         global $_USER, $_CONF, $_CONF_ADVT, $_TABLES;
 
         $days = (int)$days;
-        if ($days == 0) return;
+	$max_days = $this->calcMaxAddDays();
 
-        if (!$this->canEdit()) return;
+        if ($days == 0) return $max_days;
+        if (!$this->canEdit()) return $max_days;
 
-        $add_days = min($this->calcMaxAddDays(
-            ($this->exp_date - $this->add_date)/86400), $days);
-        if ($add_days <= 0) return;
+        $add_days = min($max_days, $days);
+        if ($add_days <= 0) return 0;
 
         $new_exp_date = $this->exp_date + ($add_days * 86400);
 
@@ -841,6 +839,7 @@ class Ad
                 exp_date=$new_exp_date,
                 exp_sent=0
             WHERE ad_id='$this->ad_id'");
+        return $max_days - $add_days;
     }
 
 

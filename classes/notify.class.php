@@ -73,13 +73,13 @@ class adNotify
 
             $ad_type = adType::GetDescription($Ad->ad_type);
             $T->set_var(array(
-                'cat'   => adCategory::BreadCrumbs($Ad->cat_id),
-                'subject' => $Ad->subject,
+                'cat'       => $Ad->Cat->BreadCrumbs(),
+                'subject'   => $Ad->subject,
                 'description' => $Ad->descript,
-                'username' => COM_getDisplayName($row['uid']),
-                'ad_url' => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=$ad_id",
-                'price' => $Ad->price,
-                'ad_type' => $Ad->ad_type,
+                'username'  => COM_getDisplayName($row['uid']),
+                'ad_url'    => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=$ad_id",
+                'price'     => $Ad->price,
+                'ad_type'   => $Ad->ad_type,
             ), false);
             $T->parse('output','message');
             $message = $T->finish($T->get_var('output'));
@@ -297,8 +297,8 @@ class adNotify
         $T = new Template($template_dir);
         $T->set_file('message', 'admin.thtml');
         $T->set_var(array(
-            'cat'   => adCategory::BreadCrumbs($Ad->catid),
-            'subject'  => $Ad->subject,
+            'cat'       => $Ad->Cat->BreadCrumbs(),
+            'subject'   => $Ad->subject,
             'description' => $Ad->descript,
             'username'  => COM_getDisplayName(2),
             'price'     => $Ad->price,

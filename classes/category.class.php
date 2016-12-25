@@ -72,6 +72,7 @@ class adCategory
         case 'keywords':
         case 'fgcolor':
         case 'bgcolor':
+        case 'parent_map':
             $this->properties[$key] = $value;
             break;
         }
@@ -121,6 +122,8 @@ class adCategory
             $this->perm_group = $A['perm_group'];
             $this->perm_members = $A['perm_members'];
             $this->perm_anon = $A['perm_anon'];
+            $this->parent_map = @json_decode($A['parent_map'], true);
+            if ($this->parent_map === NULL) $this->parent_map = array();
         } else {        // perm values are in arrays from form
             list($perm_owner,$perm_group,$perm_members,$perm_anon) =
                 SEC_getPermissionValues($A['perm_owner'] ,$A['perm_group'],
@@ -129,6 +132,7 @@ class adCategory
             $this->perm_group = $perm_group;
             $this->perm_members = $perm_members;
             $this->perm_anon = $perm_anon;
+            $this->parent_map = array();
         }
     }
 
@@ -197,6 +201,7 @@ class adCategory
             }
         }
 
+        $parent_map = DB_escapeString(json_encode($this->MakeBreadcrumbs()));
         if ($this->isNew) {
             $sql1 = "INSERT INTO {$_TABLES['ad_category']} SET ";
             $sql3 = '';
@@ -217,7 +222,8 @@ class adCategory
             perm_members = {$this->perm_members},
             perm_anon = {$this->perm_anon},
             fgcolor = '{$this->fgcolor}',
-            bgcolor = '{$this->bgcolor}'";
+            bgcolor = '{$this->bgcolor}',
+            parent_map = '$parent_map'";
         $sql = $sql1 . $sql2 . $sql3;
 
         // Propagate the permissions, if requested
@@ -422,7 +428,6 @@ class adCategory
         }
 
         $T->set_var(array(
-            'location'  => self::BreadCrumbs($this->cat_id, true),
             'catname'   => $this->cat_name,
             'keywords'  => $this->keywords,
             'description' => $this->description,
@@ -521,59 +526,88 @@ class adCategory
 
 
     /**
-    *   Calls itself recursively to create the breadcrumb links
+    *   Get the breadcrumbs for a catetory
+    *   Static function that can be passed a parent map or NULL
+    *   if a map hasn't been created yet.
     *
-    *   @param  integer $id         Current Category ID
-    *   @param  boolean $showlink   Link to the current category?
+    *   @param  mixed   $map    Parent map array or NULL
+    *   @param  boolean $showlink   True to add links, False for text only
+    *   @return string          Breadcrumbs
+    */
+    public static function showBreadCrumbs($map, $showlink=true)
+    {
+        if (!is_array($map)) {
+            $map = json_decode($map, true);
+        }
+        if (!$map) $map = array();
+        $bc = array_reverse($map);
+        $locations = array();
+        foreach ($bc as $id => $parent) {
+            if ($showlink) {
+                $locations[] = '<a href="' .
+                    CLASSIFIEDS_makeURL('home', $parent['cat_id']) .
+                    '">' . $parent['cat_name'] . '</a>';
+            } else {
+                // just get the names, no links, e.g. for notifications
+                $locations[] = $parent['cat_name'];
+            }
+        }
+        return implode(' :: ', $locations);
+    }
+
+
+    /**
+    *   Creates the breadcrumb string from the parent mapping.
+    *   Acts on the current category object
+    *
+    *   @uses   adCategory::showBreadCrumbs()
+    *   @param  boolean $showlink   Link to the categories?
     *   @return string              HTML for breadcrumbs
     */
-    public static function BreadCrumbs($id=0, $showlink=true)
+    public function BreadCrumbs($showlink=true)
+    {
+        // There should always be at least two elements in the map.
+        // The current category and "Home"
+        if ($this->parent_map == array()) {
+            $this->Save();      // Save will call MakeBreadcrumbs() and save
+        }
+        return self::showBreadCrumbs($this->parent_map, $showlink);
+    }
+
+
+    /**
+    *   Creates the parent mapping for breadcrumbs when the category is saved
+    *
+    *   @return array       Array of parent category IDs and names
+    */
+    public function MakeBreadcrumbs()
     {
         global $_TABLES, $LANG_ADVT;
-        static $breadcrumbs = array();
 
-        $id = (int)$id;
-        if ($id == 0)
-            return '';
+        $breadcrumbs = array();
 
-        if (isset($breadcrumbs[$id][$showlink])) {
-            return $breadcrumbs[$id][$showlink];
-        } else {
-            $breadcrumbs[$id] = array(true => '', false => '');
+        $breadcrumbs[] = array(
+            'cat_id' => $this->cat_id,
+            'cat_name' => $this->cat_name,
+        );
+        $papa_id = $this->papa_id;
+        while ($papa_id > 0) {
+            $sql = "SELECT cat_id, cat_name, papa_id
+                    FROM {$_TABLES['ad_category']}
+                    WHERE cat_id = $papa_id";
+            $res = DB_query($sql);
+            $A = DB_fetchArray($res, false);
+            $breadcrumbs[] = array(
+                'cat_id' => $A['cat_id'],
+                'cat_name' => $A['cat_name'],
+            );
+            $papa_id = $A['papa_id'];
         }
-
-        $sql = "SELECT cat_name, cat_id, papa_id
-                FROM {$_TABLES['ad_category']}
-                WHERE cat_id=$id";
-        $result = DB_query($sql);
-        if (!$result)
-            return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-
-        $location = '';
-        $row = DB_fetchArray($result, false);
-        if ($row['papa_id'] == 0) {
-            if ($showlink) {
-                $location .= '<a href="'. CLASSIFIEDS_makeURL('home', 0) .
-                        '">' . $LANG_ADVT['home'] . '</a> :: ';
-                $location .= '<a href="'.
-                    CLASSIFIEDS_makeURL('home', $row['cat_id']) . '">' .
-                    $row['cat_name'] . '</a>';
-            } else {
-                $location .= $LANG_ADVT['home'] . ' :: ';
-                $location .= $row['cat_name'];
-            }
-        } else {
-            $location .= self::BreadCrumbs($row['papa_id'], $showlink);
-            if ($showlink) {
-                $location .= ' :: <a href="' .
-                        CLASSIFIEDS_makeURL('home', $row['cat_id']). '">' .
-                        $row['cat_name'] . '</a>';
-            } else {
-                $location .= " :: {$row['cat_name']}";
-            }
-        }
-        $breadcrumbs[$id][$showlink] = $location;
-        return $breadcrumbs[$id][$showlink];
+        $breadcrumbs[] = array(
+            'cat_id' => 0,
+            'cat_name' => $LANG_ADVT['home'],
+        );
+        return $breadcrumbs;
     }
 
 
@@ -849,7 +883,7 @@ class adCategory
 
             $ad_type = adType::GetDescription($Ad->ad_type);
             $T->set_var(array(
-                'cat'   => self::BreadCrumbs($cat),
+                'cat'   => $Ad->Cat->BreadCrumbs(),
                 'subject' => $Ad->subject,
                 'description' => $Ad->descript,
                 'username' => COM_getDisplayName($row['uid']),

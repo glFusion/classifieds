@@ -589,6 +589,8 @@ function classifieds_upgrade_1_1_0()
             selectionArray = 3, default_value = '$emailusers_default',
             value = '$emailusers_value'
             WHERE name='emailusers' AND group_name = '{$_CONF_ADVT['pi_name']}'",
+        "ALTER TABLE {$_TABLES['ad_category']}
+            ADD parent_map TEXT DEFAULT NULL AFTER bgcolor",
         $uinfo_sql,
     );
     return classifieds_do_upgrade_sql('1.1.0', $sql);

@@ -65,7 +65,7 @@
         <ul>
         <!-- BEGIN AutoNotifyListBlk -->
         <li>
-          <a href="{pi_url}/index.php?mode=home&cat_id={cat_id}">{cat_name}</a>
+          <a href="{pi_url}/index.php?mode=home&id={cat_id}">{cat_name}</a>
           <a href="{pi_url}/index.php?mode=del_notice&id={cat_id}&page=account">
             <img src="{layout_url}/images/admin/delete.png" align="top" 
               title="{$LANG_ADVT['remove']}"
