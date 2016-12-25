@@ -35,6 +35,16 @@ case 'catunsub':
         'newstate' => $C->Subscribe(false) ? 0 : 1,
     );
     break;
+
+case 'moredays':
+    if (!isset($_GET['id'])) exit;
+    USES_classifieds_class_ad();
+    $Ad = new Ad($_GET['id']);
+    if ($Ad->isNew) exit;
+    $result = array(
+        'maxdays' => $Ad->addDays($_GET['days']),
+    );
+    break;
 }
 
 header('Content-Type: application/json; charset=utf-8');

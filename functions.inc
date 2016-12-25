@@ -713,6 +713,7 @@ function plugin_getheaderjs_classifieds()
         "$js_dir/picker.js",
         "$js_dir/toggleEnabled.js",
         "$js_dir/catsub.js",
+        "$js_dir/moredays.js",
     );
     return $files;
 }
