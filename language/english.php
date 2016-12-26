@@ -231,6 +231,7 @@ $LANG_ADVT = array (
 'fieldset2' => 'Options',
 'comments_enabled' => 'Comments Enabled',
 'comment_notification' => 'A new comment has been posted to your ad for %s.  Click the link below to view and respond to it.',
+'comment_notif_subject' => 'New comment notification',
 'notify_cmt' => 'Notify me when comments are posted to my ads?',
 'owner' => 'Owner',
 'purged_ads' => 'Purged %d expired ads: ',

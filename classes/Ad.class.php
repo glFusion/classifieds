@@ -656,8 +656,6 @@ class Ad
             $T->set_var('usercomments',
                 CMT_userComments($this->ad_id, $this->subject, 'classifieds', '',
                     '', 0, 1, false, false, $this->comments_enabled));
-            //$T->set_var('usercomments', CMT_userComments($ad_id, $subject,
-            //        'classifieds'));
         }
 
         $T->parse('output','detail');
@@ -796,6 +794,18 @@ class Ad
         return $retval;
 
     }   // function userDropdown()
+
+
+    /**
+    *   Update the comment counter
+    */
+    public function updateComments()
+    {
+        $sql = "UPDATE {$this->table}
+                SET comments = comments + 1
+                WHERE ad_id='" . $this->ad_id . "'";
+        DB_query($sql, 1);
+    }
 
 
     /**

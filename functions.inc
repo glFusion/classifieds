@@ -144,7 +144,9 @@ function plugin_commentsupport_classifieds()
 
 
 /**
-*   Save a comment
+*   Save a comment.
+*   Saves the comment, updates the comment counter in the ad record,
+*   and notifies the ad owner that a new comment has been posted.
 *
 *   @param   string  $title  comment title
 *   @param   string  $comment comment text
@@ -162,10 +164,14 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     if (!plugin_commentsupport_classifieds())
         return;
 
+    USES_classifieds_class_ad();
+    USES_classifieds_class_notify();
+
     $title = strip_tags($title);
     $pid = COM_applyFilter($pid, true);
     $postmode = COM_applyFilter($postmode);
     $db_id = DB_escapeString($id);      // Make a DB-safe id
+    $Ad = new Ad($id);
 
     $ret = CMT_saveComment($title, $comment, $id, $pid,
             'classifieds', $postmode);
@@ -178,34 +184,10 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     }
 
     // success - update the comment counter for this ad
-    DB_query("UPDATE {$_TABLES['ad_ads']}
-                SET comments = comments + 1
-                WHERE ad_id='$db_id'", 1);
+    $Ad->updateComments();
 
-    // Notify the ad's owner that a comment has been posted.  Don't notify
-    // the owner of their own comments.
-    list($uid, $title) = DB_fetchArray(DB_query("SELECT uid, subject
-            FROM {$_TABLES['ad_ads']}
-            WHERE ad_id = '$db_id'"), false);
-    $uid = (int)$uid;
-    if ($uid > 1 && $uid != $_USER['uid']) {
-        $notify = (int)DB_getItem($_TABLES['ad_uinfo'], 'notify_comment',
-                "uid='$uid'");
-        if ($notify > 0) {
-            $email = DB_getItem($_TABLES['users'], 'email', "uid='$uid'");
-            $username = COM_getDisplayName($uid);
-            $msg = sprintf($LANG_ADVT['comment_notification'], $title);
-            $msg .= '<br /><br />' . CLASSIFIEDS_makeURL('detail', $id);
-            COM_mail(
-                array($email, $username),
-                $subject,
-                $msg,
-                '',
-                true
-            );
-        }
-
-    }
+    // Notify the ad's owner that a comment has been posted.
+    adNotify::Comment($Ad);
 
     return (COM_refresh(CLASSIFIEDS_makeURL('detail', $id)));
 }
@@ -213,6 +195,7 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
 
 /**
 *   How the plugin will display specific comments
+*
 *   @param   string  $id     Unique idenifier for item comment belongs to
 *   @param   int     $cid    Comment id to display
 *   @param   string  $title  Page/comment title
@@ -1335,7 +1318,7 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 *   @param  mixed   $deflang    A single or array of language strings
 *   @return array               $LANG_ADVT, the global language array for the plugin
 */
-function plugin_loadlanguage_classifieds($requested='')
+function Xplugin_loadlanguage_classifieds($requested='')
 {
     global $_CONF;
 

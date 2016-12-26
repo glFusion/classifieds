@@ -66,7 +66,7 @@ class adNotify
 
             // Load the recipient's language.  $LANG_ADVT is *not* global here
             // to avoid overwriting the global language strings.
-            $LANG = plugin_loadlanguage_classifieds($user['language']);
+            $LANG = self::loadLanguage($user['language']);
 
             $T = new Template($template_dir);
             $T->set_file('message', 'subscriber.thtml');
@@ -131,7 +131,7 @@ class adNotify
 
         // Include the owner's language, if possible.
         $language = DB_getItem($_TABLES['users'], 'language', "uid='{$Ad->uid}'");
-        $LANG = plugin_loadlanguage_classifieds(array($language, $_CONF['language']));
+        $LANG = self::loadLanguage(array($language, $_CONF['language']));
 
         // If approved, then the ad has already been moved to the main table.
         // Otherwise, the data is still in the submission table.
@@ -226,7 +226,7 @@ class adNotify
             //$language = DB_getItem($_TABLES['users'], 'language', "uid=$user_id");
 
             // Include the owner's language, if possible.  Fallback to site language.
-            $LANG = plugin_loadlanguage_classifieds(array($info['language'], $_CONF['language']));
+            $LANG = self::loadLanguage(array($info['language'], $_CONF['language']));
 
             if (file_exists("$template_base/$language/expiration.thtml")) {
                 $template_dir = "$template_base/$language";
@@ -342,6 +342,41 @@ class adNotify
 
 
     /**
+    *   Notify the ad owner when a new comment is posted
+    *
+    *   @param  object  $Ad     Ad object
+    */
+    public static function Comment($Ad)
+    {
+        global $_TABLES, $LANG_ADVT, $_USER;
+
+        // Don't notify the owner of their own comments
+        if ($Ad->uid == $_USER['uid']) return;
+
+        // Find whether the ad owner wants to be notified of new comments
+        $notify = (int)DB_getItem($_TABLES['ad_uinfo'], 'notify_comment',
+                "uid = '{$Ad->uid}'");
+        if ($notify > 0) {
+            $res = DB_query("SELECT email, language FROM {$_TABLES['users']}
+                        WHERE uid = {$Ad->uid}");
+            if (!$res || DB_numRows($res) < 1) return;
+            $U = DB_fetchArray($res, false);
+            $LANG = self::loadLanguage($U['language']);
+            $username = COM_getDisplayName($Ad->uid);
+            $msg = sprintf($LANG_ADVT['comment_notification'], $Ad->subject);
+            $msg .= '<br /><br />' . CLASSIFIEDS_makeURL('detail', $Ad->ad_id);
+            COM_mail(
+                array($U['email'], $username),
+                $LANG['comment_notif_subject'],
+                $msg,
+                '',
+                true
+            );
+        }
+    }
+
+
+    /**
     *   Get all groups that are under the requested group
     *
     *   @param  integer $basegroup  Group ID where search starts
@@ -377,6 +412,61 @@ class adNotify
         }
 
         return $checked;
+    }
+
+
+    /**
+    *   Loads the language array. If $requested is an array, the first valid
+    *   language file is loaded. If not, the $requested language file is loaded.
+    *   If $requested doesn't refer to a vailid language, then $_CONF['language']
+    *   is assumed.
+    *
+    *   After loading the base language file, the same filename is loaded from
+    *   language/custom, if available. The admin can override language strings
+    *   by creating a language file in that directory.
+    *
+    *   @param  mixed   $deflang    A single or array of language strings
+    *   @return array               $LANG_ADVT, the global language array for the plugin
+    */
+    public static function loadLanguage($requested='')
+    {
+        global $_CONF;
+
+        // Set the language to the user's selected language, unless
+        // otherwise specified.
+        $languages = array();
+
+        // Add the requested language, which may be an array or
+        // a single item.
+        if (is_array($requested)) {
+            $languages = $requested;
+        } elseif ($requested != '') {
+            // If no language requested, load the site/user default
+            $languages[] = $requested;
+        }
+
+        // Add the site language as a failsafe
+        if (!in_array($_CONF['language'], $languages)) {
+            $languages[] = $_CONF['language'];
+        }
+        // Final failsafe, include "english.php" whish is known to exist
+        if (!in_array('english', $languages)) {
+            $languages[] = 'english';
+        }
+
+        // Search the array for desired language files, in order.
+        $langpath = CLASSIFIEDS_PI_PATH . '/language';
+        foreach ($languages as $language) {
+            if (file_exists("$langpath/$language.php")) {
+                include "$langpath/$language.php";
+                // Include admin-supplied overrides, if any.
+                if (file_exists("$langpath/custom/$language.php")) {
+                    include "$langpath/custom/$language.php";
+                }
+                break;
+            }
+        }
+        return $LANG_ADVT;
     }
 
 }

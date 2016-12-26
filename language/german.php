@@ -233,6 +233,14 @@ $LANG_ADVT = array (
 'fieldset1'             => 'öffentliches Anzeigen-Profil',
 'fieldset2'             => 'Optionen',
 'comments_enabled'      => 'Kommentare aktiviert',
+'comment_notification' => 'A new comment has been posted to your ad for %s.  Click the link below to view and respond to it.',
+'comment_notif_subject' => 'New comment notification',
+'notify_cmt' => 'Notify me when comments are posted to my ads?',
+'owner' => 'Owner',
+'purged_ads' => 'Purged %d expired ads: ',
+'block_colors' => 'Block Colors',
+'foreground' => 'Foreground',
+'background' => 'Background',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird dem Administrator zur Genehmigung vorgelegt.';
