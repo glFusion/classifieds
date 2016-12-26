@@ -8,7 +8,7 @@ Compatibile with glFusion 1.6.0 or higher.
 - Remove recursion when checking access to categories
 - Use LGLIB_ImageUrl to handle image resizing and caching
 - Remove separate configurations for ad and category image locations
-- Change user email to only no or on approval, no notification on rejection
+- Change user email to only none or on approval, no notification on rejection
 - Add DB field to hold the category parent tree to save lookups
 
 ## glClassifieds - 1.0.4
