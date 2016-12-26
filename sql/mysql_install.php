@@ -34,6 +34,7 @@ $NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
     image varchar(100),
     fgcolor varchar(10),
     bgcolor varchar(10),
+    parent_map text default NULL,
     PRIMARY KEY(cat_id))";
 
 // common SQL for ad and ad_submission tables
@@ -126,4 +127,5 @@ $DEFVALUES['category'] = "INSERT INTO {$_TABLES['ad_category']} (
         13, 2, 3, 3, 2, 2,
         '', '', '#000066', '#6699ff'
     )";
+
 ?>
