@@ -114,7 +114,7 @@ class adUpload extends upload
         $sql = "INSERT INTO {$_TABLES['ad_photo']}
                     (ad_id, filename)
                 VALUES $value_str";
-        COM_errorLog($sql);
+        //COM_errorLog($sql);
         $result = DB_query($sql);
         if (!$result) {
             $this->addError("Image::uploadFiles() : Failed to insert {$filename}");
