@@ -98,9 +98,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = $fieldvalue;
         break;
     }
-
     return $retval;
-
 }
 
 
@@ -118,7 +116,7 @@ function CLASSIFIEDS_adminAdTypes()
     $header_arr = array(      # display 'text' and use table field 'field'
         array('text' => $LANG_ADVT['edit'], 'field' => 'edit',
             'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['description'], 'field' => 'descrip',
+        array('text' => $LANG_ADVT['description'], 'field' => 'description',
             'sort' => true),
         array('text' => $LANG_ADVT['enabled'], 'field' => 'enabled',
             'sort' => false, 'align' => 'center'),
@@ -126,7 +124,7 @@ function CLASSIFIEDS_adminAdTypes()
             'sort' => false, 'align' => 'center'),
     );
 
-    $defsort_arr = array('field' => 'descrip', 'direction' => 'asc');
+    $defsort_arr = array('field' => 'description', 'direction' => 'asc');
 
     $text_arr = array(
         'has_extras' => true,
@@ -141,7 +139,6 @@ function CLASSIFIEDS_adminAdTypes()
 
     $retval .= ADMIN_list('classifieds', 'plugin_getListField_AdTypes', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '', '', $form_arr);
-
     return $retval;
 }
 
@@ -201,9 +198,7 @@ function plugin_getListField_AdCategories(
         $retval = $fieldvalue;
         break;
     }
-
     return $retval;
-
 }
 
 
@@ -241,7 +236,6 @@ function CLASSIFIEDS_adminCategories()
     $retval .= ADMIN_list('classifieds', 'plugin_getListField_AdCategories',
                 $header_arr, $text_arr, $query_arr, $defsort_arr,
                 '', '', '', $form_arr);
-
     return $retval;
 }
 
@@ -284,13 +278,12 @@ function CLASSIFIEDS_adminAds()
 
     $query_arr = array('table' => 'ad_ads',
         'sql' => "SELECT * FROM {$_TABLES['ad_ads']}",
-        'query_fields' => array('subject', 'descript', 'keywords'),
+        'query_fields' => array('subject', 'description', 'keywords'),
         'default_filter' => 'WHERE 1=1'
     );
 
     $retval .= ADMIN_list('classifieds', 'CLASSIFIEDS_getField_ad', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '', $options, $form_arr);
-
     return $retval;
 }
 
@@ -393,7 +386,6 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     }
-
     return $retval;
 }
 
