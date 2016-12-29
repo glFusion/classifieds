@@ -4,9 +4,9 @@
   <h2>{$LANG_ADVT['editadtypehdr']}</h2>
 
   <div class="uk-form-row">
-    <label for="descrip" class="uk-form-label">{$LANG_ADVT['description']}</label>
+    <label for="description" class="uk-form-label">{$LANG_ADVT['description']}</label>
     <div class="uk-form-controls">
-      <input type="text" id="descrip" name="descrip" value="{descrip}" size="70" 
+      <input type="text" id="description" name="description" value="{description}" size="70" 
         maxlength="250" />
     </div>
   </div>

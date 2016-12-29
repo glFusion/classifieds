@@ -1,6 +1,8 @@
 <?php
 /**
 *   Class for managing notifications
+*   A collection of static functions to notify admins and users of
+*   ad submissions, approvals, expirations, etc.
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
@@ -12,7 +14,7 @@
 */
 
 /**
-*   Class for category objects
+*   Class for notification functions
 */
 class adNotify
 {
@@ -39,53 +41,50 @@ class adNotify
 
         // Collect all the parent categories into a comma-separated list, and
         // find all the subscribers in any of the categories
-        USES_classifieds_class_category();
-        $catlist = adCategory::ParentList($Ad->cat_id);
-        $sql = "SELECT uid FROM {$_TABLES['ad_notice']}
-                WHERE cat_id IN ($catlist)";
+        $parents = $Ad->Cat->BreadCrumbs(false, true);
+        $catlist = implode(',', $parents);
+        //$catlist = adCategory::ParentList($Ad->cat_id);
+        $sql = "SELECT u.uid, u.username, u.email, u.language
+                FROM {$_TABLES['ad_notice']} n
+                LEFT JOIN {$_TABLES['users']} u
+                    ON u.uid = n.uid
+                WHERE n.cat_id IN ($catlist)
+                AND u.status > 0";
         $notice = DB_query($sql, 1);
-        if (!$notice)
+        if (!$notice) {
+            COM_errorLog("Adcategory::Subscribers SQL error: $sql");
             return false;
+        }
 
         // send the notification to subscribers
         while ($row = DB_fetchArray($notice, false)) {
-            $result = DB_query("SELECT username, email, language
-                FROM {$_TABLES['users']}
-                WHERE uid='{$row['uid']}'");
-            if (DB_numRows($result) == 0)
-                continue;
-
-            $user = DB_fetchArray($result, false);
-
-            // Select the template for the message
-            $template_dir = CLASSIFIEDS_PI_PATH .
-                    '/templates/notify/' . $user['language'];
+            // Select the template for the message based on language
+            $template_dir = $_CONF_ADVT['path'] .
+                    '/templates/notify/' . $row['language'];
             if (!file_exists($template_dir . '/subscriber.thtml')) {
-                $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
+                $template_dir = $_CONF_ADVT['path'] . '/templates/notify/english';
             }
 
-            // Load the recipient's language.  $LANG_ADVT is *not* global here
+            // Load the recipient's language. $LANG_ADVT is *not* global here
             // to avoid overwriting the global language strings.
-            $LANG = self::loadLanguage($user['language']);
+            $LANG = self::loadLanguage($row['language']);
 
             $T = new Template($template_dir);
             $T->set_file('message', 'subscriber.thtml');
-
-            $ad_type = adType::GetDescription($Ad->ad_type);
             $T->set_var(array(
                 'cat'       => $Ad->Cat->BreadCrumbs(),
                 'subject'   => $Ad->subject,
-                'description' => $Ad->descript,
+                'description' => $Ad->description,
                 'username'  => COM_getDisplayName($row['uid']),
-                'ad_url'    => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=$ad_id",
+                'ad_url'    => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id={$Ad->ad_id}",
                 'price'     => $Ad->price,
-                'ad_type'   => $Ad->ad_type,
+                'ad_type'   => $Ad->Type->description,
             ), false);
             $T->parse('output','message');
             $message = $T->finish($T->get_var('output'));
 
             COM_mail(
-                array($user['email']),
+                array($row['email']),
                 "{$LANG['new_ad_listing']} {$_CONF['site_name']}",
                 $message,
                 '',
@@ -96,55 +95,67 @@ class adNotify
         // update the ad's flag to indicate that a notification has been sent
         DB_query("UPDATE {$_TABLES['ad_ads']}
                 SET sentnotify=1
-                WHERE ad_id='$ad_id'");
+                WHERE ad_id='{$Ad->ad_id}'");
     }   // function Subscribers()
 
 
     /**
     *   Sends an email to the owner of an ad indicating acceptance or rejection.
     *   Note: Rejection notification is not currently supported.
-    *   The language file is determined based on the owner's configured language,
-    *   defaulting to English.
+    *   The language file is determined based on the owner's configured
+    *   language, defaulting to English.
     *
     *   @param  object  $Ad         Approved or rejected Ad object.
     *   @param  boolean $approved   True if ad is approved, False if rejected
     */
     public static function Approval($Ad, $approved=true)
     {
-        global $_TABLES, $_CONF, $_CONF_ADVT;
+        global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT;
 
         // First, determine if we even notify users of this condition
         if (
             $_CONF_ADVT['emailusers'] == 0       // Never notify
             ||
             ($_CONF_ADVT['emailusers'] == 2 && !$approved)  // approval only
-        )
+            ||
+            ($_CONF_ADVT['emailusers'] == 3 && $approved)   // rejection only
+        ) {
             return;
-
-        USES_classifieds_class_ad();
-        USES_classifieds_class_adtype();
-        USES_classifiecs_class_category();
+        }
 
         // Sanitizing this since it gets used in another query.
         $username = COM_getDisplayName($Ad->uid);
-        $email = DB_getItem($_TABLES['users'], 'email', "uid='{$Ad->uid}'");
+        $sql = "SELECT email, language FROM {$_TABLES['users']}
+                WHERE uid={$Ad->uid} AND status > 0";
+        $result = DB_query($sql, 1);
+        if (DB_error()) {
+            COM_errorLog("adNotify::Approval sql error: $sql");
+            return;
+        } elseif (DB_numRows($result) < 1) {
+            return;
+        }
+        $user = DB_fetchArray($result, false);
+        // Shouldn't be an empty email address, but just in case...
+        if (empty($user['email'])) {
+            COM_errorLog("adNotify::Approval user {$Ad->uid} has an empty email address");
+            return;
+        }
 
         // Include the owner's language, if possible.
-        $language = DB_getItem($_TABLES['users'], 'language', "uid='{$Ad->uid}'");
-        $LANG = self::loadLanguage(array($language, $_CONF['language']));
+        $LANG = self::loadLanguage(array($user['language'], $_CONF['language']));
 
         // If approved, then the ad has already been moved to the main table.
         // Otherwise, the data is still in the submission table.
         if ($approved) {
             $template_file = 'approved.thtml';
-            $subject = $LANG['subj_approved'];
+            $subject = $LANG_ADVT['subj_approved'];
         } else {
             $template_file = 'rejected.thtml';
-            $subject = $LANG['subj_rejected'];
+            $subject = $LANG_ADVT['subj_rejected'];
         }
 
         // Pick the template based on approval status and language
-        $template_base = CLASSIFIEDS_PI_PATH . '/templates/notify';
+        $template_base = $_CONF_ADVT['path'] . '/templates/notify';
 
         if (file_exists("$template_base/{$language}/$template_file")) {
             $template_dir = "$template_base/{$language}";
@@ -157,17 +168,18 @@ class adNotify
         $T->set_var(array(
             'username'  => $username,
             'subject'   => $Ad->subject,
-            'descript'  => $Ad->descript,
+            'description'  => $Ad->description,
             'price'     => $Ad->price,
-            'cat'       => adCategory::GetDescdription($Ad->cat_id),
-            'ad_type'   => adType::GetDescription($A['ad_type']),
-            'ad_url'    => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=$ad_id",
+            'cat'       => $Ad->Cat->description,
+            'ad_type'   => $Ad->Type->description,
+            'ad_url'    => "{$_CONF_ADVT['url']}/index.php?mode=detail&id=$ad_id",
+            'site_name' => $_CONF['site_name'],
         ) );
         $T->parse('output','message');
         $message = $T->finish($T->get_var('output'));
 
         COM_mail(
-            array($email, $username),
+            array($user['email'], $username),
             $subject,
             $message,
             '',
@@ -191,11 +203,12 @@ class adNotify
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_uinfo']} u
                 ON u.uid = ad.uid
-            LEFT JOINE {$_TABLES['users']} us
+            LEFT JOIN {$_TABLES['users']} us
                 ON ad.uid = us.uid
             WHERE exp_sent = 0
                 AND u.notify_exp = 1
                 AND us.uid IS NOT NULL
+                AND us.status > 0
                 AND exp_date < $exp_dt";
         $r = DB_query($sql, 1);
         if (!$r)
@@ -217,15 +230,14 @@ class adNotify
             }
         }
 
-        $template_base = CLASSIFIEDS_PI_PATH . '/templates/notify';
+        $template_base = $_CONF_ADVT['path'] . '/templates/notify';
 
         foreach ($users as $user_id=>$info) {
 
             $username = COM_getDisplayName($user_id);
-            //$email = DB_getItem($_TABLES['users'], 'email', "uid=$user_id");
-            //$language = DB_getItem($_TABLES['users'], 'language', "uid=$user_id");
 
-            // Include the owner's language, if possible.  Fallback to site language.
+            // Include the owner's language, if possible.
+            // Fallback to site language.
             $LANG = self::loadLanguage(array($info['language'], $_CONF['language']));
 
             if (file_exists("$template_base/$language/expiration.thtml")) {
@@ -256,9 +268,6 @@ class adNotify
         // Mark that the expiration notification has been sent.
         $ad_str = "'" . implode("','", $ads) . "'";
         DB_query("UPDATE {$_TABLES['ad_ads']} SET exp_sent=1 WHERE ad_id IN ($ad_str)");
-        /*foreach ($ads as $ad) {
-            //DB_query("UPDATE {$_TABLES['ad_ads']} SET exp_sent=1 WHERE ad_id='$ad'");
-        }*/
     }
 
 
@@ -276,67 +285,65 @@ class adNotify
             return true;
 
         // require a valid ad ID
-        if ($A->ad_id == '')
+        if ($Ad->ad_id == '')
             return false;
 
-        USES_classifieds_class_adtype();
-        USES_classifieds_class_category();
-
         COM_clearSpeedlimit(300,'advtnotify');
-        $last = COM_checkSpeedlimit ('advtnotify');
+        $last = COM_checkSpeedlimit('advtnotify');
         if ($last > 0) {
             return true;
         }
 
         // Select the template for the message
-        $template_dir = CLASSIFIEDS_PI_PATH .
+        $template_dir = $_CONF_ADVT['path'] .
                 '/templates/notify/' . $_CONF['language'];
         if (!file_exists($template_dir . '/admin.thtml')) {
-            $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
+            $template_dir = $_CONF_ADVT['path'] . '/templates/notify/english';
         }
         $T = new Template($template_dir);
         $T->set_file('message', 'admin.thtml');
         $T->set_var(array(
             'cat'       => $Ad->Cat->BreadCrumbs(),
             'subject'   => $Ad->subject,
-            'description' => $Ad->descript,
-            'username'  => COM_getDisplayName(2),
+            'description' => $Ad->description,
             'price'     => $Ad->price,
-            'ad_type'   => adType::GetDescription($A->ad_type),
+            'ad_type'   => $Ad->Type->description,
+            'admin_url' => $_CONF['site_url'] . '/admin/moderation.php',
         ) );
-        $T->parse('output','message');
-        $message = $T->finish($T->get_var('output'));
 
         $group_id = DB_getItem($_TABLES['groups'],'grp_id',"grp_name='classifieds Admin'");
         $groups = self::_getGroupList($group_id);
         if (empty($groups))
             return true;        // Fake success if nobody to notify
-
         $groupList = implode(',',$groups);
 
-        $sql = "SELECT DISTINCT {$_TABLES['users']}.uid,username,fullname,email
-                FROM {$_TABLES['group_assignments']}, {$_TABLES['users']}
-                WHERE {$_TABLES['users']}.uid > 1
-                AND  {$_TABLES['users']}.uid = {$_TABLES['group_assignments']}.ug_uid
-                AND {$_TABLES['group_assignments']}.ug_main_grp_id IN ({$groupList})";
+        $sql = "SELECT DISTINCT u.uid, u.email
+                FROM {$_TABLES['group_assignments']} ga
+                LEFT JOIN {$_TABLES['users']} u
+                    ON u.uid = ga.ug_uid
+                WHERE u.uid > 1
+                AND u.status > 0
+                AND ga.ug_main_grp_id IN ({$groupList})";
         $result = DB_query($sql, 1);
         if (!$result) return;
 
         while ($row = DB_fetchArray($result, false)) {
-            if ($row['email'] != '') {
-                COM_errorLog("Classifieds Submit: Sending notification email to: " .
+            if ($row['email'] == '') continue;
+            $disp_name = COM_getDisplayName($row['uid']);
+            COM_errorLog("Classifieds Submit: Sending submission email to: " .
                         $row['email'] . " - " . $row['username']);
-                COM_mail(
-                    array($row['email'], $row['username']),
-                    "{$LANG_ADVT['you_have_new_ad']} {$_CONF['site_name']}",
-                    $message,
-                    array($_CONF['site_mail'], $LANG_ADVT['new_ad_notice']),
-                    true
-                );
-            }   // if valid email
+            $T->set_var('username', $disp_name);
+            $T->parse('output','message');
+            $message = $T->finish($T->get_var('output'));
 
+            COM_mail(
+                array($row['email'], $disp_name),
+                "{$LANG_ADVT['you_have_new_ad']} {$_CONF['site_name']}",
+                $message,
+                array($_CONF['site_mail'], $LANG_ADVT['new_ad_notice']),
+                true
+            );
         }   // foreach administrator
-
         COM_updateSpeedlimit('advtnotify');
     }   // function Submission()
 
@@ -358,7 +365,7 @@ class adNotify
                 "uid = '{$Ad->uid}'");
         if ($notify > 0) {
             $res = DB_query("SELECT email, language FROM {$_TABLES['users']}
-                        WHERE uid = {$Ad->uid}");
+                        WHERE uid = {$Ad->uid} AND status > 0");
             if (!$res || DB_numRows($res) < 1) return;
             $U = DB_fetchArray($res, false);
             $LANG = self::loadLanguage($U['language']);
@@ -394,9 +401,10 @@ class adNotify
         while (sizeof($to_check) > 0) {
             $thisgroup = array_pop($to_check);
             if ($thisgroup > 0) {
-                $result = DB_query("SELECT ug_grp_id
+                $sql = "SELECT ug_grp_id
                     FROM {$_TABLES['group_assignments']}
-                    WHERE ug_main_grp_id = $thisgroup");
+                    WHERE ug_main_grp_id = $thisgroup";
+                $result = DB_query($sql);
                 if (!$result) return $checked;
                 while ($A = DB_fetchArray($result, false)) {
                     // Check this group out if not already done
@@ -410,7 +418,6 @@ class adNotify
                 $checked[] = $thisgroup;
             }
         }
-
         return $checked;
     }
 
@@ -425,8 +432,8 @@ class adNotify
     *   language/custom, if available. The admin can override language strings
     *   by creating a language file in that directory.
     *
-    *   @param  mixed   $deflang    A single or array of language strings
-    *   @return array               $LANG_ADVT, the global language array for the plugin
+    *   @param  mixed   $requested  A single or array of language strings
+    *   @return array       $LANG_ADVT, the global language array for the plugin
     */
     public static function loadLanguage($requested='')
     {
@@ -455,7 +462,7 @@ class adNotify
         }
 
         // Search the array for desired language files, in order.
-        $langpath = CLASSIFIEDS_PI_PATH . '/language';
+        $langpath = $_CONF_ADVT['path'] . '/language';
         foreach ($languages as $language) {
             if (file_exists("$langpath/$language.php")) {
                 include "$langpath/$language.php";

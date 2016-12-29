@@ -7,7 +7,7 @@
   <tr>
     <td>{$LANG_ADVT['description']}: </td>
     <td>
-      <input type=text name="descrip" value="{descrip}" size="70" 
+      <input type=text name="description" value="{description}" size="70" 
         maxlength="250" />
     </td>
   </tr>

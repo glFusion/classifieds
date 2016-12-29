@@ -75,7 +75,7 @@
 
   <div id="adDetailData">
     <p class="title">{subject}</p>
-    <p>{descript}</p>
+    <p>{description}</p>
     {!if price}
       <p>
       <span class="title">{$LANG_ADVT['price']}:</span>{price}

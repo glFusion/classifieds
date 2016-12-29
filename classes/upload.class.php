@@ -63,11 +63,11 @@ class adUpload extends upload
         parent::__construct();
 
         // Before anything else, check the upload directory
-        if (!$this->setPath(CLASSIFIEDS_IMGPATH . '/user')) {
+        if (!$this->setPath($_CONF_ADVT['imgpath'] . '/user')) {
             return;
         }
         $this->ad_id = trim($ad_id);
-        $this->pathImage = CLASSIFIEDS_IMGPATH . '/user';
+        $this->pathImage = $_CONF_ADVT['imgpath'] . '/user';
         $this->setAllowedMimeTypes(array(
                 'image/pjpeg' => '.jpg,.jpeg',
                 'image/jpeg'  => '.jpg,.jpeg',

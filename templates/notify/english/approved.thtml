@@ -3,7 +3,7 @@ Hello, {username},
 Your ad on {site_name} has been approved.
 <p />
 {ad_type}: {subject}<br />
-Description: {descript}<br />
+Description: {description}<br />
 Price: {price}<br />
 <p />
 Category: {cat}<br />

@@ -51,7 +51,7 @@ class CatList
     {
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT;
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('page', 'catlist.thtml');
 
         // Get all the root categories
@@ -137,7 +137,7 @@ class CatList
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT;
         global $CatListcolors;
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('page', 'catlist_blocks.thtml');
 
         // Get all the root categories

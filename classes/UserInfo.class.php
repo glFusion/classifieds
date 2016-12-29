@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -38,7 +38,7 @@ class adUserInfo
 
     /**
     *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   Reads in the specified class, if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
     *   @param  integer $uid    Optional User ID
@@ -115,7 +115,7 @@ class adUserInfo
     *
     *   @param  array   $row    Array of values, from DB or $_POST
     */
-    function SetVars($A)
+    public function SetVars($A)
     {
         if (!is_array($A)) return;
 
@@ -143,7 +143,7 @@ class adUserInfo
     *   @param  integer $uid    Optional User ID.  Current ID is used if zero.
     *   @return boolean     True if record found, False if not
     */
-    function ReadOne($uid = 0)
+    public function ReadOne($uid = 0)
     {
         global $_TABLES;
 
@@ -153,7 +153,7 @@ class adUserInfo
             return;
         }
 
-        $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']} 
+        $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']}
                             WHERE uid=$uid");
         if ($result && DB_numRows($result) == 1) {
             $row = DB_fetchArray($result, false);
@@ -165,7 +165,7 @@ class adUserInfo
     /**
     *   Save the current values to the database.
     */
-    function Save()
+    public function Save()
     {
         global $_TABLES;
 
@@ -201,7 +201,7 @@ class adUserInfo
     /**
     *   Delete the current user info record from the database
     */
-    function Delete()
+    public function Delete()
     {
         global $_TABLES;
 
@@ -216,9 +216,9 @@ class adUserInfo
     *   Creates the edit form
     *
     *   @param  string  $type   Type of form, plugin or glFusion acct settings
-    *   @return string HTML for edit form
+    *   @return string          HTML for edit form
     */
-    function showForm($type = 'advt')
+    public function showForm($type = 'advt')
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
 
@@ -226,7 +226,7 @@ class adUserInfo
 
         $base_url = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('accountinfo', "account_settings$tpltype.thtml");
         if ($type == 'advt') {
@@ -246,9 +246,9 @@ class adUserInfo
             'uinfo_tel'         => $this->tel,
             'uinfo_fax'         => $this->fax,
             'uinfo_postcode'    => $this->postcode,
-            'exp_notify_checked' => $this->notify_exp == 1 ? 
+            'exp_notify_checked' => $this->notify_exp == 1 ?
                         'checked="checked"' : '',
-            'cmt_notify_checked' => $this->notify_comment == 1 ? 
+            'cmt_notify_checked' => $this->notify_comment == 1 ?
                         'checked="checked"' : '',
         ) );
 
@@ -258,7 +258,7 @@ class adUserInfo
                     ON c.cat_id = n.cat_id
                 WHERE n.uid='{$_USER['uid']}'";
         $notice = DB_query($sql);
-        if (!$notice) 
+        if (!$notice)
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
 
         if (0 == DB_numRows($notice)) {
@@ -287,7 +287,7 @@ class adUserInfo
 
     }   // function showForm()
 
- 
+
     /**
     *   Update the max days balance by adding a given value
     *   (positive or negative).
@@ -295,7 +295,7 @@ class adUserInfo
     *   @param integer $value   Value to add to the current balance
     *   @param integer $id      User ID to modify, empty to use the current one.
     */
-    function UpdateDaysBalance($value, $uid=0)
+    public function UpdateDaysBalance($value, $uid=0)
     {
         global $_TABLES;
 
@@ -327,12 +327,12 @@ class adUserInfo
      *  Sets the local variable for the maximum number of days for an ad.
      *  This is used if ad purchasing or earning is enabled.
      */
-    function setMaxDays()
+    public function setMaxDays()
     {
         global $_TABLES, $_CONF_ADVT, $_USER, $_GROUPS;
 
         if (is_null($this->days_balance) ||
-                $this->uid != $_USER['uid'] || 
+                $this->uid != $_USER['uid'] ||
                 !$_CONF_ADVT['purchase_enabled']) {
             $this->max_ad_days = (int)$_CONF_ADVT['max_total_duration'];
             return;
@@ -350,8 +350,6 @@ class adUserInfo
         $this->max_ad_days = $this->days_balance;
     }
 
-
 }   // class UserInfo
-
 
 ?>

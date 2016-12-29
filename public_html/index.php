@@ -20,13 +20,7 @@ if (!in_array('classifieds', $_PLUGINS)) {
     exit;
 }
 
-USES_classifieds_advt_functions();
-
-// Clean $_POST and $_GET, in case magic_quotes_gpc is set
-if (GVERSION < '1.3.0') {
-    $_POST = CLASSIFIEDS_stripslashes($_POST);
-    $_GET = CLASSIFIEDS_stripslashes($_GET);
-}
+//USES_classifieds_advt_functions();
 
 // Determine if this is an anonymous user, and override the plugin's
 // loginrequired configuration if the global loginrequired is set.
@@ -77,12 +71,12 @@ if (!$isAnon) {
 }
 if (CLASSIFIEDS_canSubmit()) {
     $menu->add_menuitem($LANG_ADVT['mnu_submit'],
-        CLASSIFIEDS_URL . '/index.php?mode=submit');
+        $_CONF_ADVT['url'] . '/index.php?mode=submit');
         //$_CONF['site_url']. '/submit.php?type='. $_CONF_ADVT['pi_name']);
 }
 
 // Establish the output template
-$T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+$T = new Template($_CONF_ADVT['path'] . '/templates');
 $T->set_file('page','index.thtml');
 $T->set_var('site_url',$_CONF['site_url']);
 if (isset($LANG_ADVT['index_msg']) && !empty($LANG_ADVT['index_msg'])) {
@@ -115,7 +109,7 @@ case 'deletead':
         } else {
             $msg = '';
         }
-        COM_refresh(CLASSIFIEDS_URL . '?mode=manage' . $msg);
+        COM_refresh($_CONF_ADVT['url'] . '?mode=manage' . $msg);
     }
     $view = 'manage';
     break;
@@ -147,9 +141,9 @@ case 'save':
     USES_classifieds_class_ad();
     $Ad = new Ad();
     if ($Ad->Save($_POST)) {
-        COM_refresh(CLASSIFIEDS_URL . '?msg=01');
+        COM_refresh($_CONF_ADVT['url'] . '?msg=01');
     } else {
-        COM_refresh(CLASSIFIEDS_URL . '?msg=12');
+        COM_refresh($_CONF_ADVT['url'] . '?msg=12');
     }
     break;
 
@@ -247,7 +241,7 @@ default:
 
 }   // switch ($mode)
 
-if (!empty($view)) COM_refresh(CLASSIFIEDS_URL . "?mode=$view");
+if (!empty($view)) COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
 
 if ($menu_opt != '') $menu->set_selected($menu_opt);
 $T->set_var('menu', $menu->generate());
@@ -281,7 +275,7 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_URL .
+                $_CONF_ADVT['url'] .
                     "/index.php?mode=editad&amp;id={$A['ad_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-edit',
@@ -292,7 +286,7 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
         } else {
             $retval = COM_createLink(
                 $icon_arr['edit'],
-                CLASSIFIEDS_URL .
+                $_CONF_ADVT['url'] .
                 "/index.php?mode=editad&amp;id={$A['id']}"
             );
         }
@@ -306,14 +300,14 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'subject':
         $retval = COM_createLink($fieldvalue,
-                CLASSIFIEDS_URL .
+                $_CONF_ADVT['url'] .
                     "/index.php?mode=detail&amp;id={$A['ad_id']}");
         break;
 
     case 'delete':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_URL .
+                $_CONF_ADVT['url'] .
                     "/index.php?mode=deletead&amp;id={$A['ad_id']}",
                 array('title' => $LANG_ADVT['del_item'],
                     'class' => 'uk-icon uk-icon-trash',
@@ -330,7 +324,7 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
                         'class' => 'gl_mootip',
                         'onclick' => "return confirm('${LANG_ADVT['del_item_confirm']}');",
                     )),
-                CLASSIFIEDS_URL .
+                $_CONF_ADVT['url'] .
                     "/index.php?mode=deletead&amp;id=={$A['ad_id']}"
             );
         }
@@ -373,7 +367,7 @@ function CLASSIFIEDS_ManageAds()
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => CLASSIFIEDS_URL . '/index.php',
+        'form_url' => $_CONF_ADVT['url'] . '/index.php',
     );
 
     $query_arr = array('table' => 'ad_ads',

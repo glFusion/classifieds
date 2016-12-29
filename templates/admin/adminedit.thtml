@@ -15,7 +15,7 @@ window.addEvent('domready',function() {
 <div class="block-box">
   <h2>{txt_edit_type}</h2>
 
-  <form id="adminedit" enctype="multipart/form-data" method="post" 
+  <form id="adminedit" enctype="multipart/form-data" method="post"
         action="{action_url}">
     <input type="hidden" name="type" value="{type}" />
     <input type="hidden" name="ad_id" value="{row_ad_id}" />
@@ -45,8 +45,8 @@ window.addEvent('domready',function() {
       <tr>
         <td align="right"><b>{$LANG_ADVT['subject']}</b></td>
         <td align="left">
-          <input required class="fValidate['required']" type="text" id="subject" 
-            name="subject" value="{row_subject}" size="60" 
+          <input required class="fValidate['required']" type="text" id="subject"
+            name="subject" value="{row_subject}" size="60"
             maxlength="200" />
         </td>
       </tr>
@@ -59,16 +59,16 @@ window.addEvent('domready',function() {
           <p>&nbsp;</p>
         </td>
         <td align="left">
-          <textarea class="fValidate['required']" id="descript" rows="8" 
-            name="descript" cols="40" style="width:100%" 
-            maxlength="1000">{row_descript}</textarea>
+          <textarea class="fValidate['required']" id="description" rows="8"
+            name="description" cols="40" style="width:100%"
+            maxlength="1000">{description}</textarea>
         </td>
       </tr>
 
       <tr>
         <td align="right"><b>{$LANG_ADVT['price']}</b></td>
         <td align="left">
-          <input type="text" name="price" value="{row_price}" size="30" 
+          <input type="text" name="price" value="{row_price}" size="30"
             maxlength="30" />
         </td>
       </tr>
@@ -76,7 +76,7 @@ window.addEvent('domready',function() {
       <tr>
         <td align="right"><b>{$LANG_ADVT['website']}</b></td>
         <td align="left">
-          <input type="text" name="url" value="{row_url}" size="40" 
+          <input type="text" name="url" value="{row_url}" size="40"
             maxlength="200" />
         </td>
       </tr>
@@ -131,7 +131,7 @@ window.addEvent('domready',function() {
       <tr>
         <td align="right"><b>{$LANG_ADVT['keywords']}</b></td>
         <td align="left">
-          <input type="text" id="keywords" name="keywords" value="{keywords}" 
+          <input type="text" id="keywords" name="keywords" value="{keywords}"
             size="50" length="255" />
         </td>
       </tr>
@@ -175,10 +175,10 @@ window.addEvent('domready',function() {
         <td height="40" align="left">
           <input type="submit" class="lgButton green" name="save" value="{$LANG_ADVT['save']}" />
           <input type="reset" class="lgButton blue" value="{$LANG_CONFIG['reset_form']}" />
-          <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel" 
+          <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel"
                 onclick="javascript: document.location.href='{cancel_url}'"
             />
-          <input type="submit" class="lgButton red" name="deletead" value="{$LANG_ADMIN['delete']}" 
+          <input type="submit" class="lgButton red" name="deletead" value="{$LANG_ADMIN['delete']}"
                 onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" />
         </td>
       </tr>

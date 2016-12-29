@@ -31,21 +31,11 @@ if (!isset($_CONF_ADVT['imagecount'])) {
 }
 
 /** Additional config items and table definitions are added here */
-require_once "{$_CONF['path']}plugins/classifieds/classifieds.php";
+require_once dirname(__FILE__) . '/classifieds.php';
 
-define('CLASSIFIEDS_PI_PATH',
-        $_CONF['path'] . 'plugins/' . $_CONF_ADVT['pi_name']);
-define('CLASSIFIEDS_URL',
-        $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name']);
-define('CLASSIFIEDS_ADMIN_URL',
-        $_CONF['site_admin_url'] . '/plugins/' . $_CONF_ADVT['pi_name']);
-define('CLASSIFIEDS_CLASSPATH',
-    $_CONF['path'].'plugins/'.$_CONF_ADVT['pi_name'].'/classes/');
-define('CLASSIFIEDS_IMGPATH', $_CONF['path'] . 'data/classifieds/images');
-
-if (file_exists(CLASSIFIEDS_PI_PATH . '/config.php')) {
+if (file_exists(dirname(__FILE__) . '/config.php')) {
     /** Include local configuration overrides */
-    include_once CLASSIFIEDS_PI_PATH . '/config.php';
+    include_once dirname(__FILE__) . '/config.php';
 }
 
 // End of loading configurations.  Now, if login is required globally,
@@ -61,7 +51,7 @@ $_CONF_ADVT['purchase_enabled'] = 0;
 $_CONF_ADVT['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
 
 // Language file Include
-$langpath = CLASSIFIEDS_PI_PATH . '/language';
+$langpath = $_CONF_ADVT['path'] . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!is_file("$langpath/$langfile")) {
     $langfile = 'english.php';
@@ -74,43 +64,75 @@ if (is_file("$langpath/custom/$langfile")) {
 }
 
 function USES_classifieds_class_ad()
-{   require_once CLASSIFIEDS_CLASSPATH . 'Ad.class.php';    }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/Ad.class.php';
+}
 
 function USES_classifieds_class_adtype()
-{   require_once CLASSIFIEDS_CLASSPATH . 'AdType.class.php';    }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . 'AdType.class.php';
+}
 
 function USES_classifieds_class_upload()
-{   require_once CLASSIFIEDS_CLASSPATH . 'upload.class.php'; }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/upload.class.php'; }
 
 function USES_classifieds_class_image()
-{   require_once CLASSIFIEDS_CLASSPATH . 'image.class.php'; }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/image.class.php';
+}
 
 function USES_classifieds_class_userinfo()
-{   require_once CLASSIFIEDS_CLASSPATH . 'UserInfo.class.php';  }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/UserInfo.class.php';
+}
 
 function USES_classifieds_class_adlist()
-{   require_once CLASSIFIEDS_CLASSPATH . 'AdList.class.php';  }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/AdList.class.php';
+}
 
 function USES_classifieds_admin()
-{   require_once CLASSIFIEDS_PI_PATH . '/admin.php';    }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['path'] . '/admin.php';
+}
 
 function USES_classifieds_notify()
-{    require_once CLASSIFIEDS_PI_PATH . '/notify.php';  }
-
-function USES_classifieds_advt_functions()
-{    require_once CLASSIFIEDS_PI_PATH . '/advt_functions.inc.php';  }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/notify.php';
+}
 
 function USES_classifieds_class_catlist()
-{    require_once CLASSIFIEDS_CLASSPATH . '/CatList.class.php';    }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['classpath'] . '/CatList.class.php';
+}
 
 function USES_classifieds_detail()
-{    include_once CLASSIFIEDS_PI_PATH . '/detail.php';  }
+{
+    global $_CONF_ADVT;
+    require_once $_CONF_ADVT['path'] . '/detail.php';
+}
 
 function USES_classifieds_class_category()
-{   include_once CLASSIFIEDS_PI_PATH . '/classes/category.class.php';   }
+{
+    global $_CONF_ADVT;
+   include_once $_CONF_ADVT['classpath'] . '/category.class.php';
+}
 
 function USES_classifieds_class_notify()
-{   include_once CLASSIFIEDS_PI_PATH . '/classes/notify.class.php';   }
+{
+    global $_CONF_ADVT;
+    include_once $_CONF_ADVT['classpath'] . '/notify.class.php';
+}
 
 
 /**
@@ -123,10 +145,10 @@ function USES_classifieds_class_notify()
 */
 function plugin_getmenuitems_classifieds()
 {
-    global $LANG_ADVT;
-
-    $menuitems[$LANG_ADVT['menuitem']] = CLASSIFIEDS_URL . '/index.php';
-
+    global $LANG_ADVT, $_CONF_ADVT;
+    $menuitems = array(
+        $LANG_ADVT['menuitem'] => $_CONF_ADVT['url'] . '/index.php',
+    );
     return $menuitems;
 }
 
@@ -170,8 +192,6 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     $title = strip_tags($title);
     $pid = COM_applyFilter($pid, true);
     $postmode = COM_applyFilter($postmode);
-    $db_id = DB_escapeString($id);      // Make a DB-safe id
-    $Ad = new Ad($id);
 
     $ret = CMT_saveComment($title, $comment, $id, $pid,
             'classifieds', $postmode);
@@ -184,6 +204,7 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     }
 
     // success - update the comment counter for this ad
+    $Ad = new Ad($id);
     $Ad->updateComments();
 
     // Notify the ad's owner that a comment has been posted.
@@ -216,17 +237,12 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
     if (!plugin_commentsupport_classifieds())
         return $retval;
 
-    $sql = "SELECT COUNT(*) AS count, uid
-            FROM {$_TABLES['ad_ads']}
-            WHERE (ad_id = '".DB_escapeString($id)."')
-            GROUP BY ad_id";
-    $result = DB_query($sql);
-    $A = DB_fetchArray($result, false);
-    $allowed = $A['count'];
+    USES_classifieds_class_ad();
+    $Ad = new Ad($id);
 
-    if ($allowed == 1) {
+    if (!$Ad->isNew) {
         $delete_option = (plugin_ismoderator_classifieds() ||
-                $A['uid'] = $_USER['uid']);
+                $Ad->uid = $_USER['uid']);
         $retval .= CMT_userComments($id, $title, 'classifieds', $order, $format,
                                      $cid, $page, $view, $delete_option,
                                      plugin_commentsupport_classifieds());
@@ -236,7 +252,6 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
                 . $LANG_ACCESS['storydenialmsg']
                 . COM_endBlock(COM_getBlockTemplate ('_msg_block', 'footer'));
     }
-
     return $retval;
 }
 
@@ -251,7 +266,7 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
 */
 function plugin_deletecomment_classifieds($cid, $id)
 {
-    global $_CONF,$_FM_TABLES, $_TABLES;
+    global $_CONF, $_TABLES;
 
     if (plugin_ismoderator_classifieds()) {
         if (CMT_deleteComment($cid, $id, 'classifieds') == 0) {
@@ -317,7 +332,7 @@ function plugin_cclabel_classifieds()
     if (plugin_ismoderator_classifieds()) {
         return array(
             $LANG_ADVT['blocktitle'],
-            CLASSIFIEDS_ADMIN_URL . '/index.php',
+            $_CONF_ADVT['admin_url'] . '/index.php',
             plugin_geticon_classifieds()
         );
     } else {
@@ -334,7 +349,7 @@ function plugin_cclabel_classifieds()
 function plugin_geticon_classifieds()
 {
     global $_CONF_ADVT;
-    return CLASSIFIEDS_URL . '/images/' . $_CONF_ADVT['pi_name'] . '.png';
+    return $_CONF_ADVT['url'] . '/images/' . $_CONF_ADVT['pi_name'] . '.png';
 }
 
 
@@ -351,7 +366,7 @@ function plugin_getadminoption_classifieds()
     if (plugin_ismoderator_classifieds()) {
         return array(
             $LANG_ADVT['menuitem'],
-            CLASSIFIEDS_ADMIN_URL . '/index.php',
+            $_CONF_ADVT['admin_url'] . '/index.php',
         );
     } else {
         return '';
@@ -372,7 +387,7 @@ function plugin_getuseroption_classifieds()
     if (!COM_isAnonUser() && $_CONF_ADVT['hideuserfunction'] != 1) {
         return array(
             $LANG_ADVT['blocktitle'],
-            CLASSIFIEDS_URL . '/index.php?mode=account',
+            $_CONF_ADVT['url'] . '/index.php?mode=account',
             0
         );
     } else {
@@ -423,7 +438,6 @@ function plugin_whatsnewsupported_classifieds()
 {
     global $_CONF_ADVT, $LANG_ADVT, $LANG_WHATSNEW;
 
-    $retval = false;
     if ( ($_CONF_ADVT['loginrequired'] == 1 && COM_isAnonUser()) ||
         $_CONF_ADVT['hidenewads'] == 1 ||
         plugin_getwhatsnew_classifieds(true) == 0
@@ -513,8 +527,8 @@ function plugin_searchtypes_classifieds()
     global $_CONF, $_CONF_ADVT, $LANG_ADVT;
 
     if (COM_isAnonUser() &&
-    (($_CONF['loginrequired'] == 1) ||
-    ($_CONF_ADVT['loginrequired'] == 1))) {
+        (($_CONF['loginrequired'] == 1) || ($_CONF_ADVT['loginrequired'] == 1))
+    ) {
         return '';
     }
 
@@ -555,8 +569,8 @@ function plugin_dopluginsearch_classifieds(
     global $_CONF, $_TABLES, $LANG_LINKS_SEARCH, $LANG_ADVT, $_CONF_ADVT;
 
     if (COM_isAnonUser() &&
-    (($_CONF['loginrequired'] == 1) ||
-    ($_CONF_ADVT['loginrequired'] == 1))) {
+        (($_CONF['loginrequired'] == 1) || ($_CONF_ADVT['loginrequired'] == 1))
+    ) {
         return '';
     }
 
@@ -567,7 +581,7 @@ function plugin_dopluginsearch_classifieds(
 
     // Start the SQL query by selecting desired fields.
     $sql = "SELECT a.ad_id as id, a.cat_id, a.subject as title,
-                a.descript as description, a.uid, a.views as hits,
+                a.description, a.uid, a.views as hits,
                 a.add_date AS date, a.ad_type,
                 CONCAT('/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=',a.ad_id,'&query=$htmlquery') as url
             FROM {$_TABLES['ad_ads']} a
@@ -581,7 +595,7 @@ function plugin_dopluginsearch_classifieds(
     }
 
     $search = new SearchCriteria($_CONF_ADVT['pi_name'], $LANG_ADVT['blocktitle']);
-    $columns = array('a.subject', 'a.descript', 'a.keywords');
+    $columns = array('a.subject', 'a.description', 'a.keywords');
     $sql .= $search->getDateRangeSQL('AND', 'a.add_date',
                     $datestart, $dateend);
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
@@ -658,7 +672,7 @@ function plugin_getheadercss_classifieds()
     global $_CONF, $_CONF_ADVT, $_PLUGINS;
 
     $styles = array();
-    $pi_css = CLASSIFIEDS_PI_PATH . '/css/';
+    $pi_css = $_CONF_ADVT['path'] . '/css/';
     $layout_css = $_CONF['path_layout'].'plugins/'.$_CONF_ADVT['pi_name'].'/';
     $layout_dirs = array(
         $layout_css . 'custom/', $layout_css,
@@ -675,7 +689,6 @@ function plugin_getheadercss_classifieds()
             }
         }
     }
-
     return $styles;
 }
 
@@ -689,7 +702,7 @@ function plugin_getheaderjs_classifieds()
 {
     global $_CONF, $_CONF_ADVT;
 
-    $js_dir = CLASSIFIEDS_PI_PATH . '/js/';
+    $js_dir = $_CONF_ADVT['path'] . '/js/';
 
     $files = array(
         "$js_dir/catfldsxml.js",
@@ -793,7 +806,7 @@ function plugin_moderationvalues_classifieds()
     return array(
         'ad_id',
         $_TABLES['ad_ads'],
-        'ad_id, cat_id, subject, descript, url, add_date, exp_date,
+        'ad_id, cat_id, subject, description, url, add_date, exp_date,
             uid, price, ad_type, keywords',
         $_TABLES['ad_submission']);
 }
@@ -882,21 +895,26 @@ function plugin_moderationdelete_classifieds($id)
     global $_TABLES, $_CONF_ADVT;
 
     USES_classifieds_class_notify();
+    USES_classifieds_class_image();
+    USES_classifieds_class_ad();
+
+    $Ad = new Ad($id, 'ad_submission');
 
     // Return the unused days back to the user's account
     if ($_CONF_ADVT['purchase_enabled']) {
         USES_classifieds_class_userinfo();
-        list($owner_id, $add_date, $exp_date) = DB_fetchArray(DB_query(
+        $User = new adUserInfo($Ad->uid);
+        /*list($owner_id, $add_date, $exp_date) = DB_fetchArray(DB_query(
             "SELECT uid, add_date, exp_date
             FROM {$_TABLES['ad_submission']}
-            WHERE ad_id='$id'"));
-        $days = (int)(((int)$exp_date - (int)$add_date) / 86400);
-        $User->UpdateDaysBalance($days, (int)$owner_id);
+            WHERE ad_id='$id'"));*/
+        $days = ($Ad->exp_date - $Ad->add_date) / 86400;
+        $User->UpdateDaysBalance($days);
     }
 
     // Delete uploaded photos from filesystem
     adImage::DeleteAll($id);
-
+    adNotify::Approval($Ad, false);
     return '';
 }
 
@@ -908,18 +926,6 @@ function plugin_moderationdelete_classifieds($id)
 */
 function plugin_submit_classifieds()
 {
-/*    global  $HTTP_POST_VARS, $LANG12, $_CONF, $_CONF_ADVT;
-
-    // If mode = preview or editsubmission, load the ad info.
-    if ($HTTP_POST_VARS['mode'] == $LANG12[32] ||
-        $HTTP_POST_VARS['mode'] == 'editsubmission') {
-        $A = $HTTP_POST_VARS;
-    } else {
-        $A = array();
-    }
-    USES_classifieds_submitform();
-    return CLASSIFIEDS_submitForm('submit', $A);
-*/
     USES_classifieds_class_ad();
     $Ad = new Ad();
     return $Ad->Edit();
@@ -1215,7 +1221,7 @@ function phpblock_classifieds_random()
     USES_classifieds_class_image();
     $img_filename = adImage::getFirst($Ad->ad_id);
 
-    $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+    $T = new Template($_CONF_ADVT['path'] . '/templates');
     $T->set_file('rblock', 'randomblock.thtml');
     $T->set_var(array(
         'ad_url'    => CLASSIFIEDS_makeURL('detail', $id),
@@ -1241,7 +1247,8 @@ function phpblock_classifieds_random()
 */
 function CLASSIFIEDS_makeURL($mode='home', $id='', $other = '')
 {
-    $url = CLASSIFIEDS_URL . '/index.php?'
+    global $_CONF_ADVT;
+    $url = $_CONF_ADVT['url'] . '/index.php?'
         . "mode=$mode";
     if (empty($id) && !empty($other))
         $id = '0';
@@ -1320,7 +1327,7 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 */
 function Xplugin_loadlanguage_classifieds($requested='')
 {
-    global $_CONF;
+    global $_CONF, $_CONF_ADVT;
 
     // Set the language to the user's selected language, unless
     // otherwise specified.
@@ -1345,7 +1352,7 @@ function Xplugin_loadlanguage_classifieds($requested='')
     }
 
     // Search the array for desired language files, in order.
-    $langpath = CLASSIFIEDS_PI_PATH . '/language';
+    $langpath = $_CONF_ADVT['path'] . '/language';
     foreach ($languages as $language) {
         if (file_exists("$langpath/$language.php")) {
             include "$langpath/$language.php";
@@ -1371,13 +1378,12 @@ function Xplugin_loadlanguage_classifieds($requested='')
 function CLASSIFIEDS_canSubmit()
 {
     global $_CONF, $_CONF_ADVT, $_GROUPS;
-    static $canSubmit = 'unknown';
+    static $canSubmit = NULL;
 
-    if ($canSubmit === 'unknown') {
+    if ($canSubmit === NULL) {
         $canSubmit = COM_isAnonUser() ? false : true;
     }
     return $canSubmit;
-
 }
 
 
@@ -1408,10 +1414,9 @@ function plugin_centerblock_classifieds($where = 1, $page = 1, $topic = '')
     // if the centerblock value is greater than or equal to the
     // user ID, replace the homepage
     if ($cb_enable) {
-        echo COM_Refresh(CLASSIFIEDS_URL . '/index.php');
+        echo COM_Refresh($_CONF_ADVT['url'] . '/index.php');
         exit;
     }
-
 }
 
 
@@ -1437,7 +1442,6 @@ function plugin_profileedit_classifieds($uid, $panel, $fieldset)
     }
 
     return $retval;
-
 }
 
 
@@ -1585,7 +1589,7 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
     $autotag['parm1'] = str_replace(']','',$tagid);
     $autotag['parm2'] = $label;
 
-    $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+    $T = new Template($_CONF_ADVT['path'] . '/templates');
 
     // Set default values for what gets shown and how
     $ad_id = '';
@@ -1653,8 +1657,8 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             $T->clear_var('img_url');
             $T->clear_var('tn_url');
         }
-        if (strlen($A['descript']) > $textlen) {
-            $A['descript'] = substr($A['descript'], 0, $textlen - 3) . ' ...';
+        if (strlen($A['description']) > $textlen) {
+            $A['description'] = substr($A['description'], 0, $textlen - 3) . ' ...';
         }
         $T->set_var(array(
             'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
@@ -1662,13 +1666,13 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             'cat_id'    => $A['cat_id'],
             'uid'       => $A['uid'],
             'subject'   => htmlspecialchars($A['subject']),
-            'descript'  => htmlspecialchars($A['descript']),
+            'description'  => htmlspecialchars($A['description']),
             'url'       => COM_sanitizeURL($A['url']),
             'add_date'  => COM_getUserDateTimeFormat($A['add_date']),
             'exp_date'  => COM_getUserDateTimeFormat($A['exp_date']),
             'ad_type'   => htmlspecialchars($A['type']),
-            'pi_url'    => CLASSIFIEDS_URL,
-            'ad_url'    => COM_buildUrl(CLASSIFIEDS_URL
+            'pi_url'    => $_CONF_ADVT['url'],
+            'ad_url'    => COM_buildUrl($_CONF_ADVT['url']
                         . '/index.php?mode=detail&id=' . urlencode($ad_id)),
 
         ) );
@@ -1705,16 +1709,16 @@ function CLASSIFIEDS_getDocURL($file='', $doclang='english')
         if (!file_exists($doc_path . $file)) {
             $doclang = 'english';
         }
-        $doc_url = CLASSIFIEDS_URL . "/docs/$doclang/$file";
+        $doc_url = $_CONF_ADVT['url'] . "/docs/$doclang/$file";
          if (!is_file($doc_path . $file)) {
             $doclang = 'english';
         }
-        $doc_url = CLASSIFIEDS_URL . "/docs/$doclang/$file";
+        $doc_url = $_CONF_ADVT['url'] . "/docs/$doclang/$file";
     } else {
         if (!is_dir($doc_path)) {
             $doclang = 'english';
         }
-        $doc_url = CLASSIFIEDS_URL . "/docs/$doclang/";
+        $doc_url = $_CONF_ADVT['url'] . "/docs/$doclang/";
     }
 
     return $doc_url;
@@ -1872,6 +1876,82 @@ function CLASSIFIEDS_getParam($name, $type = 'string')
         return $value;
         break;
     }
+}
+
+
+/**
+*   Returns an error message formatted for on-screen display.
+*   @param  string  $msg    Error message text
+*   @param  string  $type   Error type or severity
+*   @param  string  $hdr    Optional text to appear in the header.
+*   @return string          HTML code for the formatted message
+*/
+function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
+{
+    global $_CONF_ADVT;
+
+    // Convert single message to array
+    if (!is_array($messages)) {
+        $messages = array($messages);
+    }
+    $msg_txt = '<ul>';
+    foreach ($messages as $msg) {
+        $msg_txt .= "<li>$msg</li>" . LB;
+    }
+    $msg_txt .= '</ul>';
+
+    if ($_CONF_ADVT['_is_uikit']) {
+        $element = 'div';
+        switch ($type) {
+        case 'alert':
+        default:
+            $class .= 'uk-alert uk-alert-danger';
+            break;
+        case 'info':
+            $class .= 'uk-alert';
+            break;
+        }
+    } else {
+        $element = 'span';
+        switch ($type) {
+        case 'info':
+        case 'alert':
+            $class = $type;
+            break;
+        default:
+            $class = 'alert';
+            break;
+        }
+    }
+    return "<$element class=\"$class\">$msg_txt</$element>\n";
+}
+
+
+/**
+*   Gets the correct template depending on what type of display
+*   is being used.  Currently supports the new "blocks" display and the
+*   old zClassifieds-style display
+*
+*   @param  string  $str    Template base name
+*   @return string          Template full name
+*/
+function CLASSIFIEDS_getTemplate($str)
+{
+    global $_CONF_ADVT;
+
+    if ($str == '') return '';
+
+    switch ($_CONF_ADVT['catlist_dispmode']) {
+    case 'blocks':
+        $tpl = $str . '_blocks';
+        break;
+
+    default:
+        $tpl = $str;
+        break;
+    }
+
+    return $tpl . '.thtml';
 }
 
 ?>

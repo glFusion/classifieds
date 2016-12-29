@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -41,17 +41,17 @@ class AdList
         $time = time();
 
         // Max number of ads per page
-        $maxAds = isset($_CONF_ADVT['maxads_pg_exp']) ? 
+        $maxAds = isset($_CONF_ADVT['maxads_pg_exp']) ?
                 (int)$_CONF_ADVT['maxads_pg_exp'] : 20;
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('catlist', 'adExpList.thtml');
 
         // Gt the ads for this category, starting at the requested page
         $sql = "SELECT ad.*, ad.add_date as ad_add_date, cat.*
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
-                ON cat.cat_id = ad.cat_id 
+                ON cat.cat_id = ad.cat_id
             WHERE ad.exp_date > $time " .
                 COM_getPermSQL('AND', 0, 2, 'cat');
         if ($this->where_clause != '')
@@ -98,7 +98,7 @@ class AdList
         // than one page
         $pageMenu = '';
         if ($totalPages > 1) {
-            $baseURL = CLASSIFIEDS_URL . "/index.php?page=$pagename";
+            $baseURL = $_CONF_ADVT['url'] . "/index.php?page=$pagename";
             if ($this->cat_id != '')
                 $baseURL .= "&amp;id=$this->cat_id";
             $pageMenu = COM_printPageNavigation($baseURL, $page, $totalPages, "start=");
@@ -252,9 +252,9 @@ class AdListCat extends AdList
 
         USES_classifieds_class_image();
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('header', 'adlisthdrCat.thtml');
-        $T->set_var('pi_url', $_CONF['site_url'].'/'.$_CONF_ADVT['pi_name']);
+        $T->set_var('pi_url', $_CONF_ADVT['url']);
         $T->set_var('catimg_url', adImage::thumbUrl($this->Cat->image));
 
         // Set the breadcrumb navigation
@@ -280,15 +280,14 @@ class AdListCat extends AdList
             // Display a link to submit an ad to the current category
             $submit_url = '';
             if (plugin_ismoderator_classifieds()) {
-                $submit_url = $_CONF['site_admin_url'] . 
-                        '/plugins/'. $_CONF_ADVT['pi_name'] . 
+                $submit_url = $_CONF_ADVT['admin_url'] .
                         '/index.php?editad=x&cat_id='.$this->cat_id;
             } elseif ($this->Cat->canEdit()) {
-                $submit_url = $_CONF['site_url']. '/' . $_CONF_ADVT['pi_name'] . 
+                $submit_url = $_CONF_ADVT['url'] .
                     '/index.php?mode=edit&cat_id=' . $this->cat_id;
             }
             $T->set_var(array(
-                'subscribe_img' => CLASSIFIEDS_URL.'/images/'.$sub_img,
+                'subscribe_img' => $_CONF_ADVT['url'].'/images/'.$sub_img,
                 'cat_id'        => $this->Cat->cat_id,
                 'sub_vis'       => $sub_vis,
                 'unsub_vis'     => $unsub_vis,
@@ -361,6 +360,6 @@ class AdListCat extends AdList
         return $retval;
     }
 
-}   // class AdListCat
+}   // class AdList
 
 ?>

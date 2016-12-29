@@ -58,9 +58,9 @@ window.addEvent('domready',function() {
           <p>&nbsp;</p>
         </td>
         <td align="left">
-          <textarea class="fValidate['required']" id="descript" rows="8" 
-            name="descript" cols="40" style="width:100%" 
-            maxlength="1000">{row_descript}</textarea>
+          <textarea class="fValidate['required']" id="description" rows="8" 
+            name="description" cols="40" style="width:100%" 
+            maxlength="1000">{description}</textarea>
         </td>
       </tr>
 

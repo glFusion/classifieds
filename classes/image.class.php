@@ -33,7 +33,7 @@ class adImage
     {
         global $_TABLES;
 
-        $this->pathImage = CLASSIFIEDS_IMGPATH;
+        $this->pathImage = $_CONF_ADVT['imgpath'];
         $photo_id = (int)$photo_id;
 
         $res = DB_query("SELECT * FROM {$_TABLES['ad_photo']}
@@ -128,8 +128,8 @@ class adImage
         foreach ($images as $id=>$filename) {
             // Only delete the file if it's the last record.
             if (self::UsedCount($filename) > 1) continue;
-            if (file_exists(CLASSIFIEDS_IMGPATH . '/' . $filename)) {
-                unlink(CLASSIFIEDS_IMGPATH . '/' . $filename);
+            if (file_exists($_CONF_ADVT['imgpath'] . '/' . $filename)) {
+                unlink($_CONF_ADVT['imgpath'] . '/' . $filename);
             }
         }
         // Delete all image records for this ad_id
@@ -149,7 +149,6 @@ class adImage
     public static function UsedCount($filename)
     {
         global $_TABLES;
-
         return DB_count($_TABLES['ad_photo'], 'filename', $filename);
     }
 
@@ -163,8 +162,22 @@ class adImage
     public static function dispUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/user/' . $filename,
+        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
                 $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
+    }
+
+
+    /**
+    *   Shortcut function to get the URL to the display version of the image.
+    *
+    *   @param  string  $filename   Image filename
+    *   @return string              URL to image sized for display
+    */
+    public static function smallUrl($filename)
+    {
+        global $_CONF_ADVT;
+        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                $_CONF_ADVT['detail_img_width']);
     }
 
 
@@ -177,7 +190,7 @@ class adImage
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/user/' . $filename,
+        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
                 $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
     }
 

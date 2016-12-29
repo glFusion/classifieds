@@ -29,7 +29,7 @@ class adCategory
     public function __construct($catid = 0)
     {
         $catid = (int)$catid;
-        $this->imgPath = CLASSIFIEDS_IMGPATH . '/cat/';
+        $this->imgPath = $_CONF_ADVT['imgpath'] . '/cat/';
         if ($catid > 0) {
             $this->cat_id = $catid;
             if ($this->Read()) {
@@ -412,7 +412,7 @@ class adCategory
             $this->cat_id = $cat_id;
             $this->Read();
         }
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates/admin');
+        $T = new Template($_CONF_ADVT['path'] . '/templates/admin');
         $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('modify', "catEditForm$tpltype.thtml");
 
@@ -434,8 +434,8 @@ class adCategory
             'fgcolor'   => $this->fgcolor,
             'bgcolor'   => $this->bgcolor,
             'cat_id'    => $this->cat_id,
-            'cancel_url' => CLASSIFIEDS_ADMIN_URL. '/index.php?admin=cat',
-            'img_url'   => LGLIB_ImageUrl($this->imgPath . '/' . $this->image),
+            'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?admin=cat',
+            'img_url'   => self::thumbUrl($this->image),
             'can_delete' => $this->isUsed() ? '' : 'true',
             'owner_dropdown' => COM_optionList($_TABLES['users'],
                     'uid,username', $this->owner_id, 1, 'uid > 1'),
@@ -447,11 +447,6 @@ class adCategory
                     'NOT', $this->cat_id),
             'have_propagate' => $this->isNew ? '' : 'true',
         ) );
-
-        if ($this->image != '') {
-            $T->set_var('existing_image', self::thumbUrl($this->image));
-        }
-
         $T->parse('output','modify');
         $display .= $T->finish($T->get_var('output'));
         return $display;
@@ -536,9 +531,11 @@ class adCategory
     */
     public static function showBreadCrumbs($map, $showlink=true)
     {
+        // If $map is not an array, assume it's a json string
         if (!is_array($map)) {
             $map = json_decode($map, true);
         }
+        // Invalid JSON, start with an empty array
         if (!$map) $map = array();
         $bc = array_reverse($map);
         $locations = array();
@@ -562,16 +559,21 @@ class adCategory
     *
     *   @uses   adCategory::showBreadCrumbs()
     *   @param  boolean $showlink   Link to the categories?
-    *   @return string              HTML for breadcrumbs
+    *   @param  boolean $raw        True to just get the json values
+    *   @return mixed       Parent array or HTML for breadcrumbs
     */
-    public function BreadCrumbs($showlink=true)
+    public function BreadCrumbs($showlink=true, $raw = false)
     {
         // There should always be at least two elements in the map.
         // The current category and "Home"
         if ($this->parent_map == array()) {
             $this->Save();      // Save will call MakeBreadcrumbs() and save
         }
-        return self::showBreadCrumbs($this->parent_map, $showlink);
+        if ($raw) {
+            return $this->parent_map;
+        } else {
+            return self::showBreadCrumbs($this->parent_map, $showlink);
+        }
     }
 
 
@@ -823,99 +825,11 @@ class adCategory
 
 
     /**
-    *   Send an email to all subscribers for the ad's category, or any
-    *   parent category.
-    *
-    *   Email is only sent if the ad is approved and a notification
-    *   hasn't already been sent.
-    *
-    *   @param int $ad_id  ID number of ad
-    */
-    public function Notify($ad_id)
-    {
-        global $_TABLES,  $_CONF, $_CONF_ADVT;
-
-        USES_classifieds_class_ad();
-        $Ad = new Ad($ad_id);
-        if ($Ad->isNew) return;
-
-        // check approval status and whether a notification was already sent.
-        if ($Ad->sentnotify == 1)
-            return;
-
-        $cat = (int)$adinfo['cat_id'];
-        $subject = trim($adinfo['subject']);
-        $descript = trim($adinfo['descript']);
-        $price = trim($adinfo['price']);
-
-        // Collect all the parent categories into a comma-separated list, and
-        // find all the subscribers in any of the categories
-        $catlist = self::ParentList($cat);
-        $sql = "SELECT uid FROM {$_TABLES['ad_notice']}
-                WHERE cat_id IN ($catlist)";
-        $notice = DB_query($sql, 1);
-        if (!$notice)
-            return;
-
-        // send the notification to subscribers
-        while ($row = DB_fetchArray($notice)) {
-            $result = DB_query("SELECT username, email, language
-                FROM {$_TABLES['users']}
-                WHERE uid='{$row['uid']}'");
-            if (DB_numRows($result) == 0)
-                continue;
-
-            $name = DB_fetchArray($result);
-
-            // Select the template for the message
-            $template_dir = CLASSIFIEDS_PI_PATH .
-                    '/templates/notify/' . $name['language'];
-            if (!file_exists($template_dir . '/subscriber.thtml')) {
-                $template_dir = CLASSIFIEDS_PI_PATH . '/templates/notify/english';
-            }
-
-            // Load the recipient's language.  $LANG_ADVT is *not* global here
-            // to avoid overwriting the global language strings.
-            $LANG = plugin_loadlanguage_classifieds($name['language']);
-
-            $T = new Template($template_dir);
-            $T->set_file('message', 'subscriber.thtml');
-
-            $ad_type = adType::GetDescription($Ad->ad_type);
-            $T->set_var(array(
-                'cat'   => $Ad->Cat->BreadCrumbs(),
-                'subject' => $Ad->subject,
-                'description' => $Ad->descript,
-                'username' => COM_getDisplayName($row['uid']),
-                'ad_url' => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=$ad_id",
-                'price' => $Ad->price,
-                'ad_type' => $Ad->ad_type,
-            ), false);
-            $T->parse('output','message');
-            $message = $T->finish($T->get_var('output'));
-
-            COM_mail(
-                $name['email'],
-                "{$LANG['new_ad_listing']} {$_CONF['site_name']}",
-                $message,
-                "{$_CONF['site_name']} <{$_CONF['site_mail']}>",
-                true
-            );
-
-        }
-
-        // update the ad's flag to indicate that a notification has been sent
-        DB_query("UPDATE {$_TABLES['ad_ads']}
-                SET sentnotify=1
-                WHERE ad_id='$ad_id'");
-
-    }   // function Notify()
-
-
-    /**
     *   Returns the string corresponding to the $id parameter.
     *   Designed to be used standalone; if this is an object,
     *   we already have the description in a variable.
+    *   Uses a static variable to hold the descriptions since this can be
+    *   called many times for a list.
     *
     *   @param  integer $id     Database ID of the ad type
     *   @return string          Ad Type Description
@@ -923,9 +837,13 @@ class adCategory
     public static function GetDescription($id)
     {
         global $_TABLES;
+        static $desc = array();
 
         $id = (int)$id;
-        return DB_getItem($_TABLES['ad_category'], 'descrip', "id='$id'");
+        if (!isset($desc[$id])) {
+            $desc[$id] = DB_getItem($_TABLES['ad_category'], 'description', "id='$id'");
+        }
+        return $desc[$id];
     }
 
 
@@ -936,7 +854,7 @@ class adCategory
     *   @param int id Category ID
     *   @return string Comma-separated category list
     */
-    public static function ParentList($id=0, $str='')
+    public static function XParentList($id=0, $str='')
     {
         global $_TABLES;
 
@@ -974,7 +892,7 @@ class adCategory
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/cat/' . $filename,
+        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/cat/' . $filename,
                 $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
     }
 

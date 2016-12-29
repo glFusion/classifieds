@@ -34,7 +34,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?editadtype={$A['id']}",
                 array(
                     'class' => 'uk-icon uk-icon-edit'
@@ -43,7 +43,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
         } else {
             $retval = COM_createLink(
                 $icon_arr['edit'],
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?editadtype={$A['id']}"
             );
         }
@@ -72,7 +72,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
     case 'delete':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval .= COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?deleteadtype=x&amp;type_id={$A['id']}",
                 array(
                     'title' => 'Delete this item',
@@ -88,7 +88,7 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
                         'class' => 'gl_mootip',
                         'onclick' => "return confirm('Do you really want to delete this item?');",
                     )),
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?deleteadtype=x&amp;type_id={$A['id']}"
             );
         }
@@ -130,7 +130,7 @@ function CLASSIFIEDS_adminAdTypes()
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => CLASSIFIEDS_ADMIN_URL . '/index.php',
+        'form_url' => $_CONF_ADVT['admin_url'] . '/index.php',
     );
 
     $query_arr = array('table' => 'ad_types',
@@ -157,7 +157,7 @@ function plugin_getListField_AdCategories(
     case 'edit':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?editcat=x&cat_id={$A['cat_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-edit',
@@ -166,7 +166,7 @@ function plugin_getListField_AdCategories(
         } else {
             $retval = COM_createLink(
                 $icon_arr['edit'],
-                CLASSIFIEDS_ADMIN_URL . "/index.php?editcat=x&cat_id={$A['cat_id']}"
+                $_CONF_ADVT['admin_url'] . "/index.php?editcat=x&cat_id={$A['cat_id']}"
             );
         }
         break;
@@ -174,7 +174,7 @@ function plugin_getListField_AdCategories(
     case 'delete':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval .= COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}",
                 array(
                     'title' => $LANG_ADVT['del_item'],
@@ -188,7 +188,7 @@ function plugin_getListField_AdCategories(
                 COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
                     $LANG_ADVT['del_item'],
                     array('title' => $LANG_ADVT['del_item'], 'class' => 'gl_mootip')),
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}"
             );
         }
@@ -229,7 +229,7 @@ function CLASSIFIEDS_adminCategories()
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=cat',
+        'form_url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=cat',
     );
 
     $query_arr = array('table' => 'ad_category',
@@ -278,7 +278,7 @@ function CLASSIFIEDS_adminAds()
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => CLASSIFIEDS_ADMIN_URL . '/index.php',
+        'form_url' => $_CONF_ADVT['admin_url'] . '/index.php',
     );
     $options = array('chkdelete' => true, 'chkfield' => 'ad_id');
 
@@ -319,14 +319,14 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .  "/index.php?editad=x&ad_id={$A['ad_id']}",
+                $_CONF_ADVT['admin_url'] .  "/index.php?editad=x&ad_id={$A['ad_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-edit',
                 )
             );
         } else {
             $retval = COM_createLink(
-                $icon_arr['edit'], CLASSIFIEDS_ADMIN_URL .
+                $icon_arr['edit'], $_CONF_ADVT['admin_url'] .
                 "/index.php?editad=x&ad_id={$A['ad_id']}"
             );
         }
@@ -335,14 +335,14 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
     case 'copy':
         if ($_CONF_ADVT['_is_uikit']) {
             $retval = COM_createLink('',
-                CLASSIFIEDS_ADMIN_URL .  "/index.php?dupad={$A['ad_id']}",
+                $_CONF_ADVT['admin_url'] .  "/index.php?dupad={$A['ad_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-copy',
                 )
             );
         } else {
             $retval = COM_createLink(
-                $icon_arr['copy'], CLASSIFIEDS_ADMIN_URL .
+                $icon_arr['copy'], $_CONF_ADVT['admin_url'] .
                 "/index.php?dupad={$A['ad_id']}"
             );
         }
@@ -356,7 +356,7 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         if ($_CONF_ADVT['_is_uikit']) {
-            $retval = COM_createLink('', CLASSIFIEDS_ADMIN_URL .
+            $retval = COM_createLink('', $_CONF_ADVT['admin_url'] .
                     "/index.php?deletead={$A['ad_id']}",
                 array(
                     'class' => 'uk-icon uk-icon-trash',
@@ -373,7 +373,7 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
                     height=\"16\" width=\"16\" border=\"0\"
                     onclick=\"return confirm('{$LANG_ADVT['confirm_delitem']}');\"
                     >",
-                CLASSIFIEDS_ADMIN_URL .
+                $_CONF_ADVT['admin_url'] .
                     "/index.php?deletead={$A['ad_id']}"
             );
         }
@@ -381,7 +381,7 @@ function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'subject':
         $retval = COM_createLink($fieldvalue,
-            CLASSIFIEDS_URL . '/index.php?mode=detail&id=' . $A['ad_id']);
+            $_CONF_ADVT['url'] . '/index.php?mode=detail&id=' . $A['ad_id']);
         break;
 
     case 'owner_id':

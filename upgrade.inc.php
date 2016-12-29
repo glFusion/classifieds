@@ -18,9 +18,9 @@ if (!defined('GVERSION')) {
 global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT, $_DB_dbms;
 
 /** Include the default configuration values */
-require_once CLASSIFIEDS_PI_PATH . '/install_defaults.php';
+require_once dirname(__FILE__) . '/install_defaults.php';
 /** Include the table creation strings */
-require_once CLASSIFIEDS_PI_PATH . "/sql/{$_DB_dbms}_install.php";
+require_once dirname(__FILE__) . "/sql/{$_DB_dbms}_install.php";
 
 /**
 *   Perform the upgrade starting at the current version
@@ -480,8 +480,8 @@ function classifieds_upgrade_1_1_0()
     $c = config::get_instance();
     $old_imgpath = pathinfo($_CONF_ADVT['image_dir']);
     $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
-    $new_imgpath = CLASSIFIEDS_IMGPATH  . '/user';
-    $new_catpath = CLASSIFIEDS_IMGPATH . '/cat';
+    $new_imgpath = $_CONF_ADVT['imgpath']  . '/user';
+    $new_catpath = $_CONF_ADVT['imgpath'] . '/cat';
     $mv_userimages = isset($_CONF_ADVT['image_dir']) &&
             $_CONF_ADVT['image_dir'] != $new_imgpath ? true : false;
     $mv_catimages = isset($_CONF_ADVT['catimgpath']) &&
@@ -565,18 +565,18 @@ function classifieds_upgrade_1_1_0()
     }
 
     // Get new values for conf_values table
-    $emailusers_default = 'i:0;';
-    $emailusers_value = $_CONF_ADVT['emailusers'] == 0 ? 'i:0;' : 'i:1;';
     $sql = array(
         "UPDATE {$_TABLES['ad_ads']} SET uid = owner_id",
         "ALTER TABLE {$_TABLES['ad_ads']}
             CHANGE ad_id ad_id varchar(128) NOT NULL,
+            CHANGE descript description TEXT NOT NULL,
             DROP perm_owner, DROP perm_group,
             DROP perm_members, DROP perm_anon,
             DROP owner_id, DROP group_id",
         "UPDATE {$_TABLES['ad_submission']} SET uid = owner_id",
         "ALTER TABLE {$_TABLES['ad_submission']}
             CHANGE ad_id ad_id varchar(128) NOT NULL,
+            CHANGE descript description TEXT NOT NULL,
             DROP perm_owner, DROP perm_group,
             DROP perm_members, DROP perm_anon,
             DROP owner_id, DROP group_id",
@@ -585,10 +585,8 @@ function classifieds_upgrade_1_1_0()
             ADD PRIMARY KEY(cat_id, uid)",
         "ALTER TABLE {$_TABLES['ad_uinfo']}
             CHANGE notify_exp notify_exp tinyint(1) UNSIGNED DEFAULT 1",
-        "UPDATE {$_TABLES['conf_values']} SET
-            selectionArray = 3, default_value = '$emailusers_default',
-            value = '$emailusers_value'
-            WHERE name='emailusers' AND group_name = '{$_CONF_ADVT['pi_name']}'",
+        "ALTER TABLE {$_TABLES['ad_types']}
+            CHANGE descrip description varchar(255) DEFAULT NULL",
         "ALTER TABLE {$_TABLES['ad_category']}
             ADD parent_map TEXT DEFAULT NULL AFTER bgcolor",
         $uinfo_sql,

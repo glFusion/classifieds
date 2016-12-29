@@ -3,9 +3,9 @@
 *   Admin index file.  Dispatch requests to other files
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2010 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.2
+*   @version    1.1.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -21,8 +21,6 @@ if (!in_array('classifieds', $_PLUGINS)) {
     exit;
 }
 
-/** Import plugin-specific functions */
-USES_classifieds_advt_functions();
 USES_lib_admin();
 
 // Only let admin users access this page
@@ -40,7 +38,7 @@ if (!SEC_hasRights('classifieds.admin')) {
 */
 function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 {
-    global $_CONF, $LANG_ADVT, $LANG01;
+    global $_CONF, $_CONF_ADVT, $LANG_ADVT, $LANG01;
 
     $menu_arr = array ();
     if ($help_text == '')
@@ -48,48 +46,48 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 
     if ($mode == 'ad') {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editad',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?editad',
             'text' => '<span class="adMenuActive">' . $LANG_ADVT['mnu_submit']
                     . '</span>',
             );
         $help_text = 'hlp_adlist';
     } else {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?adminad',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?adminad',
             'text' => $LANG_ADVT['mnu_adlist'],
         );
     }
 
     if ($mode == 'type') {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editadtype=0',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?editadtype=0',
             'text' => '<span class="adMenuActive">' . $LANG_ADVT['mnu_newtype']
                     . '</span>',
         );
         $help_text = 'hlp_adtypes';
     } else {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=type',
             'text' => $LANG_ADVT['mnu_types'],
         );
     }
 
     if ($mode == 'cat') {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?editcat=x&cat_id=0',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?editcat=x&cat_id=0',
             'text' => '<span class="adMenuActive">' .$LANG_ADVT['mnu_newcat']
                     . '</span>',
             );
         $help_text = 'hlp_cats';
     } else {
         $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=cat',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=cat',
             'text' => $LANG_ADVT['mnu_cats'],
         );
     }
 
     $menu_arr[] = array(
-            'url' => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=other',
+            'url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=other',
             'text' => $LANG_ADVT['mnu_other']);
     if ($mode == 'other') {
         $help_text = 'hlp_other';
@@ -159,7 +157,7 @@ case 'delbutton_x':
     foreach ($_POST['delitem'] as $ad_id) {
         Ad::Delete($ad_id);
     }
-    COM_refresh(CLASSIFIEDS_ADMIN_URL . '/index.php?admin=ad');
+    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=ad');
     break;
 
 case 'deletead':
@@ -168,7 +166,8 @@ case 'deletead':
             $type == 'moderate') {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
         Ad::Delete($ad_id, 'ad_submission');
-        $view = 'moderation';
+        echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
+        exit;
     } else {
         Ad::Delete($ad_id);
         $view = 'admin';
@@ -184,7 +183,7 @@ case 'saveadtype':
         COM_errorLog("Error saving ad type");
         COM_errorLog("Type info:" . print_r($AdType,true));
     }
-    COM_refresh(CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type');
+    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=type');
     break;
 
 case 'deleteadtype':
@@ -207,7 +206,7 @@ case 'deleteadtype':
         }
     }
     $AdType->Delete();
-    COM_refresh(CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type');
+    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=type');
     break;
 
 case 'savecat':
@@ -240,14 +239,29 @@ case 'delcatimg':
 
 case 'save':
     USES_classifieds_class_ad();
-    $Ad = new Ad($_POST['ad_id']);
-    if ($Ad->Save($_POST)) {
-        echo COM_refresh(CLASSIFIEDS_ADMIN_URL);
+    if ($_POST['type'] == 'submission') {   // approving a submission
+        $Ad = new Ad($ad_id, 'ad_submission');
+        $Ad->isNew = true;
+        $Ad->setTable('ad_ads');
+        $status = $Ad->Save($_POST);
+        if ($status) {
+            DB_delete($_TABLES['ad_submission'], 'ad_id', $ad_id);
+            plugin_moderationapprove_classifieds($ad_id);
+            echo COM_refresh($_CONF_ADVT['admin_url']);
+        } else {
+            echo COM_refresh($_CONF['site_url'] . '/admin/moderation.php');
+        }
         exit;
     } else {
-        $view = 'edit';
+        $status = $Ad->Save($_POST);
+        if ($status) {
+            echo COM_refresh($_CONF_ADVT['admin_url']);
+            exit;
+        } else {
+            $view = 'edit';
+        }
     }
-    break;
+   break;
 
 case 'dupad':
     USES_classifieds_class_ad();
@@ -256,7 +270,7 @@ case 'dupad':
     if (!$Ad->Duplicate()) {
         $msg = 13;
     }
-    echo COM_refresh(CLASSIFIEDS_ADMIN_URL . '?msg=' . $msg);
+    echo COM_refresh($_CONF_ADVT['admin_url'] . '?msg=' . $msg);
     exit;
     break;
 
@@ -296,6 +310,12 @@ case 'editcat':
     $content .= $C->Edit();
     break;
 
+case 'moderate':
+    USES_classifieds_class_ad();
+    $Ad = new Ad($ad_id, 'ad_submission');
+    $content .= $Ad->Edit();
+    break;
+
 case 'admin':
     USES_classifieds_admin();
     switch ($actionval) {
@@ -318,7 +338,7 @@ case 'admin':
         break;
     case 'other':
         $content .= CLASSIFIEDS_adminMenu($actionval);
-        $T1 = new Template(CLASSIFIEDS_PI_PATH . '/templates/admin/');
+        $T1 = new Template($_CONF_ADVT['path'] . '/templates/admin/');
         $T1->set_file('content', 'adminother.thtml');
         $T1->set_var(array(
             'cat_list' => SEC_getGroupDropdown($_CONF_ADVT['defgrpcat'], 3),
@@ -343,7 +363,7 @@ default:
  
 // Generate the common header for all admin pages
 echo CLASSIFIEDS_siteHeader();
-$T = new Template(CLASSIFIEDS_PI_PATH . '/templates/admin/');
+$T = new Template($_CONF_ADVT['path'] . '/templates/admin/');
 $T->set_file('admin', 'index.thtml');
 $T->set_var(array(
     'version'       => "{$LANG_ADVT['version']}: {$_CONF_ADVT['pi_version']}",

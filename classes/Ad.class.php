@@ -11,6 +11,10 @@
 *   @filesource
 */
 
+USES_classifieds_class_category();
+USES_classifieds_class_adtype();
+USES_classifieds_class_image();
+
 /**
 *   Class for ad type
 *   @package classifieds
@@ -22,6 +26,7 @@ class Ad
     public $Error;
     public $isNew;
     public $Cat;    // Category object
+    public $Type;   // Type object
 
     private $properties;
     private $table;
@@ -33,7 +38,7 @@ class Ad
         'cat_id' => 'int',
         'uid' => 'int',
         'subject' => 'string',
-        'descript' => 'string',
+        'description' => 'string',
         'url' => 'string',
         'views' => 'int',
         'add_date' => 'int',
@@ -64,7 +69,7 @@ class Ad
             $this->isNew = true;
             $this->ad_id = '';
             $this->subject = '';
-            $this->descrip = '';
+            $this->description = '';
         } else {
             $this->ad_id = $id;
             $this->Read();
@@ -95,7 +100,7 @@ class Ad
             $this->properties[$key] = strip_tags(trim($value));
             break;
 
-        case 'descript':
+        case 'description':
             // String values, html ok
             $this->properties[$key] = COM_checkHTML(trim($value));
             break;
@@ -170,6 +175,8 @@ class Ad
         if ($row) {
             $this->SetVars($row);
             $this->isNew = false;
+            $this->Cat = new adCategory($this->cat_id);
+            $this->Type= new adType($this->ad_type);
         }
     }
 
@@ -239,17 +246,20 @@ class Ad
             return false;
         } else {
             USES_classifieds_class_notify();
+            // Category object needed for notifications, but is not yet
+            // set in the current Ad object
+            $this->Cat = new adCategory($this->cat_id);
             if ($this->isNew) {
-                if ($this->table = 'ad_ads') {
-                    // Saved directly to prod, notify subscribers
-                    adNotify::Subscribers($this);
-                } else {
+                if ($this->isSubmission()) {
                     // Submission, notify moderators
                     adNotify::Submission($this);
+                } else {
+                    // Saved directly to prod, notify subscribers
+                    adNotify::Subscribers($this);
                 }
             }
-            return true;
         }
+        return true;
     }
 
 
@@ -268,7 +278,6 @@ class Ad
         if ($this->isNew) return NULL;
 
         // Grab the image records before the ad_id changes
-        USES_classifieds_class_image();
         $photos = adImage::getAll($this->ad_id);
 
         // Clear the ad id and save to get a new ID
@@ -294,12 +303,14 @@ class Ad
 
     /**
     *   Delete the current ad record from the database
+    *
+    *   @param  string  $ad_id  ID of ad to delete
+    *   @param  string  $table  Table, either submission or prod
+    *   @return boolean         True on success, False on failure
     */
     public static function Delete($ad_id, $table = 'ad_ads')
     {
         global $_TABLES;
-
-        USES_classifieds_class_image();
 
         // If we've gotten this far, then the current user has access
         // to delete this ad.
@@ -316,9 +327,9 @@ class Ad
         CLASSIFIEDS_auditLog("Ad {$ad_id} deleted.");
         if (DB_error()) {
             COM_errorLog(DB_error());
-            return 4;
+            return false;
         } else {
-            return 0;
+            return true;
         }
     }
 
@@ -331,7 +342,7 @@ class Ad
     public function isValidRecord()
     {
         if ($this->subject == '' ||
-            $this->descript == '' ||
+            $this->description == '' ||
              $this->cat_id == '') {
             return false;
         }
@@ -342,27 +353,25 @@ class Ad
     /**
     *   Creates the edit form
     *
-    *   @param integer $id Optional ID, current record used if zero
-    *   @return string HTML for edit form
+    *   @param  string  $id Optional Ad ID, current record used if zero
+    *   @return string      HTML for edit form
     */
     public function Edit($id = '')
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
-        USES_classifieds_class_adtype();
-        USES_classifieds_class_category();
 
         if ($id != '') $this->Read($id);
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         // Detect uikit theme
         $tpl_path = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('adedit', "edit$tpl_path.thtml");
         if ($this->isAdmin) {
-            $action_url = CLASSIFIEDS_ADMIN_URL . '/index.php';
-            $cancel_url = CLASSIFIEDS_ADMIN_URL . '/index.php?adminad=x';
+            $action_url = $_CONF_ADVT['admin_url'] . '/index.php';
+            $cancel_url = $_CONF_ADVT['admin_url'] . '/index.php?adminad=x';
         } else {
-            $action_url = CLASSIFIEDS_URL . '/index.php';
-            $cancel_url = CLASSIFIEDS_URL . '/index.php';
+            $action_url = $_CONF_ADVT['url'] . '/index.php';
+            $cancel_url = $_CONF_ADVT['url'] . '/index.php';
         }
 
         $add_date = new Date($this->add_date, $_CONF['timezone']);
@@ -378,38 +387,37 @@ class Ad
         $T->set_var(array(
             'isNew'         => $this->isNew ? 'true' : '',
             'isAdmin'       => $this->isAdmin ? 'true' : '',
-            'pi_admin_url'  => CLASSIFIEDS_ADMIN_URL,
+            'pi_admin_url'  => $_CONF_ADVT['admin_url'],
             'ad_id'         => $this->ad_id,
-            'descrip'       => htmlspecialchars($this->descript),
-            'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
-            'post_options'      => $post_options,
-            'change_editormode' => 'onchange="change_editmode(this);"',
+            'description'   => htmlspecialchars($this->description),
+            'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
+            'post_options'  => $post_options,
+            'change_editormode'     => 'onchange="change_editmode(this);"',
             'glfusionStyleBasePath' => $_CONF['site_url']. '/fckeditor',
-            'gltoken_name'      => CSRF_TOKEN,
-            'gltoken'           => SEC_createToken(),
-            'has_delbtn'        => 'true',
-            'txt_photo'         => "{$LANG_ADVT['photo']}<br />" .
+            'gltoken_name'  => CSRF_TOKEN,
+            'gltoken'       => SEC_createToken(),
+            'has_delbtn'    => 'true',
+            'txt_photo'     => "{$LANG_ADVT['photo']}<br />" .
                     sprintf($LANG_ADVT['image_max'], $img_max),
-            'type'              => $this->table == 'ad_submission' ? 'submission' : 'prod',
-            'action_url'        => $action_url,
-            'max_file_size'     => $_CONF['max_image_size'],
+            'type'          => $this->isSubmission() ? 'submission' : 'prod',
+            'action_url'    => $action_url,
+            'max_file_size' => $_CONF['max_image_size'],
             'subject'       => $this->subject,
-            'descript'      => $this->descript,
             'price'         => $this->price,
             'url'           => $this->url,
-            'keywords'          => $this->keywords,
-            'exp_date'          => $exp_date->format($_CONF['daytime']),
-            'add_date'          => $add_date->format($_CONF['daytime']),
+            'keywords'      => $this->keywords,
+            'exp_date'      => $exp_date->format($_CONF['daytime']),
+            'add_date'      => $add_date->format($_CONF['daytime']),
             'ad_type_selection' => adType::makeSelection($this->ad_type),
             'sel_list_catid'    => adCategory::buildSelection($this->cat_id),
-            'saveoption'        => $saveoption,
-            'cancel_url'        => $cancel_url,
-            'lang_runfor'       => $this->isNew ? $_LANG_ADVT['runfor'] :
+            'saveoption'    => $saveoption,
+            'cancel_url'    => $cancel_url,
+            'lang_runfor'   => $this->isNew ? $_LANG_ADVT['runfor'] :
                                     $LANG_ADVT['add'],
-            'moredays'          => $moredays,
-            'cls_exp_date'      => $this->exp_date < time() ? 'adExpiredText' : '',
+            'moredays'      => $moredays,
+            'cls_exp_date'  => $this->exp_date < time() ? 'adExpiredText' : '',
             'ownerselect'   => self::userDropdown($this->uid),
-            'uid'               => $_USER['uid'],
+            'uid'           => $_USER['uid'],
          ) );
 
         if ($this->isNew) {
@@ -434,10 +442,8 @@ class Ad
             while ($prow = DB_fetchArray($photo, false)) {
                 $i++;
                 $T->set_var(array(
-                    'img_url'   => LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/' . $prow['filename'],
-                            $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']),
-                    'thumb_url' => LGLIB_ImageUrl(CLASSIFIEDS_IMGPATH . '/' . $prow['filename'],
-                            $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']),
+                    'img_url'   => adImage::dispUrl($prow['filename']),
+                    'thumb_url' => adImage::thumbUrl($prow['filename']),
                     'seq_no'    => $i,
                     'ad_id'     => $this->ad_id,
                     'del_img_url'   => $action_url .
@@ -458,7 +464,6 @@ class Ad
         $T->parse('output','adedit');
         $display = $T->finish($T->get_var('output'));
         return $display;
-
     }   // function Edit()
 
 
@@ -472,13 +477,9 @@ class Ad
         global $_USER, $_TABLES, $_CONF, $LANG_ADVT, $_CONF_ADVT;
 
         USES_lib_comments();
-        USES_classifieds_class_category();
-        USES_classifieds_class_adtype();
 
         // Grab the search string directly from $_GET
         $srchval = isset($_GET['query']) ? trim($_GET['query']) : '';
-
-        $this->Cat = new adCategory($this->cat_id);
 
         // Check access to the ad.
         if (!$this->canView()) {
@@ -503,8 +504,8 @@ class Ad
         $replacements = array(
             '<br />',
         );
-        $descript = PLG_replaceTags(COM_checkHTML($this->descript));
-        $descript = preg_replace($patterns,$replacements,$descript);
+        $description = PLG_replaceTags(COM_checkHTML($this->description));
+        $description = preg_replace($patterns,$replacements,$description);
         $subject = strip_tags($this->subject);
         $price = strip_tags($this->price);
         $url = COM_sanitizeUrl($this->url);
@@ -513,19 +514,19 @@ class Ad
         // Highlight search terms, if any
         if ($srchval != '') {
             $subject = COM_highlightQuery($subject, $srchval);
-            $descript = COM_highlightQuery($descript, $srchval);
+            $description = COM_highlightQuery($description, $srchval);
         }
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         $tpl_type = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('detail', "detail$tpl_type.thtml");
 
         if ($this->isAdmin) {
-            $base_url = CLASSIFIEDS_ADMIN_URL . '/index.php';
+            $base_url = $_CONF_ADVT['admin_url'] . '/index.php';
             $del_link = $base_url . '?deletead=x&ad_id=' . $this->ad_id;
             $edit_link = $base_url . '?editad=x&ad_id=' . $this->ad_id;
         } else {
-            $base_url = CLASSIFIEDS_URL . '/index.php';
+            $base_url = $_CONF_ADVT['url'] . '/index.php';
             $del_link = $base_url . '?mode=delete&id=' . $this->ad_id;
             $edit_link = $base_url . '?mode=editad&id=' . $this->ad_id;
         }
@@ -557,9 +558,8 @@ class Ad
             'add_date'      => $add_date->format($_CONF['shortdate'], true),
             'exp_date'      => $exp_date->format($_CONF['shortdate'], true),
             'views_no'      => $this->views,
-            'descript'      => $descript,
-            'ad_type'       => adType::getDescription($this->ad_type),
-
+            'description'   => $description,
+            'ad_type'       => $this->Type->description,
             'uinfo_address' => $uinfo->address,
             'uinfo_city'    => $uinfo->city,
             'uinfo_state'   => $uinfo->state,
@@ -592,24 +592,15 @@ class Ad
             $T->set_var('ad_uid', $this->uid);
         }
 
-        USES_classifieds_class_image();
         $photos = adImage::getAll($this->ad_id);
         foreach ($photos as $img_id=>$filename) {
-            $img_small = LGLIB_ImageUrl(
-                CLASSIFIEDS_IMGPATH . '/user/' . $filename,
-                $_CONF_ADVT['detail_img_width']
-            );
-            $img_disp = LGLIB_ImageUrl(
-                CLASSIFIEDS_IMGPATH . '/user/' . $filename,
-                $_CONF_ADVT['img_max_width'],
-                $_CONF_ADVT['img_max_height']
-            );
+            $img_small = adImage::smallUrl($filename);
             if (!empty($img_small)) {
                 $T->set_block('detail', 'PhotoBlock', 'PBlock');
                 $T->set_var(array(
                     'tn_width'  => $_CONF_ADVT['detail_img_width'],
                     'small_url' => $img_small,
-                    'disp_url' => $img_disp,
+                    'disp_url' => adImage::dispUrl($filename),
                 ) );
                 $T->parse('PBlock', 'PhotoBlock', true);
                 $T->set_var('have_photo', 'true');
@@ -618,7 +609,7 @@ class Ad
 
         if (DB_count($_TABLES['ad_ads'], 'uid', $this->uid) > 1) {
             $T->set_var('byposter_url',
-                CLASSIFIEDS_URL . '/index.php?' .
+                $_CONF_ADVT['url'] . '/index.php?' .
                 "mode=byposter&uid={$this->uid}");
         }
 
@@ -643,11 +634,11 @@ class Ad
                 $T->set_var(array(
                     'hot_title' => $hotrow['subject'],
                     'hot_url'   => CLASSIFIEDS_makeURL('detail', $hotrow['ad_id']),
-                    'hot_cat_url' => CLASSIFIEDS_makeURL('home', $this->Cat->cat_id),
-                    'hot_cat'   => $this->Cat->cat_name,
+                    'hot_cat_url' => CLASSIFIEDS_makeURL('home', $hotrow['cat_id']),
+                    'hot_cat'   => $hotrow['cat_name'],
                 ) );
+                $T->parse('HBlock', 'HotBlock', true);
             }
-            $T->parse('HBlock', 'HotBlock', true);
         }
         $T->set_var('whats_hot_row', $hot_data);
 
@@ -667,9 +658,9 @@ class Ad
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @param  integer     $newval New value to set
-    *   @param  integer     $id     ID number of element to modify
-    *   @return integer     New value (old value if failed)
+    *   @param  integer $newval New value to set (1 or 0)
+    *   @param  integer $id     ID number of element to modify
+    *   @return integer New value (old value if failed)
     */
     public function toggleEnabled($newval, $id=0)
     {
@@ -707,6 +698,18 @@ class Ad
     {
         global $_TABLES;
         $this->table = $_TABLES[$table];
+    }
+
+
+    /**
+    *   Helper function to check if the current object is a submission.
+    *
+    *   @return boolean     True if this is a submission, False if it is prod
+    */
+    public function isSubmission()
+    {
+        global $_TABLES;
+        return $this->table == $_TABLES['ad_submission'] ? true : false;
     }
 
 
@@ -907,15 +910,17 @@ class Ad
 
         // Get the hot results (most viewed ads)
         $sql = "SELECT ad.ad_id, ad.cat_id, ad.subject,
-                    cat.cat_id, cat.fgcolor, cat.bgcolor
+                    cat.cat_id, cat.fgcolor, cat.bgcolor,
+                    cat.cat_name
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON ad.cat_id = cat.cat_id
-            WHERE ad.exp_date > $time " .
+            WHERE ad.exp_date > $time
+                AND ad.views > 2 " .
                 COM_getPermSQL('AND', 0, 2, 'cat') . "
-            ORDER BY views DESC
+            ORDER BY ad.views DESC
             LIMIT $num";
-            //echo $sql;die;
+        //echo $sql;die;
         $res = DB_query($sql);
         while ($hotrow = DB_fetchArray($res, false)) {
             $retval[] = $hotrow;

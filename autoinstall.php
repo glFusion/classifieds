@@ -21,7 +21,7 @@ global $_DB_dbms;
 */
 require_once $_CONF['path'].'plugins/classifieds/functions.inc';
 /** Import plugin database definition */
-require_once CLASSIFIEDS_PI_PATH . '/sql/'. $_DB_dbms. '_install.php';
+require_once $_CONF_ADVT['path'] . '/sql/'. $_DB_dbms. '_install.php';
 
 /** Plugin installation options
 *   @global array $INSTALL_plugin['classifieds']
@@ -114,8 +114,8 @@ $INSTALL_plugin['classifieds'] = array(
             'dirs' => array(
                 $_CONF['path'] . 'data/' . $_CONF_ADVT['pi_name'],
                 $_CONF['path'] . 'data/' . $_CONF_ADVT['pi_name'] . '/images',
-                CLASSIFIEDS_IMGPATH . '/user',
-                CLASSIFIEDS_IMGPATH . '/cat',
+                $_CONF_ADVT['imgpath'] . '/user',
+                $_CONF_ADVT['imgpath'] . '/cat',
             ),
     ),
 
@@ -157,7 +157,7 @@ function plugin_load_configuration_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $_TABLES;
 
-    require_once CLASSIFIEDS_PI_PATH . '/install_defaults.php';
+    require_once $_CONF_ADVT['path'] . '/install_defaults.php';
 
     // Get the admin group ID that was saved previously.
     $group_id = (int)DB_getItem($_TABLES['groups'], 'grp_id', 

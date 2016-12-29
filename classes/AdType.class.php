@@ -38,7 +38,7 @@ class adType
         $id = (int)$id;
         if ($id < 1) {
             $this->id = 0;
-            $this->descrip = '';
+            $this->description = '';
             $this->enabled = 1;
         } else {
             $this->id = $id;
@@ -52,7 +52,7 @@ class adType
         case 'id':
             $this->properties[$key] = (int)$value;
             break;
-        case 'descrip':
+        case 'description':
             $this->properties[$key] = trim($value);
             break;
         case 'enabled':
@@ -80,7 +80,7 @@ class adType
         if (!is_array($row)) return;
 
         $this->id = $row['id'];
-        $this->descrip = $row['descrip'];
+        $this->description = $row['description'];
         $this->enabled = $row['enabled'];
     }
 
@@ -147,7 +147,7 @@ class adType
             $sql1 = "UPDATE {$_TABLES['ad_types']} SET ";
             $sql3 = "WHERE id=" . $this->id;
         }
-        $sql2 = "descrip = '" . DB_escapeString($this->descrip) . "',
+        $sql2 = "description = '" . DB_escapeString($this->description) . "',
                 enabled = {$this->enabled}";
         $sql = $sql1 . $sql2 . $sql3;
         $res = DB_query($sql);
@@ -162,7 +162,7 @@ class adType
     */
     public function isValidRecord()
     {
-        if ($this->descrip == '') {
+        if ($this->description == '') {
             return false;
         } else {
             return true;
@@ -183,18 +183,18 @@ class adType
         $id = (int)$id;
         if ($id > 0) $this->Read($id);
 
-        $T = new Template(CLASSIFIEDS_PI_PATH . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates');
         if ($_CONF_ADVT['_is_uikit']) {
             $T->set_file('admin','adtypeform.uikit.thtml');
         } else {
             $T->set_file('admin','adtypeform.thtml');
         }
         $T->set_var(array(
-            'pi_admin_url'  => CLASSIFIEDS_ADMIN_URL,
-            'cancel_url'    => CLASSIFIEDS_ADMIN_URL . '/index.php?admin=type',
+            'pi_admin_url'  => $_CONF_ADVT['admin_url'],
+            'cancel_url'    => $_CONF_ADVT['admin_url'] . '/index.php?admin=type',
             'show_name'     => $this->showName,
             'type_id'       => $this->id,
-            'descrip'       => htmlspecialchars($this->descrip),
+            'descriptiuon'  => htmlspecialchars($this->description),
             'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
         ) );
 
@@ -222,7 +222,7 @@ class adType
         global $_TABLES;
 
         return COM_optionList($_TABLES['ad_types'],
-                'id,descrip', $sel, 1, 'enabled=1');
+                'id,description', $sel, 1, 'enabled=1');
     }   // function makeSelection()
 
 
@@ -282,6 +282,8 @@ class adType
     *   Returns the string corresponding to the $id parameter.
     *   Designed to be used standalone; if this is an object,
     *   we already have the description in a variable.
+    *   Uses a static variable to hold the descriptions since this can
+    *   be called many times for an ad listing.
     *
     *   @param  integer $id     Database ID of the ad type
     *   @return string          Ad Type Description
@@ -289,9 +291,13 @@ class adType
     public static function GetDescription($id)
     {
         global $_TABLES;
+        static $desc = array();
 
         $id = (int)$id;
-        return DB_getItem($_TABLES['ad_types'], 'descrip', "id='$id'");
+        if (!isset($desc[$id])) {
+            $desc[$id] = DB_getItem($_TABLES['ad_types'], 'description', "id='$id'");
+        }
+        return $desc[$id];
     }
 
 }   // class adType

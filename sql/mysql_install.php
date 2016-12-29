@@ -43,7 +43,7 @@ $adtable_create = "
     cat_id SMALLINT UNSIGNED NOT NULL,
     uid SMALLINT UNSIGNED NOT NULL,
     subject varchar(255) NOT NULL,
-    descript TEXT NOT NULL,
+    description TEXT NOT NULL,
     url varchar(255) NOT NULL,
     views INT NOT NULL DEFAULT '0',
     add_date INT NOT NULL,
@@ -90,7 +90,7 @@ $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
 
 $NEWTABLE['ad_types'] = "CREATE TABLE {$_TABLES['ad_types']} (
     id int(11) NOT NULL auto_increment,
-    descrip varchar(255) default NULL,
+    description varchar(255) default NULL,
     enabled tinyint(1) default '1',
     PRIMARY KEY  (`id`))";
 
@@ -113,7 +113,7 @@ $DEFVALUES['block1'] = "INSERT INTO {$_TABLES['blocks']}
 ;";
 
 $DEFVALUES['ad_types'] = "INSERT INTO {$_TABLES['ad_types']}
-        (descrip)
+        (description)
     VALUES
         ('For Sale'),
         ('Wanted')
