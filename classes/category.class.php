@@ -896,6 +896,29 @@ class adCategory
                 $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
     }
 
+
+    /**
+    *   Reset all category permissions to a single group/perm setting
+    *
+    *   @param  integer $gid    Group ID to set
+    *   @param  array   $perms  Permissions to set
+    */
+    public static function ResetPerms($gid, $perms)
+    {
+        global $_TABLES;
+        for ($i = 0; $i < 4; $i++) {
+            $perms[$i] = (int)$perms[$i];
+        }
+        $gid = (int)$gid;
+        $sql = "UPDATE {$_TABLES['ad_category']} SET
+            perm_owner = {$perms[0]},
+            perm_group = {$perms[1]},
+            perm_members = {$perms[2]},
+            perm_anon = {$perms[3]},
+            group_id = $gid";
+        DB_query($sql);
+    }
+
 }
 
 ?>

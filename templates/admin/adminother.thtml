@@ -1,11 +1,11 @@
 {# begin {templatelocation} #}
 <h2>{$LANG_ADVT['reset_cat_perms']}</h2>
 <form 
-    action="{site_url}/admin/plugins/classifieds/index.php?mode=resetcatperms"
-    method="POST">
+    action="{site_url}/admin/plugins/classifieds/index.php"
+    method="post">
   {$LANG_ACCESS['group']}: {cat_list}<p />
   {cat_perms}<p />
-  <input type="submit" name="submit" value="{$LANG12[8]}" />
+  <input type="submit" name="resetcatperms" value="{$LANG12[8]}" />
 </form>
 <hr />
 {# end {templatelocation} #}

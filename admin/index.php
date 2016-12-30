@@ -105,7 +105,7 @@ function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 $action = '';
 $expected = array('edit', 'moderate', 'save', 'deletead', 'deleteimage',
         'deleteadtype', 'saveadtype', 'editadtype', 'editad', 'dupad',
-        'deletecat', 'editcat', 'savecat', 'delbutton_x',
+        'deletecat', 'editcat', 'savecat', 'delbutton_x', 'resetcatperms',
         'cancel', 'admin');
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -271,6 +271,19 @@ case 'dupad':
         $msg = 13;
     }
     echo COM_refresh($_CONF_ADVT['admin_url'] . '?msg=' . $msg);
+    exit;
+    break;
+
+case 'resetcatperms':
+    USES_classifieds_class_category();
+    $new_perms = array(
+        $_POST['perm_owner'][0],
+        $_POST['perm_group'][0],
+        $_POST['perm_members'][0],
+        $_POST['perm_anon'][0],
+    );
+    adCategory::ResetPerms($_POST['group_id'], $new_perms);
+    echo COM_refresh($_CONF_ADVT['admin_url']);
     exit;
     break;
 
