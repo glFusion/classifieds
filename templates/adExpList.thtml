@@ -27,7 +27,7 @@
     <td height="25" align="center"><small>{add_date}</small>&nbsp;&nbsp;</td>
   </tr>
   <tr>
-    <td width="120">
+    <td width="{tn_cellwidth}" style="padding-bottom: 20px;">
       {!if img_url}
         {!if is_uikit}
         <a href="{img_url}" data-uk-lightbox>
@@ -37,10 +37,6 @@
           <img src="{thumb_url}" border="0" 
             alt="{$LANG_ADVT['click_to_enlarge']}" />
         </a>
-        <br />
-      {!else}
-        <br />
-        <span style="color:#808080;size:small;">{$LANG_ADVT[no_image]}</span>
       {!endif}
     </td>
     <td valign="top" colspan="4">
@@ -49,11 +45,6 @@
       {!if price}
         {$LANG_ADVT['price']}: {price}
       {!endif}
-    </td>
-  </tr>
-  <tr>
-    <td colspan="5" align="right">
-      <a href="?page=detail&cat={cat_id}&id={ad_id}"><small>{txt_more}</small></a>
     </td>
   </tr>
   <!-- END QueueRow -->

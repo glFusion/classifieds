@@ -133,6 +133,7 @@ class AdList
                 'ellipses'  => strlen($row['descript']) > 300 ? '...' : '',
                 'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
                 'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
+                'tn_cellwidth' => $_CONF_ADVT['thumb_max_size'] - 20,
             ) );
 
             $photos = adImage::GetAll($row['ad_id'], 1);
