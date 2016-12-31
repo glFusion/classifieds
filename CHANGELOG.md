@@ -11,6 +11,7 @@ Compatibile with glFusion 1.6.0 or higher.
 - Add DB field to hold the category parent tree to save lookups
 - Standardize "description" field name for ads, types and categories
 - Move notification functions to separate class
+- Add AJAX update when adding days to an ad
 
 ## glClassifieds - 1.0.4
 Released 2011-09-02
