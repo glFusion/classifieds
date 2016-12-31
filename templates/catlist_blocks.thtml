@@ -9,10 +9,10 @@
         {cat_name}
       </font>
     </div>
-    {!if cat_image}
+    {!if image}
     <div class="catImage" style="cursor:pointer;">
       <a href="{cat_url}">
-      <img class="catImage" src="{cat_image}" />
+      <img class="catImage" src="{image}" />
       </a>
     </div>
     {!endif}
