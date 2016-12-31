@@ -1,6 +1,8 @@
 # Classifieds Plugin for glFusion - Change Log
 
 ## Version 1.1.0
+released 2016-12-31
+
 Compatibile with glFusion 1.6.0 or higher.
 - Refactor code into classes for different object types
 - Add uikit templates when a uikit-based theme is in use
