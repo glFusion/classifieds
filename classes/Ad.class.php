@@ -312,8 +312,8 @@ class Ad
     {
         global $_TABLES;
 
-        // If we've gotten this far, then the current user has access
-        // to delete this ad.
+        if (empty($ad_id)) return false;
+
         if ($table == 'ad_submission') {
             // Do the normal plugin rejection stuff
             plugin_moderationdelete_classifieds($ad_id);

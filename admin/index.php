@@ -130,7 +130,6 @@ if ($view === NULL) {
     $view = $action;
 }
 
-$type = CLASSIFIEDS_getParam('type');
 $content = '';      // initialize variable for page content
 $A = array();       // initialize array for form vars
 
@@ -161,7 +160,9 @@ case 'delbutton_x':
     break;
 
 case 'deletead':
+    $ad_id = $actionval;
     USES_classifieds_class_ad();
+    $type = CLASSIFIEDS_getParam('type', 'string');
     if ($type == 'submission' || $type == 'editsubmission' || 
             $type == 'moderate') {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
@@ -253,6 +254,7 @@ case 'save':
         }
         exit;
     } else {
+        $Ad = new Ad($ad_id);
         $status = $Ad->Save($_POST);
         if ($status) {
             echo COM_refresh($_CONF_ADVT['admin_url']);
@@ -266,11 +268,8 @@ case 'save':
 case 'dupad':
     USES_classifieds_class_ad();
     $Ad = new Ad($actionval);
-    $msg = 14;
-    if (!$Ad->Duplicate()) {
-        $msg = 13;
-    }
-    echo COM_refresh($_CONF_ADVT['admin_url'] . '?msg=' . $msg);
+    $msg = $Ad->Duplicate() ? 14 : 13;
+    echo COM_refresh($_CONF_ADVT['admin_url'] . '?plugin=classifieds&msg=' . $msg);
     exit;
     break;
 
