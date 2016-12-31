@@ -39,7 +39,7 @@
           class="adExpiredText"
         {!endif}
       >
-        {$LANG_ADVT['expires_col']} {exp_date}
+        {$LANG_ADVT['expires_col']} <span id="exp_date">{exp_date}</span>
         <p />
       </span>
 

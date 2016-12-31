@@ -844,12 +844,12 @@ class Ad
         $add_days = min($max_days, $days);
         if ($add_days <= 0) return 0;
 
-        $new_exp_date = $this->exp_date + ($add_days * 86400);
+        $this->exp_date += ($add_days * 86400);
 
         // Finally, we have access to this add and there's a valid number
         // of days to add.
         DB_query("UPDATE {$_TABLES['ad_ads']} SET
-                exp_date=$new_exp_date,
+                exp_date={$this->exp_date},
                 exp_sent=0
             WHERE ad_id='$this->ad_id'");
         return $max_days - $add_days;

@@ -41,8 +41,12 @@ case 'moredays':
     USES_classifieds_class_ad();
     $Ad = new Ad($_GET['id']);
     if ($Ad->isNew) exit;
+    $maxdays = $Ad->addDays($_GET['days']);
+    $dt = new Date($Ad->exp_date, $_CONF['timezone']);
+    $expdate = $dt->format($_CONF['shortdate'], true);
     $result = array(
-        'maxdays' => $Ad->addDays($_GET['days']),
+        'maxdays' => $maxdays,
+        'expdate' => $expdate,
     );
     break;
 }

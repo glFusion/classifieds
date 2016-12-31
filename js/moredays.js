@@ -22,5 +22,6 @@ function ADVTdaysStateChanged()
     // Get the new max days to add
     document.getElementById("f_max_add_days").value = '';
     document.getElementById("max_add_days").innerHTML = jsonObj.maxdays;
+    document.getElementById("exp_date").innerHTML = jsonObj.expdate;
   }
 }
