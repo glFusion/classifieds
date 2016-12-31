@@ -129,30 +129,25 @@ class AdList
                 'cat_name'  => $row['cat_name'],
                 'cat_url'   => CLASSIFIEDS_makeURL('home', $row['cat_id']),
                 'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
+                'descript' => substr(strip_tags($row['description']), 0, 300),
+                'ellipses'  => strlen($row['descript']) > 300 ? '...' : '',
+                'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
                 'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
             ) );
 
             $photos = adImage::GetAll($row['ad_id'], 1);
-            foreach ($photos as $photo_id=>$filename) {
-                //$prow = DB_fetchArray($photo);
-                $T->set_var('img_url', adImage::dispUrl($filename));
-                $T->set_var('thumb_url', adImage::thumbUrl($filename));
-                break;
-            }
-
-            $T->set_var('descript', substr(strip_tags($row['descript']), 0, 300));
-            if (strlen($row['descript']) > 300)
-                $T->set_var('ellipses', '...');
-
-            if ($row['price'] != '')
-                $T->set_var('price', strip_tags($row['price']));
-            else
-                $T->set_var('price', '');
-
-            //Additional info
-            for ($j = 0; $j < 5; $j++) {
-                $T->set_var('name0'.$j, $row['name0'.$j]);
-                $T->set_var('value0'.$j, $row['value0'.$j]);
+            if (empty($photos)) {
+                $filename = current($photos);
+                $T->set_var(array(
+                    'img_url'   => '',
+                    'thumb_url' => '',
+                ) );
+            } else {
+                $filename = current($photos);
+                $T->set_var(array(
+                    'img_url'   => adImage::dispUrl($filename),
+                    'thumb_url' => adImage::thumbUrl($filename),
+                ) );
             }
 
             $T->parse('QRow', 'QueueRow', true);

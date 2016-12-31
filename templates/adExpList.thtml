@@ -56,29 +56,6 @@
       <a href="?page=detail&cat={cat_id}&id={ad_id}"><small>{txt_more}</small></a>
     </td>
   </tr>
-  <tr>
-    <td colspan="5" align="center">
-      <table border=0 width=100%>
-        <tr>
-          <td colspan="5">{txt_addit_info}</td>
-        </tr>
-        <tr>
-          <td>{name00}</td>
-          <td>{name01}</td>
-          <td>{name02}</td>
-          <td>{name03}</td>
-          <td>{name04}</td>
-        </tr>
-        <tr>
-          <td>{value00}</td>
-          <td>{value01}</td>
-          <td>{value02}</td>
-          <td>{value03}</td>
-          <td>{value04}</td>
-        </tr>
-      </table>
-    </td>
-  </tr>
   <!-- END QueueRow -->
 
   <tr>
