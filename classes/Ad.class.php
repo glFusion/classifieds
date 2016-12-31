@@ -768,7 +768,7 @@ class Ad
         if ($max_add_days < $run_days)
             return 0;
         else
-            return ($max_add_days - $run_days);
+            return (int)($max_add_days - $run_days);
     }
 
 
