@@ -19,6 +19,7 @@
   min-height:180px;
   font-family:Helvetica;
   background: #90ee90;  /* default */
+  cursor: pointer;
 }
 
 .adcat img {

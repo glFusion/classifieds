@@ -2,7 +2,7 @@
 {menu}
 <!-- BEGIN CatDiv -->
 <a href="{cat_url}">
-  <div class="adcat" style="background-color:{bgcolor}; cursor:pointer;">
+  <div class="adcat" style="background-color:{bgcolor};">
     <!--<div class="catTitle" style="background:{hdcolor}">-->
     <div class="catTitle">
      <font color="{fgcolor}">
@@ -10,10 +10,8 @@
       </font>
     </div>
     {!if image}
-    <div class="catImage" style="cursor:pointer;">
-      <a href="{cat_url}">
+    <div class="catImage">
       <img class="catImage" src="{image}" />
-      </a>
     </div>
     {!endif}
     <div class="catDesc">
