@@ -28,6 +28,8 @@ class adCategory
     */
     public function __construct($catid = 0)
     {
+        global $_CONF_ADVT;
+
         $catid = (int)$catid;
         $this->imgPath = $_CONF_ADVT['imgpath'] . '/cat/';
         if ($catid > 0) {
@@ -194,10 +196,10 @@ class adCategory
             }
 
             // If a new image was uploaded, and this is an existing category,
-            // then delete the old image, if any.  The DB still has the old filename
-            // at this point.
+            // then delete the old image, if any. The DB still has the old 
+            // filename at this point.
             if (!$this->isNew) {
-                self::DelImage($catid);
+                self::DelImage($thie->cat_id);
             }
         }
 
