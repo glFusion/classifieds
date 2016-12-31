@@ -63,7 +63,6 @@ $_ADVT_DEFAULLT['emailusers'] = 0;
 $_ADVT_DEFAULT['hideuserfunction'] = 1;     // 1 = hide from User Functions menu
 
 // Set the default permissions
-$_ADVT_DEFAULT['default_permissions'] =  array (3, 2, 2, 2);
 $_ADVT_DEFAULT['default_perm_cat'] =  array (3, 3, 2, 2);
 
 // Default values for max ads shown per page (expanded & list views)
@@ -193,12 +192,6 @@ function plugin_initconfig_classifieds($group_id = 0)
                 'select', 0, 0, 3, 220, true, $_CONF_ADVT['pi_name']);
         $c->add('displayblocks', $_ADVT_DEFAULT['displayblocks'],
                 'select', 0, 0, 13, 230, true, $_CONF_ADVT['pi_name']);
-
-        $c->add('fs_permissions', NULL, 'fieldset', 0, 4, NULL, 0, true, $_CONF_ADVT['pi_name']);
-        $c->add('defgrpad', $group_id,
-                'select', 0, 4, 0, 90, true, $_CONF_ADVT['pi_name']);
-        $c->add('default_permissions', $_ADVT_DEFAULT['default_permissions'],
-                '@select', 0, 4, 12, 100, true, $_CONF_ADVT['pi_name']);
 
         $c->add('fs_perm_cat', NULL, 'fieldset', 0, 5, NULL, 0, true, $_CONF_ADVT['pi_name']);
         $c->add('defgrpcat', $_ADVT_DEFAULT['defgrpcat'],
