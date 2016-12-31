@@ -128,8 +128,8 @@ class adImage
         foreach ($images as $id=>$filename) {
             // Only delete the file if it's the last record.
             if (self::UsedCount($filename) > 1) continue;
-            if (file_exists($_CONF_ADVT['imgpath'] . '/' . $filename)) {
-                unlink($_CONF_ADVT['imgpath'] . '/' . $filename);
+            if (file_exists($_CONF_ADVT['imgpath'] . '/user/' . $filename)) {
+                unlink($_CONF_ADVT['imgpath'] . '/user/' . $filename);
             }
         }
         // Delete all image records for this ad_id
@@ -155,6 +155,7 @@ class adImage
 
     /**
     *   Shortcut function to get the URL to the display version of the image.
+    *   Used for the lightbox popup display.
     *
     *   @param  string  $filename   Image filename
     *   @return string              URL to image sized for display
@@ -168,7 +169,8 @@ class adImage
 
 
     /**
-    *   Shortcut function to get the URL to the display version of the image.
+    *   Shortcut function to get the URL to the vmall display image.
+    *   Used for the larger thumbnails on the ad detail page
     *
     *   @param  string  $filename   Image filename
     *   @return string              URL to image sized for display
@@ -183,6 +185,7 @@ class adImage
 
     /**
     *   Shortcut functions to get resized thumbnail URLs.
+    *   Used for the small thumbnails on ad listings.
     *
     *   @param  string  $filename   Filename to view
     *   @return string      URL to the resized image
