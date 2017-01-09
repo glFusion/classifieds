@@ -1635,7 +1635,7 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
         break;
     }
 
-    $sql = "SELECT ad.ad_id,
+    $sql = "SELECT ad.ad_id
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} c
             ON ad.cat_id = c.id
