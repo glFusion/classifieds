@@ -1619,7 +1619,6 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             }
         }
     }
-
     $where = '1=1';
     $order = '';
     $limit = "LIMIT $limit";
@@ -1631,18 +1630,17 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
         break;
     case 'recent':  // Show one or more recent ads
         $order = 'ORDER BY ad.add_date DESC';
-        if (!$result || DB_numRows($result) < 1) return $content;
         break;
     }
 
     $sql = "SELECT ad.ad_id
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} c
-            ON ad.cat_id = c.id
+                ON ad.cat_id = c.cat_id
             WHERE $where " . COM_getPermSQL('AND', 0, 2, 'c') .
             " $order $limit";
-    $result = DB_query($sql);
-    if (!$result || DB_numRows($result) < 1) return '';
+    $result = DB_query($sql, 1);
+    if (DB_error() || DB_numRows($result) < 1) return $content;
 
     $T->set_file('autotag', $template);
     $T->set_block('autotag', 'tag_data', 'TAG');

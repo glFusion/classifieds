@@ -1,21 +1,21 @@
 {# begin {templatelocation} #}
 <!-- BEGIN tag_data -->
 <div style="clear:both;">
-  {!if img_url}
+{!if img_url}
   <div style="float:left;padding:10px;">
-    {!if is_uikit}
+{!if is_uikit}
     <a href="{img_url}" data-uk-lightbox="{group:'ad'}">
-    {!else}
+{!else}
     <a href="{img_url}" target="_blank" rel="slimbox[ad]" 
       onclick="initLightbox()">
-    {!end}
+{!endif}
       <img src="{tn_url}" border="0" 
           alt="{$LANG_ADVT[click_to_enlarge]}" 
           title="{$LANG_ADVT[click_to_enlarge]}"
           class="gl_mootip" data-uk-tooltip />
     </a>
   </div>
-  {!endif}
+{!endif}
   <div style="float:left;">
     <a href="{ad_url}">{subject}</a>
   </div>
