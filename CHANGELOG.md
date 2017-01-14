@@ -1,5 +1,10 @@
 # Classifieds Plugin for glFusion - Change Log
 
+## Version 1.1.1
+released 2017-01-10
+
+- Fix SQL error and template for autotags
+
 ## Version 1.1.0
 released 2016-12-31
 
