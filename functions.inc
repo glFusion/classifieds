@@ -228,7 +228,7 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
 */
 function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $page, $view)
 {
-    global $_TABLES, $LANG_ACCESS;
+    global $LANG_ACCESS, $_USER;
 
     $retval = '';
 
@@ -361,11 +361,12 @@ function plugin_geticon_classifieds()
 */
 function plugin_getadminoption_classifieds()
 {
-    global $_TABLES, $LANG_ADVT;
+    global $_TABLES, $LANG_ADVT, $_CONF_ADVT;
 
     if (plugin_ismoderator_classifieds()) {
         return array(
-            $LANG_ADVT['menuitem'],
+            $LANG_ADVT['menuitem'] . ' (' .
+                DB_count($_TABLES['ad_ads']) . ')',
             $_CONF_ADVT['admin_url'] . '/index.php',
         );
     } else {
