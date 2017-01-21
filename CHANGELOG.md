@@ -1,5 +1,10 @@
 # Classifieds Plugin for glFusion - Change Log
 
+## Version 1.1.2
+Released 2017-01-21
+- Fix admin menu link
+- Add missing comment count field to submissions table
+
 ## Version 1.1.1
 released 2017-01-10
 

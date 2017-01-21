@@ -4,7 +4,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -88,8 +88,13 @@ function classifieds_do_upgrade($current_ver)
             return $error;
     }
 
-    return $error;
+    if ($current_ver < '1.1.2') {
+        $error = classifieds_upgrade_1_1_2();
+        if ($error)
+            return $error;
+    }
 
+    return $error;
 }
 
 
@@ -125,7 +130,6 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='')
     }
 
     return 0;
-
 }
 
 
@@ -227,7 +231,6 @@ function classifieds_upgrade_0_2()
     }
 
     return classifieds_do_upgrade_sql('0.2', $sql);
-
 }
 
 
@@ -376,7 +379,6 @@ function classifieds_upgrade_0_4()
     //        ADD day_balance INT(11) DEFAULT 0";
 
    return classifieds_do_upgrade_sql('0.4', $sql);
-
 }
 
 
@@ -400,7 +402,6 @@ function classifieds_upgrade_1_0_1()
     }
 
     return classifieds_do_upgrade_sql('1.0.1', $sql);
-
 }
 
 
@@ -433,7 +434,6 @@ function classifieds_upgrade_1_0_2()
             WHERE name='hidenewads' AND group_name='{$_CONF_ADVT['pi_name']}'";
 
     return classifieds_do_upgrade_sql('1.0.2', $sql);
-
 }
 
 
@@ -464,7 +464,6 @@ function classifieds_upgrade_1_0_4()
     }
 
     return classifieds_do_upgrade_sql('1.0.4', $sql);
-
 }
 
 /**
@@ -592,6 +591,22 @@ function classifieds_upgrade_1_1_0()
         $uinfo_sql,
     );
     return classifieds_do_upgrade_sql('1.1.0', $sql);
+}
+
+
+/**
+*   Upgrade to version 1.1.2
+*   Adds comments field to submissions to match ad table
+*/
+function classifieds_upgrade_1_1_2()
+{
+    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
+
+    $sql = array(
+        "ALTER TABLE {$_TABLES['ad_submission']}
+            ADD comments INT(4) UNSIGNED NOT NULL DEFAULT '0' AFTER exp_sent",
+    );
+    return classifieds_do_upgrade_sql('1.1.2', $sql);
 }
 
 ?>
