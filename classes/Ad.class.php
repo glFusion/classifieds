@@ -3,9 +3,9 @@
 *   Class to manage ad types
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -369,9 +369,12 @@ class Ad
         if ($this->isAdmin) {
             $action_url = $_CONF_ADVT['admin_url'] . '/index.php';
             $cancel_url = $_CONF_ADVT['admin_url'] . '/index.php?adminad=x';
+            $del_img_url = $action_url . '?ad_id=' . $this->ad_id . '&deleteimg=';
         } else {
             $action_url = $_CONF_ADVT['url'] . '/index.php';
             $cancel_url = $_CONF_ADVT['url'] . '/index.php';
+            $del_img_url = $action_url . '?mode=delete_img&ad_id=' . $this->ad_id .
+                '&img_id=';
         }
 
         $add_date = new Date($this->add_date, $_CONF['timezone']);
@@ -446,9 +449,7 @@ class Ad
                     'thumb_url' => adImage::thumbUrl($prow['filename']),
                     'seq_no'    => $i,
                     'ad_id'     => $this->ad_id,
-                    'del_img_url'   => $action_url .
-                        "?deleteimage={$prow['photo_id']}" .
-                        "&ad_id={$this->ad_id}",
+                    'del_img_url'   => $del_img_url . $prow['photo_id'],
                 ) );
                 $T->parse('PRow', 'PhotoRow', true);
             }

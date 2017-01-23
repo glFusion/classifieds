@@ -1,5 +1,9 @@
 # Classifieds Plugin for glFusion - Change Log
 
+## Version 1.1.3
+Release TBD
+- Fix image deletion from ad edit page
+
 ## Version 1.1.2
 Released 2017-01-21
 - Fix admin menu link

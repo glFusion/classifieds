@@ -3,9 +3,9 @@
 *   Public entry point for the Classifieds plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -90,6 +90,7 @@ switch ($mode) {
 
 case 'submit':
 case 'edit':
+    if ($isAnon) COM_404();
     USES_classifieds_class_ad();
     $Ad = new Ad($id);
     if (isset($_GET['cat_id']) && $Ad->isNew) {
@@ -100,6 +101,7 @@ case 'edit':
 
 case 'delete':
 case 'deletead':
+    if ($isAnon) COM_404();
     if ($id != '') {
         USES_classifieds_class_ad();
         $Ad = new Ad($id);
@@ -116,13 +118,7 @@ case 'deletead':
 
 case 'update_account':
     // only valid users allowed
-    if ($isAnon) {
-        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'],
-                    'alert',
-                    $LANG_ADVT['access_denied']);
-        break;
-    }
-
+    if ($isAnon) COM_404();
     USES_classifieds_class_userinfo();
     $U = new adUserInfo($_USER['uid']);
     $U->SetVars($_POST);
@@ -138,6 +134,7 @@ echo 'update_ad DEPRECATED'; die;
     break;
 
 case 'save':
+    if ($isAnon) COM_404();
     USES_classifieds_class_ad();
     $Ad = new Ad();
     if ($Ad->Save($_POST)) {
@@ -148,14 +145,17 @@ case 'save':
     break;
 
 case 'delete_img':
+    if ($isAnon) COM_404();
     USES_classifieds_class_image();
-    $Image = new adImage($actionval);
-    $Image->Delete();
-    $actionval = $ad_id;
-    $view = 'editad';
+    $Image = new adImage($_GET['img_id']);
+    if ($Image->photo_id > 0) {
+        $Image->Delete();
+    }
+    COM_refresh($_CONF_ADVT['url'] . '/index.php?mode=editad&id=' . $_GET['ad_id']);
     break;
 
 case 'moredays':
+    if ($isAnon) COM_404();
     USES_classifieds_class_ad();
     $Ad = new Ad($id);
     $Ad->addDays($_POST['add_days']);
@@ -173,25 +173,14 @@ case 'recent':
 
 case 'manage':
     // Manage ads.  Restricted to the user's own ads
-    if ($isAnon) {
-        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'], 'note');
-    } else {
-        $content .= CLASSIFIEDS_ManageAds();
-    }
+    if ($isAnon) COM_404();
+    $content .= CLASSIFIEDS_ManageAds();
     $T->set_var('header', $LANG_ADVT['ads_mgnt']);
     $menu_opt = $LANG_ADVT['mnu_myads'];
     break;
 
 case 'account':
-    // Update the user's account info
-    // only valid users allowed
-    if ($isAnon) {
-        $content .= CLASSIFIEDS_errorMsg($LANG_ADVT['login_required'],
-                    'alert',
-                    $LANG_ADVT['access_denied']);
-        break;
-    }
-
+    if ($isAnon) COM_404();
     USES_classifieds_class_userinfo();
     $U = new adUserInfo();
     $content .= $U->showForm('advt');
@@ -208,6 +197,7 @@ case 'detail':
 
 case 'editad':
     // Edit an ad.
+    if ($isAnon) COM_404();
     USES_classifieds_class_ad();
     $Ad = new Ad($id);
     $content .= $Ad->Edit();

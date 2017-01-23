@@ -3,9 +3,9 @@
 *   Class to handle images
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -64,8 +64,10 @@ class adImage
 
         DB_delete($_TABLES['ad_photo'], 'photo_id', $this->photo_id);
 
-        if (self::UsedCount() == 1 && file_exists($imgpath . '/' . $this->filename))
+        if (self::UsedCount($this->photo_id) == 1 &&
+            file_exists($imgpath . '/' . $this->filename)) {
             unlink($imgpath . '/' . $this->filename);
+        }
     }
 
 
