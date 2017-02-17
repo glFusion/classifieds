@@ -223,7 +223,7 @@ default:
         $pageTitle = $L->Cat->cat_name;
     } else {
         USES_classifieds_class_catlist();
-        $content .= CatList::Render();
+        $content .= adCatList::Render();
     }
     $T->set_var('header', $LANG_ADVT['blocktitle']);
     $menu_opt = $LANG_ADVT['mnu_home'];

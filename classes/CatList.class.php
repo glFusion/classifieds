@@ -13,11 +13,11 @@
 
 
 /**
-*   @class CatList
+*   @class adCatList
 *   @package classifieds
 *   Create a listing of ads
 */
-class CatList
+class adCatList
 {
 
     /**
