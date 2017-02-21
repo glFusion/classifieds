@@ -1649,7 +1649,13 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             WHERE $where " . COM_getPermSQL('AND', 0, 2, 'c') .
             " $order $limit";
     $result = DB_query($sql, 1);
-    if (DB_error() || DB_numRows($result) < 1) return $content;
+    // In case of an error, log it and return unchanged content
+    if (DB_error()) {
+        COM_errorLog("plugin_autotags_classifieds SQL error: $sql");
+        return $content;
+    }
+    // No results found is a normal condition
+    if (DB_numRows($result) < 1) return $content;
 
     $T->set_file('autotag', $template);
     $T->set_block('autotag', 'tag_data', 'TAG');
