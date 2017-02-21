@@ -3,9 +3,9 @@
 *   Common functions for the Classifieds plugin
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -37,6 +37,8 @@ if (file_exists(dirname(__FILE__) . '/config.php')) {
     /** Include local configuration overrides */
     include_once dirname(__FILE__) . '/config.php';
 }
+// New feature not fully implemented, different template options
+if (!isset($_CONF_ADVT['detail_tpl_ver'])) $_CONF_ADVT['detail_tpl_ver'] = '/v1';
 
 // End of loading configurations.  Now, if login is required globally,
 // set our configuration accordingly
@@ -62,6 +64,12 @@ if (is_file("$langpath/custom/$langfile")) {
     /** Include the custom language file, if any */
     include_once "$langpath/custom/$langfile";
 }
+
+// Session variables for TimThumb image url, if used
+SESS_setVar($_CONF_ADVT['pi_name'], array(
+    'origpath'      => $_CONF_ADVT['imgpath'],
+));
+
 
 function USES_classifieds_class_ad()
 {
@@ -1620,17 +1628,17 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             }
         }
     }
-    $where = '1=1';
+    $where = ' 1=1 ';
     $order = '';
     $limit = "LIMIT $limit";
 
     switch ($autotag['parm1']) {
     case 'ad':      // Show an ad
         if (empty($ad_id)) return $content;   // must have a valid ad ID
-        $where .= "ad_id = '" . DB_escapeString($ad_id) . "'";
+        $where = " ad_id = '" . DB_escapeString($ad_id) . "' ";
         break;
     case 'recent':  // Show one or more recent ads
-        $order = 'ORDER BY ad.add_date DESC';
+        $order = ' ORDER BY ad.add_date DESC ';
         break;
     }
 
