@@ -181,15 +181,10 @@ class adCategory
         // Handle the uploaded category image, if any.  We don't want to delete
         // the image if one isn't uploaded, we should leave it unchanged.  So
         // we'll first retrieve the existing image filename, if any.
-        if (!$this->isNew) {
-            $img_filename = DB_getItem($_TABLES['ad_category'], 'image',
-                "cat_id={$this->cat_id}");
-        } else {
-            $img_filename = '';
-        }
         if (is_uploaded_file($_FILES['imagefile']['tmp_name'])) {
             $img_filename = $time . "_" . rand(1,100) . "_" .
                 $_FILES['imagefile']['name'];
+            $img_sql = "image = '$img_filename',";
             if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
                 $this->imgPath . $img_filename)) {
                 $retval .= CLASSIFIEDS_errorMsg("Error Moving Image", 'alert');
@@ -199,11 +194,15 @@ class adCategory
             // then delete the old image, if any. The DB still has the old 
             // filename at this point.
             if (!$this->isNew) {
-                self::DelImage($thie->cat_id);
+                self::DelImage($this->cat_id);
             }
+        } else {
+            $img_filename = '';
+            $img_sql = '';
         }
 
         $parent_map = DB_escapeString(json_encode($this->MakeBreadcrumbs()));
+
         if ($this->isNew) {
             $sql1 = "INSERT INTO {$_TABLES['ad_category']} SET ";
             $sql3 = '';
@@ -215,7 +214,7 @@ class adCategory
         $sql2 = "cat_name = '" . DB_escapeString($this->cat_name) . "',
             papa_id = {$this->papa_id},
             keywords = '{$this->keywords}',
-            image = '$img_filename',
+            $img_sql
             description = '" . DB_escapeString($this->description) . "',
             owner_id = {$this->owner_id},
             group_id = {$this->group_id},
@@ -847,42 +846,6 @@ class adCategory
         }
         return $desc[$id];
     }
-
-
-    /**
-    *   Calls itself recursively to find the root category of the requested id
-    *   Finally returns a string of cat_id1,cat_id2,this_cat_id
-    *
-    *   @param int id Category ID
-    *   @return string Comma-separated category list
-    */
-    public static function XParentList($id=0, $str='')
-    {
-        global $_TABLES;
-
-        $id = (int)$id;
-        if ($id == 0)
-            return $str;
-
-        // Append our id to the string
-        $str .= $id;
-
-        // Get the papa_id of the current id
-        $sql = "SELECT cat_id, papa_id
-            FROM {$_TABLES['ad_category']}
-            WHERE cat_id=$id";
-        $result = DB_query($sql);
-        if (!$result) return $str;
-
-        $row = DB_fetchArray($result);
-        // If we found a parent category, call ourself to add it
-        if ((int)$row['papa_id'] > 0) {
-            $str = self::ParentList($row['papa_id'], $str.',');
-        }
-
-        return trim($str, ',');
-
-    }   // ParentList()
 
 
     /**
