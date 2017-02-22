@@ -62,12 +62,12 @@ class adImage
             return;
         }
 
-        DB_delete($_TABLES['ad_photo'], 'photo_id', $this->photo_id);
-
         if (self::UsedCount($this->photo_id) == 1 &&
             file_exists($imgpath . '/' . $this->filename)) {
             unlink($imgpath . '/' . $this->filename);
         }
+        DB_delete($_TABLES['ad_photo'], 'photo_id', $this->photo_id);
+        $this->photo_id = 0;
     }
 
 
@@ -198,7 +198,6 @@ class adImage
         return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
                 $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
     }
-
 
 }   // class adImage
 
