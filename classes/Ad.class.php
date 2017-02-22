@@ -518,7 +518,7 @@ class Ad
             $description = COM_highlightQuery($description, $srchval);
         }
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates');
+        $T = new Template($_CONF_ADVT['path'] . '/templates'. $_CONF_ADVT['detail_tpl_ver']);
         $tpl_type = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('detail', "detail$tpl_type.thtml");
 
@@ -554,7 +554,7 @@ class Ad
             'base_url'      => $base_url,
             'edit_link'     => $edit_link,
             'del_link'      => $del_link,
-            'curr_loc'      => $this->Cat->BreadCrumbs(true),
+            'breadcrumbs'   => $this->Cat->BreadCrumbs(true),
             'subject'       => $subject,
             'add_date'      => $add_date->format($_CONF['shortdate'], true),
             'exp_date'      => $exp_date->format($_CONF['shortdate'], true),
@@ -578,6 +578,7 @@ class Ad
             'cat_id'        => $this->cat_id,
             'have_editlink' => $have_editlink,
             'have_userlinks' => 'true',
+            'session_id'    => session_id(),
         ) );
 
         // Display a link to email the poster, or other message as needed
@@ -596,17 +597,24 @@ class Ad
         $photos = adImage::getAll($this->ad_id);
         foreach ($photos as $img_id=>$filename) {
             $img_small = adImage::smallUrl($filename);
+            if ($main_img == '') {
+                $main_img = adImage::dispUrl($filename);
+                $main_imgname = 'user/' . $filename;
+            }
             if (!empty($img_small)) {
                 $T->set_block('detail', 'PhotoBlock', 'PBlock');
                 $T->set_var(array(
                     'tn_width'  => $_CONF_ADVT['detail_img_width'],
                     'small_url' => $img_small,
                     'disp_url' => adImage::dispUrl($filename),
+                    'small_imgname' => 'user/' . $filename,
                 ) );
                 $T->parse('PBlock', 'PhotoBlock', true);
                 $T->set_var('have_photo', 'true');
             }
         }
+        $T->set_var('main_img', $main_img);
+        $T->set_var('main_imgname', $main_imgname);
 
         if (DB_count($_TABLES['ad_ads'], 'uid', $this->uid) > 1) {
             $T->set_var('byposter_url',
