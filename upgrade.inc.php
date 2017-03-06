@@ -24,84 +24,79 @@ require_once dirname(__FILE__) . "/sql/{$_DB_dbms}_install.php";
 
 /**
 *   Perform the upgrade starting at the current version
-*   @param string $current_ver Current installed version to be upgraded
-*   @return integer Error code, 0 for success
+*
+*   @return boolean     True on success, False on failure
 */
-function classifieds_do_upgrade($current_ver)
+function classifieds_do_upgrade()
 {
-    $error = 0;
+    global $_CONF_ADVT, $_PLUGIN_INFO;
 
-    if ($current_ver < '0.2') {
-        // upgrade from 0.1 to 0.2
-        $error = classifieds_upgrade_0_2();
-        if ($error)
-            return $error;
+    if (isset($_PLUGIN_INFO[$_CONF_ADVT['pi_name']])) {
+        $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']];
+    } else {
+        return false;
+    }
+    $installed_ver = plugin_chkVersion_classifieds();
+
+    if (!COM_checkVersion($current_ver, '0.2')) {
+        $current_ver = '0.2';
+        if (!classifieds_upgrade_0_2()) return false;
     }
 
-    if ($current_ver < '0.2.2') {
-        // upgrade to 0.2.2
-        $error = classifieds_upgrade_0_2_2();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '0.2.2')) {
+        if (!classifieds_upgrade_0_2_2()) return false;
     }
 
-    if ($current_ver < '0.2.3') {
-        // upgrade to 0.2.3
-        $error = classifieds_upgrade_0_2_3();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '0.2.3')) {
+        if (!classifieds_upgrade_0_2_3()) return false;
     }
 
-    if ($current_ver < '0.3') {
-        // upgrade to 0.3
-        $error = classifieds_upgrade_0_3();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '0.3')) {
+        if (!classifieds_upgrade_0_3()) return false;
     }
 
-    if ($current_ver < '0.4') {
-        $error = classifieds_upgrade_0_4();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '0.4')) {
+        if (!classifieds_upgrade_0_4()) return false;
     }
 
-    if ($current_ver < '1.0.1') {
-        $error = classifieds_upgrade_1_0_1();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '1.0.1')) {
+        if (!classifieds_upgrade_1_0_1()) return false;
     }
 
-    if ($current_ver < '1.0.2') {
-        $error = classifieds_upgrade_1_0_2();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '1.0.2')) {
+        if (!classifieds_upgrade_1_0_2()) return false;
     }
 
-    if ($current_ver < '1.0.4') {
-        $error = classifieds_upgrade_1_0_4();
-        if ($error)
-            return $error;
-    }
-    if ($current_ver < '1.1.0') {
-        $error = classifieds_upgrade_1_1_0();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '1.0.4')) {
+        if (!classifieds_upgrade_1_0_4()) return false;
     }
 
-    if ($current_ver < '1.1.2') {
-        $error = classifieds_upgrade_1_1_2();
-        if ($error)
-            return $error;
+    if (!COM_checkVersion($current_ver, '1.1.0')) {
+        if (!classifieds_upgrade_1_1_0()) return false;
     }
 
-    return $error;
+    if (!COM_checkVersion($current_ver, '1.1.2')) {
+        if (!classifieds_upgrade_1_1_2()) return false;
+    }
+
+    // Final version update to catch updates that don't go through
+    // any of the update functions, e.g. code-only updates
+    if (classifieds_do_set_version($installed_ver)) {
+        CTL_clearCache($_CONF_ADVT['pi_name']);
+        COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
 /**
 *   Actually perform any sql updates
-*   @param string $version  Version being upgraded TO
-*   @param array  $sql      Array of SQL statement(s) to execute
+*
+*   @param  string  $version    Version being upgraded TO
+*   @param  array   $sql        Array of SQL statement(s) to execute
+*   @return boolean         True on success, False on failure
 */
 function classifieds_do_upgrade_sql($version='Undefined', $sql='')
 {
@@ -110,12 +105,12 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='')
     // We control this, so it shouldn't happen, but just to be safe...
     if ($version == 'Undefined') {
         COM_errorLog("Error updating {$_CONF_ADVT['pi_name']} - Undefined Version");
-        return 1;
+        return false;
     }
 
     // If no sql statements passed in, return success
     if (!is_array($sql))
-        return 0;
+        return true;
 
     // Execute SQL now to perform the upgrade
     COM_errorLOG("--Updating Classified Ads to version $version");
@@ -124,12 +119,10 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='')
         DB_query($s,'1');
         if (DB_error()) {
             COM_errorLog("SQL Error during Classifieds plugin update",1);
-            return 1;
-            break;
+            return false;
         }
     }
-
-    return 0;
+    return true;
 }
 
 
@@ -140,7 +133,7 @@ function classifieds_upgrade_0_2()
 
     if (empty($_TABLES['ad_submission'])) {
         COM_errorLog("The ad_submission table is undefined.  Check your config.php");
-        return 1;
+        return false;
     }
 
     $sql[] = $NEWTABLE['ad_submission'];  // new table added this version
@@ -172,42 +165,32 @@ function classifieds_upgrade_0_2()
     $adsql = "SELECT ad_id FROM {$_TABLES['ad_ads']}";
     $result = DB_query($adsql);
     if (!$result)
-        return 1;
+        return false;
     while ($row = DB_fetchArray($result)) {
         $new_ad_id = COM_makesid();
-        $sql[] = "UPDATE
-                {$_TABLES['ad_ads']}
-            SET
-                ad_id='$new_ad_id'
-            WHERE
-                ad_id={$row['ad_id']}";
+        $sql[] = "UPDATE {$_TABLES['ad_ads']}
+            SET ad_id='$new_ad_id'
+            WHERE ad_id={$row['ad_id']}";
 
-        $sql[] = "UPDATE
-                {$_TABLES['ad_photo']}
-            SET
-                ad_id='$new_ad_id'
-            WHERE
-                ad_id={$row['ad_id']}";
+        $sql[] = "UPDATE {$_TABLES['ad_photo']}
+            SET ad_id='$new_ad_id'
+            WHERE ad_id={$row['ad_id']}";
     }
 
     // Add the new classifieds.submit feature
-    DB_query("INSERT INTO
-            {$_TABLES['features']}
-            (ft_name, ft_descr)
-        VALUES (
-            'classifieds.submit',
-            'Bypass Classifieds Submission Queue'
-    )",1);
+    DB_query("INSERT INTO {$_TABLES['features']}
+                (ft_name, ft_descr)
+            VALUES (
+                'classifieds.submit',
+                'Bypass Classifieds Submission Queue'
+            )",1);
     $feat_id = DB_insertId();
     $group_id = DB_getItem($_TABLES['vars'], 'value', "name='classifieds_gid'");
-    DB_query("INSERT INTO
-            {$_TABLES['access']} (
-            acc_ft_id,
-            acc_grp_id
-        ) VALUES (
-            $feat_id,
-            $group_id
-    )");
+    DB_query("INSERT INTO {$_TABLES['access']} (
+                acc_ft_id, acc_grp_id
+            ) VALUES (
+                $feat_id, $group_id
+            )");
 
     // Add new configuration items
     $c = config::get_instance();
@@ -230,7 +213,8 @@ function classifieds_upgrade_0_2()
                 'select', 0, 0, 3, 190, true, $_CONF_ADVT['pi_name']);
     }
 
-    return classifieds_do_upgrade_sql('0.2', $sql);
+    if (!classifieds_do_upgrade_sql('0.2', $sql)) return false;
+    return classifieds_do_set_version('0.2');
 }
 
 
@@ -248,7 +232,7 @@ function classifieds_upgrade_0_2_2()
                 array($ft_id, 13));
     }
 
-    return classifieds_do_upgrade_sql('0.2');
+    return classifieds_do_set_version('0.2');
 }
 
 
@@ -284,8 +268,7 @@ function classifieds_upgrade_0_2_3()
                 '@select', 0, 5, 12, 100, true, $_CONF_ADVT['pi_name']);
     }
 
-    return classifieds_do_upgrade_sql('0.2.3');
-
+    return classifieds_do_set_version('0.2.3');
 }
 
 
@@ -326,8 +309,8 @@ function classifieds_upgrade_0_3()
         ADD fgcolor varchar(10),
         ADD bgcolor varchar(10)";
 
-    return classifieds_do_upgrade_sql('0.3', $sql);
-
+    if (!classifieds_do_upgrade_sql('0.3', $sql)) return false;
+    return classifieds_do_set_version('0.3');
 }
 
 
@@ -378,7 +361,8 @@ function classifieds_upgrade_0_4()
     //$sql[] = "ALTER TABLE {$_TABLES['ad_uinfo']}
     //        ADD day_balance INT(11) DEFAULT 0";
 
-   return classifieds_do_upgrade_sql('0.4', $sql);
+    if (!classifieds_do_upgrade_sql('0.4', $sql)) return false;
+    return classifieds_do_set_version('0.4');
 }
 
 
@@ -386,8 +370,6 @@ function classifieds_upgrade_0_4()
 function classifieds_upgrade_1_0_1()
 {
     global $_ADVT_DEFAULT, $_CONF_ADVT;
-
-    $sql = array();
 
     // Add new configuration items
     $c = config::get_instance();
@@ -401,7 +383,7 @@ function classifieds_upgrade_1_0_1()
                 'select', 0, 0, 3, 240, true, $_CONF_ADVT['pi_name']);
     }
 
-    return classifieds_do_upgrade_sql('1.0.1', $sql);
+    return classifieds_set_version('1.0.1');
 }
 
 
@@ -433,7 +415,8 @@ function classifieds_upgrade_1_0_2()
             SET selectionArray=14
             WHERE name='hidenewads' AND group_name='{$_CONF_ADVT['pi_name']}'";
 
-    return classifieds_do_upgrade_sql('1.0.2', $sql);
+    if (!classifieds_do_upgrade_sql('1.0.2', $sql)) return false;
+    return classifieds_do_set_version('1.0.2');
 }
 
 
@@ -463,7 +446,8 @@ function classifieds_upgrade_1_0_4()
                 'select', 0, 0, 3, 175, true, $_CONF_ADVT['pi_name']);
     }
 
-    return classifieds_do_upgrade_sql('1.0.4', $sql);
+    if (!classifieds_do_upgrade_sql('1.0.4', $sql)) return false;
+    return classifieds_do_set_version('1.0.4');
 }
 
 /**
@@ -490,7 +474,7 @@ function classifieds_upgrade_1_1_0()
         @mkdir($new_catpath, 755, true);
         if (!is_dir($new_catpath)) {
             COM_errorLog("Error creating new dir $new_catpath");
-            return 1;
+            return false;
         }
         $files = glob($_CONF_ADVT['catimgpath'] . '/*');
         if ($files) {
@@ -510,7 +494,7 @@ function classifieds_upgrade_1_1_0()
         @mkdir($new_imgpath, 755, true);
         if (!is_dir($new_imgpath)) {
             COM_errorLog("Error creating new dir $new_imgpath");
-            return 1;
+            return false;
         }
         $files = glob($_CONF_ADVT['image_dir'] . '/*');
         if ($files) {
@@ -590,7 +574,8 @@ function classifieds_upgrade_1_1_0()
             ADD parent_map TEXT DEFAULT NULL AFTER bgcolor",
         $uinfo_sql,
     );
-    return classifieds_do_upgrade_sql('1.1.0', $sql);
+    if (!classifieds_do_upgrade_sql('1.1.0', $sql)) return false;
+    return classifieds_do_set_version('1.1.0');
 }
 
 
@@ -606,7 +591,37 @@ function classifieds_upgrade_1_1_2()
         "ALTER TABLE {$_TABLES['ad_submission']}
             ADD comments INT(4) UNSIGNED NOT NULL DEFAULT '0' AFTER exp_sent",
     );
-    return classifieds_do_upgrade_sql('1.1.2', $sql);
+    if (!classifieds_do_upgrade_sql('1.1.2', $sql)) return false;
+    return classifieds_do_set_version('1.1.2');
+}
+
+
+/**
+*   Update the plugin version number in the database.
+*   Called at each version upgrade to keep up to date with
+*   successful upgrades.
+*
+*   @param  string  $ver    New version to set
+*   @return boolean         True on success, False on failure
+*/
+function classifieds_do_set_version($ver)
+{
+    global $_TABLES, $_CONF_ADVT;
+
+    // now update the current version number.
+    $sql = "UPDATE {$_TABLES['plugins']} SET
+            pi_version = '{$_CONF_ADVT['pi_version']}',
+            pi_gl_version = '{$_CONF_ADVT['gl_version']}',
+            pi_homepage = '{$_CONF_ADVT['pi_url']}'
+        WHERE pi_name = '{$_CONF_ADVT['pi_name']}'";
+
+    $res = DB_query($sql, 1);
+    if (DB_error()) {
+        COM_errorLog("Error updating the {$_CONF_ADVT['pi_display_name']} Plugin version",1);
+        return false;
+    } else {
+        return true;
+    }
 }
 
 ?>
