@@ -32,7 +32,13 @@ function classifieds_do_upgrade()
     global $_CONF_ADVT, $_PLUGIN_INFO;
 
     if (isset($_PLUGIN_INFO[$_CONF_ADVT['pi_name']])) {
-        $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']];
+        if (is_array($_PLUGIN_INFO[$_CONF_ADVT['pi_name'])) {
+            // glFusion > 1.6.5
+            $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']]['pi_versino'];
+        } else {
+            // legacy
+            $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']];
+        }
     } else {
         return false;
     }
