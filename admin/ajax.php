@@ -20,14 +20,14 @@ if (!SEC_hasRights('classifieds.admin')) {
     exit;
 }
 
-switch ($_GET['action']) {
+switch ($_POST['action']) {
 case 'toggleEnabled':
-    $newval = $_REQUEST['newval'] == 1 ? 1 : 0;
+    $oldval = $_POST['oldval'] == 1 ? 1 : 0;
 
-    switch ($_GET['type']) {
+    switch ($_POST['type']) {
     case 'adtype':
         USES_classifieds_class_adtype();
-        $newval = AdType::toggleEnabled($newval, $_GET['id']);
+        $newval = AdType::toggleEnabled($oldval, $_POST['id']);
         break;
 
      default:
@@ -35,8 +35,10 @@ case 'toggleEnabled':
     }
 
     $result = array(
-        'id' => $_GET['id'],
-        'newstate' => $newval,
+        'id' => $_POST['id'],
+        'newval' => $newval,
+        'statusMessage' => $newval != $oldval ? $LANG_ADVT['msg_item_updated']
+                : $LANG_ADVT['msg_item_nochange'],
     );
     break;
 }

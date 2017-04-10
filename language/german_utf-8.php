@@ -241,6 +241,12 @@ $LANG_ADVT = array (
 'block_colors' => 'Block Colors',
 'foreground' => 'Foreground',
 'background' => 'Background',
+'msg_added_days' => 'Added %s days',
+'msg_item_updated' => 'Item has been updated',
+'msg_item_nochange' => 'Item is unchanged',
+'msg_catsub' => 'You have subscribed to this category',
+'msg_catunsub' => 'You have unsubscribed from this category',
+'msg_error' => 'There has been an error processing your request',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird dem Administrator zur Genehmigung vorgelegt.';

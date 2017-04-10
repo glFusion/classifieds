@@ -15,38 +15,45 @@
  */
 require_once '../lib-common.php';
 
-switch ($_GET['action']) {
+switch ($_REQUEST['action']) {
 case 'catsub':
-    if (!isset($_GET['id'])) exit;
+    if (!isset($_POST['id'])) exit;
     USES_classifieds_class_category();
-    $C = new adCategory($_GET['id']);
+    $C = new adCategory($_POST['id']);
+    $status = $C->Subscribe(true);
     $result = array(
-        'cat_id' => $_GET['id'],
-        'newstate' => $C->Subscribe(true) ? 1 : 0,
+        'cat_id' => $_POST['id'],
+        'newstate' => $status ? 1 : 0,
+        'statusMessage' => $status ? $LANG_ADVT['msg_catsub'] :
+                $LANG_ADVT['msg_error'],
     );
     break;
 
 case 'catunsub':
-    if (!isset($_GET['id'])) exit;
+    if (!isset($_POST['id'])) exit;
     USES_classifieds_class_category();
-    $C = new adCategory($_GET['id']);
+    $C = new adCategory($_POST['id']);
+    $status = $C->Subscribe(false);
     $result = array(
-        'cat_id' => $_GET['id'],
-        'newstate' => $C->Subscribe(false) ? 0 : 1,
+        'cat_id' => $_POST['id'],
+        'newstate' => $status ? 0 : 1,
+        'statusMessage' => $status ? $LANG_ADVT['msg_catunsub'] :
+                $LANG_ADVT['msg_error'],
     );
     break;
 
 case 'moredays':
-    if (!isset($_GET['id'])) exit;
+    if (!isset($_POST['id'])) exit;
     USES_classifieds_class_ad();
-    $Ad = new Ad($_GET['id']);
+    $Ad = new Ad($_POST['id']);
     if ($Ad->isNew) exit;
-    $maxdays = $Ad->addDays($_GET['days']);
+    $maxdays = $Ad->addDays($_POST['days']);
     $dt = new Date($Ad->exp_date, $_CONF['timezone']);
     $expdate = $dt->format($_CONF['shortdate'], true);
     $result = array(
         'maxdays' => $maxdays,
         'expdate' => $expdate,
+        'statusMessage' => sprintf($LANG_ADVT['msg_added_days'], $_POST['days']),
     );
     break;
 }

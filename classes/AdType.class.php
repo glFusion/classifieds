@@ -229,23 +229,16 @@ class adType
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @param  integer     $newval New value to set
+    *   @param  integer     $oldval Original value to change
     *   @param  integer     $id     ID number of element to modify
     *   @return integer     New value (old value if failed)
     */
-    public function toggleEnabled($newval, $id=0)
+    public static function toggleEnabled($oldval, $id=0)
     {
         global $_TABLES;
 
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return;
-        }
-
         $id = (int)$id;
-        $newval = $newval == 1 ? 1 : 0;
+        $newval = $oldval == 1 ? 0 : 1;
 
         $sql = "UPDATE {$_TABLES['ad_types']}
             SET enabled=$newval
@@ -253,7 +246,7 @@ class adType
         //echo $sql;die;
         DB_query($sql, 1);
         if (DB_error()) {
-            $retval = $newval == 1 ? 0 : 1;
+            $retval = $oldval;
         } else {
             $retval = $newval;
         }
