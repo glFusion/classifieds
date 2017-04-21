@@ -306,6 +306,7 @@ $LANG_confignames['classifieds'] = array(
     'disp_fullname' => 'Show owner full name with ads?',
     'detail_img_width' => 'Image width on ad detail pages',
     'visible_to' => 'Visible To',
+    'detail_tpl_ver' => 'Ad Detail Template Version',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

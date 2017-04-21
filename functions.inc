@@ -836,14 +836,14 @@ function plugin_itemlist_classifieds()
 */
 function plugin_moderationapprove_classifieds($id, $owner_id=0)
 {
-    global $_TABLES, $_USER, $_CONF, $_CONF_ADVT;
-
     // Notify subscribers.
     USES_classifieds_class_notify();
     USES_classifieds_class_ad();
     $Ad = new Ad($id);
     adNotify::Approval($Ad, true);
     adNotify::Subscribers($Ad);
+    // Update the date added to now.
+//    Ad::setAddDate($id);
     return '';
 }
 
@@ -1244,6 +1244,25 @@ function plugin_configmanager_select_defgrpcat_classifieds()
 {
     return CLASSIFIEDS_getGroups('\'All Users\'', 'NOT');
 }
+
+
+/**
+*   Select the template to use for product detail pages, by default
+*
+*   @return array   $option => path
+*/
+function plugin_configmanager_select_detail_tpl_ver_classifieds()
+{
+    global $_CONF_ADVT;
+    $A = array();
+    $dirs = glob($_CONF_ADVT['path'] . '/templates/detail/*', GLOB_ONLYDIR);
+    foreach ($dirs as $dir) {
+        $opt = end(explode('/', $dir));
+        $A[$opt] = $opt;
+    }
+    return $A;
+}
+
 
 
 /**

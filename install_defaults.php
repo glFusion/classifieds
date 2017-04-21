@@ -2,9 +2,9 @@
 /**
 *   Installation defaults for the Classifieds plugin
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -97,6 +97,9 @@ $_ADVT_DEFAULT['defgrpcat'] = 13;
 // Category display type.  This will be a value like 'normal', 'blocks', etc.
 $_ADVT_DEFAULT['catlist_dispmode'] = 'normal';
 
+// Template version of the ad detail
+$_ADVT_DEFAULT['detail_tpl_ver'] = 'v1';
+
 // Replace home page? 1=yes, 0=no
 $_ADVT_DEFAULT['centerblock'] = 0;
 
@@ -186,6 +189,8 @@ function plugin_initconfig_classifieds($group_id = 0)
                 'select', 0, 0, 3, 190, true, $_CONF_ADVT['pi_name']);
         $c->add('catlist_dispmode', $_ADVT_DEFAULT['catlist_dispmode'],
                 'select', 0, 0, 6, 200, true, $_CONF_ADVT['pi_name']);
+        $c->add('detail_tpl_ver', $_ADVT_DEFAULT['detail_tpl_ver'],
+                'select', 0, 0, 6, 205, true, $_CONF_ADVT['pi_name']);
         $c->add('centerblock', $_ADVT_DEFAULT['centerblock'],
                 'select', 0, 0, 3, 210, true, $_CONF_ADVT['pi_name']);
         $c->add('commentsupport', $_ADVT_DEFAULT['commentsupport'],

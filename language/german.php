@@ -308,6 +308,8 @@ $LANG_confignames['classifieds'] = array(
     'commentsupport'     => 'Kommentare erlauben?',
     'displayblocks'      => 'Anzeige glFusion Blöcke',
     'detail_img_width' => 'Image width on ad detail pages',
+    'visible_to' => 'Visible To',
+    'detail_tpl_ver' => 'Ad Detail Template Version',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

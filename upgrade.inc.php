@@ -2,9 +2,9 @@
 /**
 *   Upgrade routines for the Classifieds plugin
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.2
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -32,9 +32,9 @@ function classifieds_do_upgrade()
     global $_CONF_ADVT, $_PLUGIN_INFO;
 
     if (isset($_PLUGIN_INFO[$_CONF_ADVT['pi_name']])) {
-        if (is_array($_PLUGIN_INFO[$_CONF_ADVT['pi_name'])) {
+        if (is_array($_PLUGIN_INFO[$_CONF_ADVT['pi_name']])) {
             // glFusion > 1.6.5
-            $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']]['pi_versino'];
+            $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']]['pi_version'];
         } else {
             // legacy
             $current_ver = $_PLUGIN_INFO[$_CONF_ADVT['pi_name']];
@@ -50,39 +50,57 @@ function classifieds_do_upgrade()
     }
 
     if (!COM_checkVersion($current_ver, '0.2.2')) {
+        $current_ver = '0.2.2';
         if (!classifieds_upgrade_0_2_2()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.2.3')) {
+        $current_ver = '0.2.3';
         if (!classifieds_upgrade_0_2_3()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.3')) {
+        $current_ver = '0.3';
         if (!classifieds_upgrade_0_3()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.4')) {
+        $current_ver = '0.4';
         if (!classifieds_upgrade_0_4()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.1')) {
+        $current_ver = '1.0.1';
         if (!classifieds_upgrade_1_0_1()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.2')) {
+        $current_ver = '1.0.2';
         if (!classifieds_upgrade_1_0_2()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.4')) {
+        $current_ver = '1.0.4';
         if (!classifieds_upgrade_1_0_4()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.1.0')) {
+        $current_ver = '1.1.0';
         if (!classifieds_upgrade_1_1_0()) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.1.2')) {
+        $current_ver = '1.1.2';
         if (!classifieds_upgrade_1_1_2()) return false;
+    }
+
+    if (!COM_checkVersion($current_ver, '1.1.3')) {
+        $current_ver = '1.1.3';
+        COM_errorLog("Updating {$_CONF_ADVT['pi_display_name']} to $current_ver");
+        $c = config::get_instance();
+        $c->add('detail_tpl_ver', 'v1',
+                'select', 0, 0, 6, 205, true, $_CONF_ADVT['pi_name']);
+        if (!classifieds_do_set_version('1.1.3')) return false;
     }
 
     // Final version update to catch updates that don't go through
