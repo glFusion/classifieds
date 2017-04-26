@@ -843,7 +843,7 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
     adNotify::Approval($Ad, true);
     adNotify::Subscribers($Ad);
     // Update the date added to now.
-//    Ad::setAddDate($id);
+    Ad::setAddDate($id);
     return '';
 }
 

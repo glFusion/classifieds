@@ -3,6 +3,10 @@
 ## Version 1.1.3
 Release TBD
 - Fix image deletion from ad edit page
+- Require glFusion 1.6+
+- Use JQuery AJAX functions
+- Enable different versions of Ad templates, configurable globally
+- Reset date added when an ad is approved
 
 ## Version 1.1.2
 Released 2017-01-21

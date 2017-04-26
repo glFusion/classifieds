@@ -221,9 +221,7 @@ class Ad
 
         USES_classifieds_class_upload();
         $Image = new adUpload($this->ad_id);
-        if ($Image->havefiles) {
-            $Image->uploadFiles();
-        }
+        $Image->uploadFiles();
 
         $fld_array = array();
         foreach ($this->fields as $name=>$type) {
@@ -518,13 +516,14 @@ class Ad
             $description = COM_highlightQuery($description, $srchval);
         }
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates'. $_CONF_ADVT['detail_tpl_ver']);
+        $T = new Template($_CONF_ADVT['path'] . '/templates/detail/' .
+                $_CONF_ADVT['detail_tpl_ver']);
         $tpl_type = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('detail', "detail$tpl_type.thtml");
 
         if ($this->isAdmin) {
             $base_url = $_CONF_ADVT['admin_url'] . '/index.php';
-            $del_link = $base_url . '?deletead=x&ad_id=' . $this->ad_id;
+            $del_link = $base_url . '?deletead=' . $this->ad_id;
             $edit_link = $base_url . '?editad=x&ad_id=' . $this->ad_id;
         } else {
             $base_url = $_CONF_ADVT['url'] . '/index.php';
@@ -567,7 +566,7 @@ class Ad
             'uinfo_postcode' => $uinfo->postcode,
             'uinfo_tel'     => $uinfo->tel,
             'uinfo_fax'     => $uinfo->fax,
-            'price'         => $price,
+            'price'         => COM_numberFormat($price, 2),
             'ad_id'         => $this->ad_id,
             'ad_url'        => $url,
             'username'      => $_CONF_ADVT['disp_fullname'] == 1 ?
@@ -579,6 +578,7 @@ class Ad
             'have_editlink' => $have_editlink,
             'have_userlinks' => 'true',
             'session_id'    => session_id(),
+            'timthumb'  => true,
         ) );
 
         // Display a link to email the poster, or other message as needed
@@ -976,6 +976,23 @@ class Ad
         $r = DB_query($sql);
         $neighbor = DB_fetchArray($r, false);
         return empty($neighbor) ? '' : $neighbor['ad_id'];
+    }
+
+
+    /**
+    *   Update the date that the ad was added.
+    *   Used to change the date upon approval, so the add will run the
+    *   entire allowed number of days.
+    *
+    *   @param  integer $id     ID of ad to update
+    *   @param  integer $ts     Unix timestamp to set, default is time()
+    */
+    public static function setAddDate($id, $ts = NULL)
+    {
+        global $_TABLES;
+
+        if (!$ts) $ts = time();
+        DB_change($_TABLES['ad_ads'], 'add_date', (int)$ts, 'ad_id', $id);
     }
 
 }   // class Ad
