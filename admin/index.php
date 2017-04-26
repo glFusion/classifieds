@@ -171,8 +171,8 @@ case 'deletead':
         exit;
     } else {
         Ad::Delete($ad_id);
-        $view = 'admin';
-        $actionval = 'ad';
+        echo COM_refresh($_CONF_ADVT['admin_url'] . '/index.php');
+        exit;
     }
     break;
 
