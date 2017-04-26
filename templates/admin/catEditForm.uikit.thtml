@@ -3,6 +3,7 @@
     class="uk-form-horizontal"
     action="?mode=update_cat&catid={cat_id}">
   <input type="hidden" name="cat_id" value="{cat_id}" />
+  <input type="hidden" name="orig_pcat" value="{orig_pcat}" />
 
   <div class="uk-form-row">
     <label class="uk-form-label" for="catname">{$LANG_ADVT['enter_cat']}:</label>

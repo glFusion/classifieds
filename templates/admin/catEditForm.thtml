@@ -10,6 +10,7 @@ window.addEvent('domready',function() {
 <form id="submit" enctype="multipart/form-data" method="post" 
     action="?mode=update_cat&catid={cat_id}">
   <input type="hidden" name="cat_id" value="{cat_id}" />
+  <input type="hidden" name="orig_pcat" value="{orig_pcat}" />
   <table border=0>
 
     <tr>

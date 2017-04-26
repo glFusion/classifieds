@@ -233,10 +233,21 @@ class adCategory
         }
 
         $result = DB_query($sql);
-        if (!$result)
+        if (!$result) {
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
-        else
+        } else {
+            // When updating, check if the parent category has changed.
+            // If so, update the breadcrumbs for any subcategories.
+            if (!$this->isNew && 
+                    isset($A['orig_pcat']) &&
+                    $A['orig_pcat'] != $this->papa_id) {
+                foreach (self::SubCats($this->cat_id) as $id=>$cat) {
+                    $X = new adCategory($id);
+                    $X->Save();
+                }
+            }
             return '';      // no actual return if this function works ok
+        }
     }
 
 
@@ -447,6 +458,7 @@ class adCategory
             'sel_parent_cat' => self::buildSelection($this->papa_id, 0, '',
                     'NOT', $this->cat_id),
             'have_propagate' => $this->isNew ? '' : 'true',
+            'orig_pcat' => $this->papa_id,
         ) );
         $T->parse('output','modify');
         $display .= $T->finish($T->get_var('output'));
@@ -701,7 +713,6 @@ class adCategory
         $res = DB_query($sql);
         $totalAds += DB_numRows($res);
         return $totalAds;
-
     }   // function TotalAds()
 
 
