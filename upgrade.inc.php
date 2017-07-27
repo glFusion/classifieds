@@ -18,9 +18,9 @@ if (!defined('GVERSION')) {
 global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT, $_DB_dbms;
 
 /** Include the default configuration values */
-require_once dirname(__FILE__) . '/install_defaults.php';
+require_once __DIR__ . '/install_defaults.php';
 /** Include the table creation strings */
-require_once dirname(__FILE__) . "/sql/{$_DB_dbms}_install.php";
+require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
 
 /**
 *   Perform the upgrade starting at the current version

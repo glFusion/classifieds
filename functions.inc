@@ -31,11 +31,11 @@ if (!isset($_CONF_ADVT['imagecount'])) {
 }
 
 /** Additional config items and table definitions are added here */
-require_once dirname(__FILE__) . '/classifieds.php';
+require_once __DIR__ . '/classifieds.php';
 
-if (file_exists(dirname(__FILE__) . '/config.php')) {
+if (file_exists(__DIR__ . '/config.php')) {
     /** Include local configuration overrides */
-    include_once dirname(__FILE__) . '/config.php';
+    include_once __DIR__ . '/config.php';
 }
 // New feature not fully implemented, different template options
 if (!isset($_CONF_ADVT['detail_tpl_ver'])) $_CONF_ADVT['detail_tpl_ver'] = '/v1';
@@ -752,7 +752,7 @@ function plugin_configmanager_select_grp_classifieds()
 */
 function plugin_upgrade_classifieds()
 {
-    require_once dirname(__FILE__) . '/upgrade.inc.php';
+    require_once __DIR__ . '/upgrade.inc.php';
     return classifieds_do_upgrade();
 }
 
