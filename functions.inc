@@ -433,9 +433,6 @@ function plugin_autouninstall_classifieds()
         'php_blocks' => array('phpblock_' . $_CONF_ADVT['pi_name'] . '_random'),
         'vars'      => array($_CONF_ADVT['pi_name'] . '_gid')
     );
-
-    // Notify other plugins that all items for this plugin are being deleted
-    PLG_itemDeleted('*', $_CONF_ADVT['pi_name']);
     return $out;
 }
 
@@ -902,7 +899,7 @@ function plugin_submit_classifieds()
 
 
 /**
-*   Provides the getSearchInfo function for classified ads
+*   Provides the getItemInfo function for classified ads
 *
 *   @param  string  $id         Product ID
 *   @param  string  $fields     Comma-separated list of fields to return
@@ -993,7 +990,7 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
                         $A['keywords'];
                 break;
             case 'url':
-                $props[$p] = COM_buildUrl($_CONF['site_url'] . 
+                $props[$p] = COM_buildUrl($_CONF['site_url'] .
                     '/classifieds/index.php?mode=detail&id=' . urlencode($A['ad_id']));
                 break;
             default:
@@ -1216,6 +1213,13 @@ function plugin_runScheduledTask_classifieds($standalone=false)
     if (!$standalone && $_CONF_ADVT['use_gl_cron'] == 0)
         return;
 
+    // Other plugins should consider expired ads as "deleted"
+    $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']}
+                WHERE exp_date < " . time());
+    while ($A = DB_fetchArray($r, false)) {
+        PLG_itemDeleted($A['ad_id'], $_CONF_ADVT['pi_name']);
+    }
+
     // Check if purging is disabled
     if ($_CONF_ADVT['purge_days'] > 0) {
         $purge_exp_date = time() - ((int)$_CONF_ADVT['purge_days'] * 86400);
@@ -1224,7 +1228,7 @@ function plugin_runScheduledTask_classifieds($standalone=false)
         if ($r) {
             $numrows = DB_numRows($r);
             USES_classifieds_class_ad();
-            while ($row = DB_fetchArray($r)) {
+            while ($row = DB_fetchArray($r, false)) {
                 Ad::Delete($row['ad_id']);
             }
 
