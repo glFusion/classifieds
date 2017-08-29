@@ -31,10 +31,6 @@ class adUpload extends upload
     *   @var string */
     var $mime_type;
 
-    /** Array of the names of successfully uploaded files
-     *  @var array */
-    var $goodfiles = array();
-
     /** Indicate that we actually have one or more files to upload
      *  @var boolean */
     public $havefiles;
@@ -74,10 +70,7 @@ class adUpload extends upload
                 'image/png'   => '.png',
         ));
         $this->setMaxFileSize($_CONF['max_image_size']);
-        $this->setMaxDimensions(
-                $_CONF_ADVT['img_max_width'],
-                $_CONF_ADVT['img_max_height']
-        );
+        $this->setMaxDimensions(0, 0);
         $this->setAutomaticResize(true);
         $this->setFieldName($varname);
 
@@ -99,9 +92,7 @@ class adUpload extends upload
     {
         global $_TABLES;
 
-        // If there are no files at all, just return.
-        //if (empty($this->goodfiles))
-        //    return;
+        if (!$this->havefiles) return;
 
         parent::uploadFiles();
 
