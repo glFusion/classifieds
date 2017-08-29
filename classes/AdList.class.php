@@ -260,19 +260,14 @@ class AdListCat extends AdList
         if (!COM_isAnonUser()) {
             // Determine whether the user is subscribed to notifications for
             // this category and display a message and or link accordingly
-            $notice_count = DB_count($_TABLES['ad_notice'],
-                array('uid', 'cat_id'),
-                array($_USER['uid'], $this->cat_id)
-            );
-
-            if ($notice_count) {
-                $sub_img = 'unsubscribe.png';
+            if (PLG_isSubscribed($_CONF_ADVT['pi_name'], 'category', $this->cat_id)) {
                 $sub_vis = 'none';
                 $unsub_vis = 'block';
             } else {
                 $sub_vis = 'block';
                 $unsub_vis = 'none';
             }
+
             // Display a link to submit an ad to the current category
             $submit_url = '';
             if (plugin_ismoderator_classifieds()) {
@@ -283,7 +278,6 @@ class AdListCat extends AdList
                     '/index.php?mode=edit&cat_id=' . $this->cat_id;
             }
             $T->set_var(array(
-                'subscribe_img' => $_CONF_ADVT['url'].'/images/'.$sub_img,
                 'cat_id'        => $this->Cat->cat_id,
                 'sub_vis'       => $sub_vis,
                 'unsub_vis'     => $unsub_vis,
