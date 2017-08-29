@@ -256,6 +256,12 @@ class Ad
                     adNotify::Subscribers($this);
                 }
             }
+            // Wouldn't be normal, but if this is being saved with an
+            // expiration date in the past then don't tell other plugins
+            // about it.
+            if ($this->exp_date < time()) {
+                PLG_itemSaved($this->ad_id, $_CONF_ADVT['pi_name']);
+            }
         }
         return true;
     }
@@ -281,19 +287,19 @@ class Ad
         // Clear the ad id and save to get a new ID
         $this->ad_id = '';
         $this->isNew = true;
-        $this->Save();
-
-        // Now duplicate all the image records
-        $values = array();
-        foreach ($photos as $id=>$filename) {
-            $values[] = "('{$this->ad_id}', '$filename')";
-        }
-        if (!empty($values)) {
-            $value_str = implode(',', $values);
-            $sql = "INSERT INTO {$_TABLES['ad_photo']} (ad_id, filename)
-                    VALUES $value_str";
-            $r = DB_query($sql);
-            if (DB_error()) return NULL;
+        if ($this->Save()) {
+            // Now duplicate all the image records
+            $values = array();
+            foreach ($photos as $id=>$filename) {
+                $values[] = "('{$this->ad_id}', '$filename')";
+            }
+            if (!empty($values)) {
+                $value_str = implode(',', $values);
+                $sql = "INSERT INTO {$_TABLES['ad_photo']} (ad_id, filename)
+                        VALUES $value_str";
+                $r = DB_query($sql);
+                if (DB_error()) return NULL;
+            }
         }
         return $this->ad_id;
     }
@@ -308,7 +314,7 @@ class Ad
     */
     public static function Delete($ad_id, $table = 'ad_ads')
     {
-        global $_TABLES;
+        global $_TABLES, $_CONF_ADVT;
 
         if (empty($ad_id)) return false;
 
@@ -321,6 +327,7 @@ class Ad
         }
 
         // After the cleanup stuff, delete the ad record itself.
+        PLG_itemDeleted($ad_id, $_CONF_ADVT['pi_name']);
         DB_delete($_TABLES[$table], 'ad_id', $ad_id);
         CLASSIFIEDS_auditLog("Ad {$ad_id} deleted.");
         if (DB_error()) {
