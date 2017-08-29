@@ -289,7 +289,7 @@ class adCategory
 
         if ($result) {
             while ($row = DB_fetcharray($result)) {
-                if (!adCategory::Delete($row['cat_id']))
+                if (!self::Delete($row['cat_id']))
                     return false;
             }
         }
@@ -403,7 +403,7 @@ class adCategory
 
         // Now update the children of the current category's children
         foreach ($cats as $catid) {
-            adCategory::_propagateCatPerms($catid, $perms);
+            self::_propagateCatPerms($catid, $perms);
         }
     }
 
@@ -570,7 +570,7 @@ class adCategory
     *   Creates the breadcrumb string from the parent mapping.
     *   Acts on the current category object
     *
-    *   @uses   adCategory::showBreadCrumbs()
+    *   @uses   self::showBreadCrumbs()
     *   @param  boolean $showlink   Link to the categories?
     *   @param  boolean $raw        True to just get the json values
     *   @return mixed       Parent array or HTML for breadcrumbs
@@ -653,7 +653,7 @@ class adCategory
             $subcats[$id] = array();
         }
 
-        $sql = "SELECT cat_name, cat_id, fgcolor, bgcolor, papa_id
+        $sql = "SELECT cat_name, cat_id, fgcolor, bgcolor, papa_id, description
                 FROM {$_TABLES['ad_category']}
                 WHERE papa_id=$id";
         //echo $sql;die;
@@ -664,9 +664,9 @@ class adCategory
         while ($row = DB_fetchArray($result, false)) {
             $subcats[$master_id][$row['cat_id']] = $row;
             $subcats[$id][$row['cat_id']]['total_ads'] =
-                    adCategory::TotalAds($row['cat_id']);
+                    self::TotalAds($row['cat_id']);
 
-            $A = adCategory::SubCats($row['cat_id'], $master_id);
+            $A = self::SubCats($row['cat_id'], $master_id);
             if (!empty($A)) {
                 array_merge($subcats[$id], $A);
             }
@@ -700,7 +700,7 @@ class adCategory
                     WHERE papa_id=$cat_id";
             $result = DB_query($sql);
             while ($row = DB_fetchArray($result, false)) {
-                $totalAds += adCategory::TotalAds($row['cat_id'], $current, $sub);
+                $totalAds += self::TotalAds($row['cat_id'], $current, $sub);
             }
         }
         // Now check the current category
@@ -761,7 +761,7 @@ class adCategory
     /**
     *   Check if the current user has read-write access to this category
     *
-    *   @uses   adCategory::checkAccess()
+    *   @uses   self::checkAccess()
     *   @return boolean     True if the user can edit, False if not
     */
     public function canEdit()
@@ -773,7 +773,7 @@ class adCategory
     /**
     *   Check if the current user has read access to this category
     *
-    *   @uses   adCategory::checkAccess()
+    *   @uses   self::checkAccess()
     *   @return boolean     True if the user can view, False if not
     */
     public function canView()
@@ -814,7 +814,7 @@ class adCategory
     */
     public function Subscribe($sub = true)
     {
-        global $_USER, $_TABLES;
+        global $_CONF_ADVT;
 
         // only registered users can subscribe, and make sure this is an
         // existing category
@@ -822,17 +822,25 @@ class adCategory
             return false;;
 
         $sub = $sub == true ? true : false;
+        $subcats = self::SubCats($this->cat_id);
 
         if ($sub === true) {
-            DB_save($_TABLES['ad_notice'],
-                'cat_id,uid',
-                "{$this->cat_id},{$_USER['uid']}");
+            if ($_CONF_ADVT['auto_subcats']) {
+                foreach ($subcats as $cat) {
+                    PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $cat['cat_id'],
+                            0, $_CONF_ADVT['pi_name'], $cat['description']);
+                }
+            }
+            return PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id,
+                    0, $_CONF_ADVT['pi_name'], $this->description);
         } else {
-            DB_delete($_TABLES['ad_notice'],
-                array('cat_id', 'uid'),
-                array($this->cat_id, $_USER['uid']));
+            if ($_CONF_ADVT['auto_subcats']) {
+                foreach ($subcats as $cat) {
+                    PLG_unsubscribe($_CONF_ADVT['pi_name'], 'category', $cat['cat_id']);
+                }
+            }
+            return PLG_unsubscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id);
         }
-        return (DB_error()) ? false : true;
     }   // function Subscribe
 
 

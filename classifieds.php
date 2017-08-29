@@ -29,12 +29,15 @@ $_AD_table_prefix = $_DB_table_prefix;
 $_TABLES['ad_category'] = $_AD_table_prefix . 'classified_category';
 $_TABLES['ad_ads']      = $_AD_table_prefix . 'classified_ads';
 $_TABLES['ad_photo']    = $_AD_table_prefix . 'classified_photo';
-$_TABLES['ad_notice']   = $_AD_table_prefix . 'classified_notice';
 $_TABLES['ad_uinfo']    = $_AD_table_prefix . 'classified_uinfo';
 $_TABLES['ad_catflds']  = $_AD_table_prefix . 'classified_catflds';
 $_TABLES['ad_submission'] = $_AD_table_prefix . 'classified_submission';
 $_TABLES['ad_types']    = $_AD_table_prefix . 'classified_types';
 $_TABLES['ad_trans']    = $_AD_table_prefix . 'classified_trans';
+
+// Deprecated tables to be removed
+// 1.1.3
+$_TABLES['ad_notice']   = $_AD_table_prefix . 'classified_notice';
 
 $_CONF_ADVT['pi_name'] = 'classifieds';
 $_CONF_ADVT['pi_version'] = '1.1.3';
@@ -46,7 +49,7 @@ $_CONF_ADVT['pi_display_name'] = 'Classified Ads';
 *   Other semi-static configurations
 */
 global $_CONF;
-$_CONF_ADVT['path'] = dirname(__FILE__);
+$_CONF_ADVT['path'] = __DIR__;
 $_CONF_ADVT['imgpath'] = $_CONF['path'] . 'data/classifieds/images';
 $_CONF_ADVT['classpath'] = $_CONF_ADVT['path'] . '/classes/';
 $_CONF_ADVT['url'] = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];

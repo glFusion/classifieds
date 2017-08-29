@@ -112,6 +112,8 @@ $_ADVT_DEFAULT['commentsupport'] = 1;
 $_ADVT_DEFAULT['helpurl'] = '';
 $_ADVT_DEFAULT['disp_fullname'] = 1;
 
+// Automatically subscribe sub-categories?
+$_ADVT_DEFAULT['auto_subcats'] = 0;
 
 /**
  *  Initialize Classifieds plugin configuration
@@ -197,6 +199,8 @@ function plugin_initconfig_classifieds($group_id = 0)
                 'select', 0, 0, 3, 220, true, $_CONF_ADVT['pi_name']);
         $c->add('displayblocks', $_ADVT_DEFAULT['displayblocks'],
                 'select', 0, 0, 13, 230, true, $_CONF_ADVT['pi_name']);
+        $c->add('auto_subcats', $_ADVT_DEFAULT['auto_subcats'],
+                'select', 0, 0, 3, 240, true, $_CONF_ADVT['pi_name']);
 
         $c->add('fs_perm_cat', NULL, 'fieldset', 0, 5, NULL, 0, true, $_CONF_ADVT['pi_name']);
         $c->add('defgrpcat', $_ADVT_DEFAULT['defgrpcat'],

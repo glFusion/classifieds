@@ -50,7 +50,6 @@ $adtable_create = "
     exp_date INT NOT NULL,
     price varchar(50) default '',
     ad_type smallint(5) unsigned NOT NULL default '0',
-    sentnotify tinyint(1) unsigned NOT NULL default '0',
     keywords varchar(255),
     exp_sent tinyint(1) unsigned NOT NULL default '0',
     comments int(4) unsigned NOT NULL default '0',
@@ -68,11 +67,11 @@ $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
     PRIMARY KEY(photo_id),
     KEY `idxAd` (`ad_id`,`photo_id`))";
 
-$NEWTABLE['ad_notice'] = "CREATE TABLE {$_TABLES['ad_notice']} (
+/*$NEWTABLE['ad_notice'] = "CREATE TABLE {$_TABLES['ad_notice']} (
     cat_id SMALLINT UNSIGNED NOT NULL,
     uid VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL,
-    PRIMARY KEY(cat_id, uid))";
+    PRIMARY KEY(cat_id, uid))";*/
 
 $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
     uid SMALLINT UNSIGNED NOT NULL auto_increment,

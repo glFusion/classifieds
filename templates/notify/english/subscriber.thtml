@@ -1,12 +1,12 @@
-Hello, {username},
-<p />
-There is a new ad listed on {site_name}.
-<p />
+<p>Hello, {username},</p>
+<p>There is a new ad listed on {site_name}.</p>
+<p>
 {ad_type}: {subject}<br />
-Description: {description}<br />
-Price: {price}<br />
-<p />
-Category: {cat}<br />
-<p />
-Click <a href="{ad_url}">here</a> for more details.
-
+Description: {description}
+{!if price}
+<br />
+Price: {price}
+{!endif}
+</p>
+<p>Category: {cat}</p>
+<p>Click <a href="{ad_url}">here</a> for more details.</p>

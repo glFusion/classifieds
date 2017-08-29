@@ -2,6 +2,7 @@
 
 ## Version 1.1.3
 Release TBD
+- Use glFusion subscription functions
 - Fix image deletion from ad edit page
 - Require glFusion 1.6+
 - Use JQuery AJAX functions

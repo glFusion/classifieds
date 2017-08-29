@@ -306,6 +306,7 @@ $LANG_confignames['classifieds'] = array(
     'detail_img_width' => 'Image width on ad detail pages',
     'visible_to' => 'Visible To',
     'detail_tpl_ver' => 'Ad Detail Template Version',
+    'auto_subcats' => '(Un)Subscriptions act on sub-categories?',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

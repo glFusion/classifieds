@@ -96,22 +96,20 @@ function classifieds_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '1.1.3')) {
         $current_ver = '1.1.3';
-        COM_errorLog("Updating {$_CONF_ADVT['pi_display_name']} to $current_ver");
-        $c = config::get_instance();
-        $c->add('detail_tpl_ver', 'v1',
-                'select', 0, 0, 6, 205, true, $_CONF_ADVT['pi_name']);
-        if (!classifieds_do_set_version('1.1.3')) return false;
+        if (!classifieds_upgrade_1_1_3()) return false;
     }
 
     // Final version update to catch updates that don't go through
     // any of the update functions, e.g. code-only updates
-    if (classifieds_do_set_version($installed_ver)) {
-        CTL_clearCache($_CONF_ADVT['pi_name']);
-        COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
-        return true;
-    } else {
-        return false;
+    if (!COM_checkVersion($current_ver, $installed_ver)) {
+        if (!classifieds_do_set_version($installed_ver)) {
+            COM_errorLog($_CONF_ADVT['pi_display_name'] .
+                    " Error performing final update $current_ver to $installed_ver");
+            return false;
+        }
     }
+    COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
+    CTL_clearCache($_CONF_ADVT['pi_name']);
 }
 
 
@@ -621,6 +619,39 @@ function classifieds_upgrade_1_1_2()
 
 
 /**
+*   Upgrade to version 1.1.3
+*   Migrates notification subscriptions to glFusion subscription system.
+*/
+function classifieds_upgrade_1_1_3()
+{
+    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
+
+    COM_errorLog("Updating {$_CONF_ADVT['pi_display_name']} to 1.1.3");
+    $c = config::get_instance();
+    $c->add('detail_tpl_ver', 'v1',
+            'select', 0, 0, 6, 205, true, $_CONF_ADVT['pi_name']);
+    $c->add('auto_subcats', 0,
+            'select', 0, 0, 3, 240, true, $_CONF_ADVT['pi_name']);
+    $sql = "SELECT n.cat_id, n.uid, c.description
+            FROM {$_TABLES['ad_notice']} n
+            LEFT JOIN {$_TABLES['ad_category']} c
+                ON c.cat_id = n.cat_id";
+    $res = DB_query($sql);
+    while ($A = DB_fetchArray($res, false)) {
+        PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $A['cat_id'],
+                $A['uid'], $_CONF_ADVT['pi_name'], $A['description']);
+    }
+    $sql = array(
+        "ALTER TABLE {$_TABLES['ad_submission']} DROP sentnotify",
+        "ALTER TABLE {$_TABLES['ad_ads']} DROP sentnotify",
+        "DROP TABLE {$_TABLES['ad_notice']}",
+    );
+    if (!classifieds_do_upgrade_sql('1.1.3', $sql)) return false;
+    return classifieds_do_set_version('1.1.3');
+}
+
+
+/**
 *   Update the plugin version number in the database.
 *   Called at each version upgrade to keep up to date with
 *   successful upgrades.
@@ -634,7 +665,7 @@ function classifieds_do_set_version($ver)
 
     // now update the current version number.
     $sql = "UPDATE {$_TABLES['plugins']} SET
-            pi_version = '{$_CONF_ADVT['pi_version']}',
+            pi_version = '" . DB_escapeString($ver) . "',
             pi_gl_version = '{$_CONF_ADVT['gl_version']}',
             pi_homepage = '{$_CONF_ADVT['pi_url']}'
         WHERE pi_name = '{$_CONF_ADVT['pi_name']}'";

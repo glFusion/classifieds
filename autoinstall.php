@@ -51,10 +51,6 @@ $INSTALL_plugin['classifieds'] = array(
             'sql' => $NEWTABLE['ad_submission']),
 
     array('type' => 'table', 
-            'table' => $_TABLES['ad_notice'], 
-            'sql' => $NEWTABLE['ad_notice']),
-
-    array('type' => 'table', 
             'table' => $_TABLES['ad_photo'], 
             'sql' => $NEWTABLE['ad_photo']),
 

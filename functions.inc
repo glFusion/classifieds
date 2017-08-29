@@ -418,7 +418,6 @@ function plugin_autouninstall_classifieds()
     $out = array (
         'tables'    => array('ad_ads',
                             'ad_category',
-                            'ad_notice',
                             'ad_photo',
                             'ad_uinfo',
                             'ad_catflds',
@@ -505,7 +504,7 @@ function plugin_getwhatsnew_classifieds($countonly = false)
         $newads = array();
         while ($A = DB_fetchArray($result, false)) {
             $url = CLASSIFIEDS_makeURL('detail', $A['ad_id']);
-    	    // Trim the length if over 16 characters
+            // Trim the length if over 16 characters
             if (strlen($A['subject']) > $title_len) {
                 $title = substr($A['subject'], 0, $title_len - 3) . '...';
             } else {
@@ -540,9 +539,59 @@ function plugin_searchtypes_classifieds()
         return '';
     }
 
-    $tmp = array('classifieds' => $LANG_ADVT['classifieds']);
+    return array('classifieds' => $LANG_ADVT['classifieds']);
+}
 
-    return $tmp;
+
+/**
+*   Get the formatted email message for subscription notifications.
+*
+*   @param  string  $category   Type of item, always 'category'
+*   @param  mixed   $track_id   Category ID
+*   @param  mixed   $post_id    Ad ID
+*   @param  integer $uid        Poseter UID
+*/
+function plugin_subscription_email_format_classifieds($category, $track_id, $post_id, $uid)
+{
+    global $_CONF, $_USER, $_TABLES, $LANG01, $LANG03, $LANG04;
+
+    USES_classifieds_class_ad();
+
+    $filter = sanitizer::getInstance();
+    $AllowedElements = $filter->makeAllowedElements($_CONF['htmlfilter_comment']);
+    $filter->setAllowedelements($AllowedElements);
+    $filter->setNamespace('classifieds','category');
+
+    // Get the ad from the DB and make sure it exists
+    $Ad = new Ad($post_id);
+    if ($Ad->isNew) return false;
+
+    // Sanitize text fields for the message
+    $permalink = CLASSIFIEDS_makeURL('detail', $Ad->ad_id);
+    $name = COM_getDisplayName($Ad->uid);
+    $name = @htmlspecialchars($name, ENT_QUOTES, COM_getEncodingt());
+    $title = COM_checkWords($Ad->subject);
+    $title = @htmlspecialchars($title, ENT_QUOTES, COM_getEncodingt());
+    $text = nl2br($Ad->description);
+    $text = $filter->_replaceTags($text);
+
+    $T = new Template(__DIR__ . '/templates/notify/english');
+    $T->set_file('message', 'subscriber.thtml');
+    $T->set_var(array(
+        'cat'       => $Ad->Cat->BreadCrumbs(),
+        'subject'   => $title,
+        'description' => $text,
+        'username'  => $name,
+        'ad_url'    => $permalink,
+        'price'     => $Ad->price,
+        'ad_type'   => $Ad->Type->description,
+    ), false);
+    $T->parse('output','message');
+    $message = $T->finish($T->get_var('output'));
+
+    $html2txt = new Html2Text\Html2Text($message, false);
+    $messageText = $html2txt->get_text();
+    return array($message, $messageText, array());
 }
 
 
@@ -939,6 +988,7 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
             $fields[] = 'price';
             break;
         case 'author':
+        case 'author_name':
             $fields[] = 'uid';
             break;
         case 'date':
@@ -981,6 +1031,9 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
                 break;
             case 'author':
                 $props[$p] = $A['uid'];
+                break;
+            case 'author_name':
+                $props[$p] = COM_getDisplayName($A['uid']);
                 break;
             case 'date':
                 $props[$p] = $A['add_date'];
@@ -1280,8 +1333,6 @@ function plugin_user_move_classifieds($origUID, $destUID)
     DB_query("UPDATE {$_TABLES['ad_ads']}
             SET uid = $destUID WHERE uid = $origUID", 1);
     DB_query("UPDATE {$_TABLES['ad_submission']}
-            SET uid = $destUID WHERE uid = $origUID", 1);
-    DB_query("UPDATE {$_TABLES['ad_notice']}
             SET uid = $destUID WHERE uid = $origUID", 1);
     DB_query("UPDATE {$_TABLES['ad_uinfo']}
             SET uid = $destUID WHERE uid = $origUID", 1);

@@ -32,71 +32,12 @@ class adNotify
     {
         global $_TABLES,  $_CONF, $_CONF_ADVT;
 
-        if ($Ad->isNew)
+        if (!$Ad->isNew)
             return false;
 
-        // check approval status and whether a notification was already sent.
-        if ($Ad->sentnotify == 1)
-            return true;
-
-        // Collect all the parent categories into a comma-separated list, and
-        // find all the subscribers in any of the categories
-        $parents = $Ad->Cat->BreadCrumbs(false, true);
-        $catlist = implode(',', $parents);
-        //$catlist = adCategory::ParentList($Ad->cat_id);
-        $sql = "SELECT u.uid, u.username, u.email, u.language
-                FROM {$_TABLES['ad_notice']} n
-                LEFT JOIN {$_TABLES['users']} u
-                    ON u.uid = n.uid
-                WHERE n.cat_id IN ($catlist)
-                AND u.status > 0";
-        $notice = DB_query($sql, 1);
-        if (!$notice) {
-            COM_errorLog("Adcategory::Subscribers SQL error: $sql");
-            return false;
-        }
-
-        // send the notification to subscribers
-        while ($row = DB_fetchArray($notice, false)) {
-            // Select the template for the message based on language
-            $template_dir = $_CONF_ADVT['path'] .
-                    '/templates/notify/' . $row['language'];
-            if (!file_exists($template_dir . '/subscriber.thtml')) {
-                $template_dir = $_CONF_ADVT['path'] . '/templates/notify/english';
-            }
-
-            // Load the recipient's language. $LANG_ADVT is *not* global here
-            // to avoid overwriting the global language strings.
-            $LANG = self::loadLanguage($row['language']);
-
-            $T = new Template($template_dir);
-            $T->set_file('message', 'subscriber.thtml');
-            $T->set_var(array(
-                'cat'       => $Ad->Cat->BreadCrumbs(),
-                'subject'   => $Ad->subject,
-                'description' => $Ad->description,
-                'username'  => COM_getDisplayName($row['uid']),
-                'ad_url'    => "{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id={$Ad->ad_id}",
-                'price'     => $Ad->price,
-                'ad_type'   => $Ad->Type->description,
-            ), false);
-            $T->parse('output','message');
-            $message = $T->finish($T->get_var('output'));
-
-            COM_mail(
-                array($row['email']),
-                "{$LANG['new_ad_listing']} {$_CONF['site_name']}",
-                $message,
-                '',
-                true
-            );
-        }
-
-        // update the ad's flag to indicate that a notification has been sent
-        DB_query("UPDATE {$_TABLES['ad_ads']}
-                SET sentnotify=1
-                WHERE ad_id='{$Ad->ad_id}'");
-    }   // function Subscribers()
+        return PLG_sendSubscriptionNotification($_CONF_ADVT['pi_name'],
+                'category', $Ad->cat_id, $Ad->ad_id, $Ad->uid);
+    }
 
 
     /**
