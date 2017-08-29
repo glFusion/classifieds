@@ -171,19 +171,36 @@ img.RandBlock {
     margin-top: 2rem;
 }
 
+.adDetailWrapper.v2 {
+    display:flex;
+}
+
 #adDetailWrapper .adImage {
     float: left;
     margin-right: 20px;
 }
 
+#adDetailWrapper .adImage.v2 {
+    clear: both;
+    float: left;
+    margin-right: 20px;
+}
+
+
 #adDetailWrapper .adImage img {
     padding-bottom: 5px;
 }
 
-#adDetailData {
+/*#adDetailData {
     float: left;
     min-width: 50%;
     margin-left: 20px;
+}*/
+
+.adDetailData.v2 {
+    min-width: 20%;
+    float:left;
+    flex: 1;
 }
 
 #adDetailData img {
@@ -272,3 +289,22 @@ div.adContactItem div.label {
     color: red;
 }
 
+div.advtMainImage.v2 {
+    height: 320px;
+    width: 360px;
+}
+
+img.advtMainImage.v2,
+img.advtImageThumb.v2 {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+.mainImageWrapper.v2 {
+    width: 375px;
+}
+.advtThumbnails.v2 {
+    width: 100%;
+    margin-top: 2px;
+}

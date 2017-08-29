@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 {breadcrumbs}
-<div id="adDetailWrapper">
+<div id="adDetailWrapper" class="v2">
 {!if have_userlinks}
   <div id="adDetailUserLinks">
 {!if have_editlink}
@@ -18,7 +18,7 @@
     {!if have_photo}
     <!-- BEGIN PhotoBlock -->
     <a data-lightbox-type="image" data-uk-lightbox="{group:'a'}" href="{disp_url}" target="_blank">
-      <img src="{small_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" />
+      <img src="{small_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" data-uk-tooltip />
     </a>
     <br />
     <!-- END PhotoBlock -->
