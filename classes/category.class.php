@@ -658,8 +658,9 @@ class adCategory
                 WHERE papa_id=$id";
         //echo $sql;die;
         $result = DB_query($sql);
-        if (!$result)
+        if (!$result) {
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
+        }
 
         while ($row = DB_fetchArray($result, false)) {
             $subcats[$master_id][$row['cat_id']] = $row;
@@ -814,7 +815,7 @@ class adCategory
     */
     public function Subscribe($sub = true)
     {
-        global $_CONF_ADVT;
+        global $_CONF_ADVT, $LANG_ADVT;
 
         // only registered users can subscribe, and make sure this is an
         // existing category
@@ -828,11 +829,11 @@ class adCategory
             if ($_CONF_ADVT['auto_subcats']) {
                 foreach ($subcats as $cat) {
                     PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $cat['cat_id'],
-                            0, $_CONF_ADVT['pi_name'], $cat['description']);
+                            0, $LANG_ADVT['category'], $cat['description']);
                 }
             }
             return PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id,
-                    0, $_CONF_ADVT['pi_name'], $this->description);
+                    0, $LANG_ADVT['category'], $this->description);
         } else {
             if ($_CONF_ADVT['auto_subcats']) {
                 foreach ($subcats as $cat) {
