@@ -50,7 +50,6 @@ $LANG_ADVT = array (
 'ads_by_poster'         => 'Alle Kleinanzeigen dieses Einsenders',
 'ads_by'                => 'Kleinanzeige eingereicht von',
 'already_expired'       => 'bereits abgelaufen',
-'auto_notify_list'      => 'automatische Benachrichtigung: Kategorieliste',
 'addit_info'            => 'Zusätzliche Informationen',
 'ad_type'               => 'Typ hinzufügen',
 'new_type'              => 'Neuer Typ',

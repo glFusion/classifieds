@@ -50,7 +50,6 @@ $LANG_ADVT = array (
 'ads_by_poster'     => 'Ver todos los Clasificados de este miembro',
 'ads_by'            => 'Clasificado enviado por',
 'already_expired'   => 'Expirado',
-'auto_notify_list'  => 'Lista de Auto-notificaciones de Categorías',
 'addit_info'        => 'Información Adicional',
 'ad_type'          => 'Tipo',
 'new_type'          => 'Crear',

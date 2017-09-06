@@ -50,7 +50,6 @@ $LANG_ADVT = array (
 'ads_by_poster'     => 'See all ads by this poster',
 'ads_by'            => 'Ads Posted By',
 'already_expired'   => 'Already Expired',
-'auto_notify_list'  => 'Auto-notify Category List',
 'addit_info'        => 'Additional Information',
 'ad_type'           => 'Ad Type',
 'new_type'          => 'New Type',

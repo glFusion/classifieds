@@ -65,27 +65,6 @@
             {exp_notify_checked} />
       </td>
     </tr> 
-    <tr>
-      <td class="label">{$LANG_ADVT['auto_notify_list']}</td>
-      <td class="input">
-        <ul>
-        <!-- BEGIN AutoNotifyListBlk -->
-        <li>
-          <a href="{pi_url}/index.php?mode=home&cat_id={cat_id}">{cat_name}</a>
-          <a href="{pi_url}/index.php?mode=del_notice&id={cat_id}&page=account">
-            <img src="{layout_url}/images/admin/delete.png" align="top" 
-                title="{$LANG_ADVT['remove']}"
-                class="gl_mootip"
-                alt="{$LANG_ADVT['remove']}" />
-          </a>
-        </li>
-        <!-- END AutoNotifyListBlk -->
-        {!if no_autonotify_list}
-          <li>{$LANG_ADVT['pls_auto_notify']}</li>
-        {!endif}
-        </ul>
-      </td>
-    </tr>
   </table>
 </fieldset>
 {!if profileedit}
