@@ -12,11 +12,12 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Classifieds;
 
 /**
 *   Class for notification functions
 */
-class adNotify
+class Notify
 {
     /**
     *   Send an email to all subscribers of a category or its parent
@@ -104,7 +105,7 @@ class adNotify
             $template_dir = "$template_base/english";
         }
 
-        $T = new Template($template_dir);
+        $T = new \Template($template_dir);
         $T->set_file('message', $template_file);
         $T->set_var(array(
             'username'  => $username,
@@ -187,7 +188,7 @@ class adNotify
                 $template_dir = "$template_base/english";
             }
 
-            $T = new Template($template_dir);
+            $T = new \Template($template_dir);
             $T->set_file('message', 'expiration.thtml');
             $T->set_var(array(
                 'num_ads'   => $info['ad_count'],
@@ -241,7 +242,7 @@ class adNotify
         if (!file_exists($template_dir . '/admin.thtml')) {
             $template_dir = $_CONF_ADVT['path'] . '/templates/notify/english';
         }
-        $T = new Template($template_dir);
+        $T = new \Template($template_dir);
         $T->set_file('message', 'admin.thtml');
         $T->set_var(array(
             'cat'       => $Ad->Cat->BreadCrumbs(),

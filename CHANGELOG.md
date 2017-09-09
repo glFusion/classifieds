@@ -2,6 +2,8 @@
 
 ## Version 1.1.3
 Release TBD
+- Rename classes, use PHP autoloader
+- Implement Classifieds namespace
 - Use glFusion subscription functions
 - Fix image deletion from ad edit page
 - Require glFusion 1.6+

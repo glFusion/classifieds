@@ -10,10 +10,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
-USES_classifieds_class_category();
-USES_classifieds_class_adtype();
-USES_classifieds_class_image();
+namespace Classifieds;
 
 /**
 *   Class for ad type
@@ -45,7 +42,6 @@ class Ad
         'exp_date' => 'int',
         'price' => 'string',
         'ad_type' => 'int',
-        'sentnotify' => 'int',
         'keywords' => 'string',
         'exp_sent' => 'int',
         'comments' => 'int',
@@ -105,7 +101,6 @@ class Ad
             $this->properties[$key] = COM_checkHTML(trim($value));
             break;
 
-        case 'sentnotify':
         case 'exp_sent':
         case 'comments_enabled':
             // Boolean values
@@ -175,8 +170,8 @@ class Ad
         if ($row) {
             $this->SetVars($row);
             $this->isNew = false;
-            $this->Cat = new adCategory($this->cat_id);
-            $this->Type= new adType($this->ad_type);
+            $this->Cat = new Category($this->cat_id);
+            $this->Type= new AdType($this->ad_type);
         }
     }
 
@@ -219,8 +214,7 @@ class Ad
         // Make sure ad_id isn't empty
         $this->ad_id = COM_sanitizeId($this->ad_id, true);
 
-        USES_classifieds_class_upload();
-        $Image = new adUpload($this->ad_id);
+        $Image = new Upload($this->ad_id);
         $Image->uploadFiles();
 
         $fld_array = array();
@@ -243,17 +237,16 @@ class Ad
             LGLIB_storeMessage('Database error saving ad');
             return false;
         } else {
-            USES_classifieds_class_notify();
             // Category object needed for notifications, but is not yet
             // set in the current Ad object
-            $this->Cat = new adCategory($this->cat_id);
+            $this->Cat = new Category($this->cat_id);
             if ($this->isNew) {
                 if ($this->isSubmission()) {
                     // Submission, notify moderators
-                    adNotify::Submission($this);
+                    Notify::Submission($this);
                 } else {
                     // Saved directly to prod, notify subscribers
-                    adNotify::Subscribers($this);
+                    Notify::Subscribers($this);
                 }
             }
             // Wouldn't be normal, but if this is being saved with an
@@ -282,7 +275,7 @@ class Ad
         if ($this->isNew) return NULL;
 
         // Grab the image records before the ad_id changes
-        $photos = adImage::getAll($this->ad_id);
+        $photos = Image::getAll($this->ad_id);
 
         // Clear the ad id and save to get a new ID
         $this->ad_id = '';
@@ -323,7 +316,7 @@ class Ad
             plugin_moderationdelete_classifieds($ad_id);
         } else {
             // Do the extra cleanup manually, delete any images
-            adImage::DeleteAll($ad_id);
+            Image::DeleteAll($ad_id);
         }
 
         // After the cleanup stuff, delete the ad record itself.
@@ -367,7 +360,7 @@ class Ad
 
         if ($id != '') $this->Read($id);
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
         // Detect uikit theme
         $tpl_path = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('adedit', "edit$tpl_path.thtml");
@@ -382,8 +375,8 @@ class Ad
                 '&img_id=';
         }
 
-        $add_date = new Date($this->add_date, $_CONF['timezone']);
-        $exp_date = new Date($this->add_date, $_CONF['timezone']);
+        $add_date = new \Date($this->add_date, $_CONF['timezone']);
+        $exp_date = new \Date($this->add_date, $_CONF['timezone']);
 
         if ($this->isNew) {
             $moredays = $_CONF_ADVT['default_duration'];
@@ -416,8 +409,8 @@ class Ad
             'keywords'      => $this->keywords,
             'exp_date'      => $exp_date->format($_CONF['daytime']),
             'add_date'      => $add_date->format($_CONF['daytime']),
-            'ad_type_selection' => adType::makeSelection($this->ad_type),
-            'sel_list_catid'    => adCategory::buildSelection($this->cat_id),
+            'ad_type_selection' => AdType::makeSelection($this->ad_type),
+            'sel_list_catid'    => Category::buildSelection($this->cat_id),
             'saveoption'    => $saveoption,
             'cancel_url'    => $cancel_url,
             'lang_runfor'   => $this->isNew ? $_LANG_ADVT['runfor'] :
@@ -450,8 +443,8 @@ class Ad
             while ($prow = DB_fetchArray($photo, false)) {
                 $i++;
                 $T->set_var(array(
-                    'img_url'   => adImage::dispUrl($prow['filename']),
-                    'thumb_url' => adImage::thumbUrl($prow['filename']),
+                    'img_url'   => Image::dispUrl($prow['filename']),
+                    'thumb_url' => Image::thumbUrl($prow['filename']),
                     'seq_no'    => $i,
                     'ad_id'     => $this->ad_id,
                     'del_img_url'   => $del_img_url . $prow['photo_id'],
@@ -482,7 +475,7 @@ class Ad
     {
         global $_USER, $_TABLES, $_CONF, $LANG_ADVT, $_CONF_ADVT;
 
-        USES_lib_comments();
+        //USES_lib_comments();
 
         // Grab the search string directly from $_GET
         $srchval = isset($_GET['query']) ? trim($_GET['query']) : '';
@@ -500,8 +493,7 @@ class Ad
         $nextAd = $this->GetNeighbor('next');
 
         // Get the user contact info. If none, just show the email link
-        USES_classifieds_class_userinfo();
-        $uinfo = new adUserInfo($this->uid);
+        $uinfo = new UserInfo($this->uid);
 
         // convert line breaks & others to html
         $patterns = array(
@@ -523,7 +515,7 @@ class Ad
             $description = COM_highlightQuery($description, $srchval);
         }
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates/detail/' .
+        $T = new \Template($_CONF_ADVT['path'] . '/templates/detail/' .
                 $_CONF_ADVT['detail_tpl_ver']);
         $tpl_type = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('detail', "detail$tpl_type.thtml");
@@ -554,8 +546,8 @@ class Ad
         if ($this->exp_date < $time) {
             $T->set_var('is_expired', 'true');
         }
-        $add_date = new Date($this->add_date, $_CONF['timezone']);
-        $exp_date = new Date($this->exp_date, $_CONF['timezone']);
+        $add_date = new \Date($this->add_date, $_CONF['timezone']);
+        $exp_date = new \Date($this->exp_date, $_CONF['timezone']);
         $T->set_var(array(
             'base_url'      => $base_url,
             'edit_link'     => $edit_link,
@@ -601,11 +593,11 @@ class Ad
             $T->set_var('ad_uid', $this->uid);
         }
 
-        $photos = adImage::getAll($this->ad_id);
+        $photos = Image::getAll($this->ad_id);
         foreach ($photos as $img_id=>$filename) {
-            $img_small = adImage::smallUrl($filename);
+            $img_small = Image::smallUrl($filename);
             if ($main_img == '') {
-                $main_img = adImage::dispUrl($filename);
+                $main_img = Image::dispUrl($filename);
                 $main_imgname = 'user/' . $filename;
             }
             if (!empty($img_small)) {
@@ -613,7 +605,7 @@ class Ad
                 $T->set_var(array(
                     'tn_width'  => $_CONF_ADVT['detail_img_width'],
                     'small_url' => $img_small,
-                    'disp_url' => adImage::dispUrl($filename),
+                    'disp_url' => Image::dispUrl($filename),
                     'small_imgname' => 'user/' . $filename,
                 ) );
                 $T->parse('PBlock', 'PhotoBlock', true);
@@ -894,7 +886,7 @@ class Ad
     *   Users can always view their own ads, and those under categories
     *   to which they have read access
     *
-    *   @uses   adCategory::canView()
+    *   @uses   Category::canView()
     *   @return boolean     True if access allows viewing, False if not
     */
     public function canView()

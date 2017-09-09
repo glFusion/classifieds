@@ -18,8 +18,7 @@ require_once '../lib-common.php';
 switch ($_REQUEST['action']) {
 case 'catsub':
     if (!isset($_POST['id'])) exit;
-    USES_classifieds_class_category();
-    $C = new adCategory($_POST['id']);
+    $C = new Classifieds\Category($_POST['id']);
     $status = $C->Subscribe(true);
     $result = array(
         'cat_id' => $_POST['id'],
@@ -31,8 +30,7 @@ case 'catsub':
 
 case 'catunsub':
     if (!isset($_POST['id'])) exit;
-    USES_classifieds_class_category();
-    $C = new adCategory($_POST['id']);
+    $C = new Classifieds\Category($_POST['id']);
     $status = $C->Subscribe(false);
     $result = array(
         'cat_id' => $_POST['id'],
@@ -44,8 +42,7 @@ case 'catunsub':
 
 case 'moredays':
     if (!isset($_POST['id'])) exit;
-    USES_classifieds_class_ad();
-    $Ad = new Ad($_POST['id']);
+    $Ad = new Classifieds\Ad($_POST['id']);
     if ($Ad->isNew) exit;
     $maxdays = $Ad->addDays($_POST['days']);
     $dt = new Date($Ad->exp_date, $_CONF['timezone']);

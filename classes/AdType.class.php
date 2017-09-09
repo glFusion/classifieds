@@ -10,12 +10,13 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Classifieds;
 
 /**
 *   Class for ad type
 *   @package classifieds
 */
-class adType
+class AdType
 {
     /** Properties array
      *  @var array */
@@ -293,6 +294,6 @@ class adType
         return $desc[$id];
     }
 
-}   // class adType
+}   // class AdType
 
 ?>

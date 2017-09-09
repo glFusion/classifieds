@@ -10,14 +10,13 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
-USES_class_upload();
+namespace Classifieds;
 
 /**
- *  Image-handling class
- *  @package classifieds
- */
-class adUpload extends upload
+*   Image-handling class
+*   @package classifieds
+*/
+class Upload extends \upload
 {
     /** Path to actual image (without filename)
      *  @var string */

@@ -3,23 +3,22 @@
 *   List categories on the home page
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
 */
-
+namespace Classifieds;
 
 /**
-*   @class adCatList
+*   @class CatList
 *   @package classifieds
 *   Create a listing of ads
 */
-class adCatList
+class CatList
 {
-
     /**
     *   When no category is given, show a table of all categories
     *   along with the count of ads for each.  
@@ -51,7 +50,7 @@ class adCatList
     {
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT;
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('page', 'catlist.thtml');
 
         // Get all the root categories
@@ -73,7 +72,6 @@ class adCatList
         $T->set_block('page', 'CatRows', 'CRow');
 
         $i = 1;
-        USES_classifieds_class_category();
         while ($catsrow = DB_fetchArray($cats)) {
             // For each category, find the total ad count (including subcats)
             // and display the subcats below it.
@@ -81,8 +79,8 @@ class adCatList
                 'rowstart'  => $i % 2 == 1 ? "<tr>\n" : '',
                 'cat_url'   => CLASSIFIEDS_makeUrl('home', $catsrow['cat_id']),
                 'cat_name'  => $catsrow['cat_name'],
-                'cat_ad_count' => adCategory::TotalAds($catsrow['cat_id']),
-                'image' => $catsrow['image'] ? adCategory::thumbUrl($catsrow['image']) : '',
+                'cat_ad_count' => Category::TotalAds($catsrow['cat_id']),
+                'image' => $catsrow['image'] ? Category::thumbUrl($catsrow['image']) : '',
             ) );
 
             $sql = "SELECT * FROM {$_TABLES['ad_category']} 
@@ -107,7 +105,7 @@ class adCatList
                 $subcatlist .= '<a href="'.
                         CLASSIFIEDS_makeURL('home', $subcatsrow['cat_id']). '">'.
                         "{$subcatsrow['cat_name']}</a>&nbsp;(" .
-                        adCategory::TotalAds($subcatsrow['cat_id']). ")&nbsp;{$isnew}";
+                        Category::TotalAds($subcatsrow['cat_id']). ")&nbsp;{$isnew}";
 
                 if ($num != $j)
                     $subcatlist .= ", ";
@@ -137,7 +135,7 @@ class adCatList
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT;
         global $CatListcolors;
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('page', 'catlist_blocks.thtml');
 
         // Get all the root categories
@@ -161,7 +159,6 @@ class adCatList
         $max = count($CatListcolors);
 
         $i = 0;
-        USES_classifieds_class_category();
         while ($catsrow = DB_fetchArray($cats)) {
             if ($catsrow['fgcolor'] == '' || $catsrow['bgcolor'] == '') {
                 if ($i >= $max) $i = 0;
@@ -183,8 +180,8 @@ class adCatList
                 'cat_url'   => CLASSIFIEDS_makeUrl('home',$catsrow['cat_id']),
                 'cat_name'  => $catsrow['cat_name'],
                 'cat_desc'  => $catsrow['description'],
-                'cat_ad_count' => adCategory::TotalAds($catsrow['cat_id']),
-                'image' => $catsrow['image'] ? adCategory::thumbUrl($catsrow['image']): '',
+                'cat_ad_count' => Category::TotalAds($catsrow['cat_id']),
+                'image' => $catsrow['image'] ? Category::thumbUrl($catsrow['image']): '',
             ) );
             $T->parse('Div', 'CatDiv', true);
         }

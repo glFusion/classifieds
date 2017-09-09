@@ -10,12 +10,13 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Classifieds;
 
 /**
  *  Image-handling class
  *  @package classifieds
  */
-class adImage
+class Image
 {
     /** Path to actual image (without filename)
      *  @var string */
@@ -165,8 +166,12 @@ class adImage
     public static function dispUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
+        if (function_exists(LGLIB_ImageUrl)) {
+            return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                    $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
+        } else {
+            return false;
+        }
     }
 
 
@@ -180,8 +185,12 @@ class adImage
     public static function smallUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                $_CONF_ADVT['detail_img_width']);
+        if (function_exists(LGLIB_ImageUrl)) {
+            return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                    $_CONF_ADVT['detail_img_width']);
+        } else {
+            return false;
+        }
     }
 
 
@@ -195,10 +204,14 @@ class adImage
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
+        if (function_exists(LGLIB_ImageUrl)) {
+            return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                    $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
+        } else {
+            return false;
+        }
     }
 
-}   // class adImage
+}   // class Image
 
 ?>

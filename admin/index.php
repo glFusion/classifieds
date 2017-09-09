@@ -135,8 +135,7 @@ $A = array();       // initialize array for form vars
 
 switch ($action) {
 case 'deleteimage': // delete an image
-    USES_classifieds_class_image();
-    $Image = new adImage($actionval);
+    $Image = new Classifieds\Image($actionval);
     $Image->Delete();
     $actionval = $ad_id;
     $view = 'editad';
@@ -145,41 +144,37 @@ case 'deleteimage': // delete an image
 case 'deletecat':   // delete a single category
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     if ($cat_id > 0) {
-        USES_classifieds_class_category();
-        adCategory::Delete($_REQUEST['cat_id']);
+        Classifieds\Category::Delete($_REQUEST['cat_id']);
         $view = 'admin';
     }
     break;
 
 case 'delbutton_x':
-    USES_classifieds_class_ad();
     foreach ($_POST['delitem'] as $ad_id) {
-        Ad::Delete($ad_id);
+        Classifieds\Ad::Delete($ad_id);
     }
     COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=ad');
     break;
 
 case 'deletead':
     $ad_id = $actionval;
-    USES_classifieds_class_ad();
     $type = CLASSIFIEDS_getParam('type', 'string');
     if ($type == 'submission' || $type == 'editsubmission' || 
             $type == 'moderate') {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
-        Ad::Delete($ad_id, 'ad_submission');
+        Classifieds\Ad::Delete($ad_id, 'ad_submission');
         echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
         exit;
     } else {
-        Ad::Delete($ad_id);
+        Classifieds\Ad::Delete($ad_id);
         echo COM_refresh($_CONF_ADVT['admin_url'] . '/index.php');
         exit;
     }
     break;
 
 case 'saveadtype':
-    USES_classifieds_class_adtype();
     $type_id = CLASSIFIEDS_getParam('type_id', 'int');
-    $AdType = new adType($type_id);
+    $AdType = new Classifieds\AdType($type_id);
     if (!$AdType->Save($_POST)) {
         COM_errorLog("Error saving ad type");
         COM_errorLog("Type info:" . print_r($AdType,true));
@@ -188,9 +183,8 @@ case 'saveadtype':
     break;
 
 case 'deleteadtype':
-    USES_classifieds_class_adtype();
     $type_id = CLASSIFIEDS_getParam('type_id', 'int');
-    $AdType = new adType($type_id);
+    $AdType = new Classifieds\AdType($type_id);
     $view = 'admin';
     $actionval = 'type';
     if ($AdType->isUsed()) {
@@ -212,9 +206,8 @@ case 'deleteadtype':
 
 case 'savecat':
     // Insert or update a category record from form vars
-    USES_classifieds_class_category();
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
-    $C = new adCategory($cat_id);
+    $C = new Classifieds\Category($cat_id);
     $C->Save($_POST);
     $view = 'admin';
     $actionval = 'cat';
@@ -222,8 +215,7 @@ case 'savecat':
 
 case 'delcat':
     // Insert or update a category record from form vars
-    USES_classifieds_class_category();
-    adCategory::DeleteMulti($_POST['c']);
+    Classifieds\Category::DeleteMulti($_POST['c']);
     $view = 'admin';
     $actionval = 'cat';
     break;
@@ -232,16 +224,14 @@ case 'delcatimg':
     // Delete a category image
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     if ($cat_id > 0) {
-        USES_classifieds_class_category();
-        adCategory::DelImage($cat_id);
+        Classifieds\Category::DelImage($cat_id);
     }
     $view = 'editcat';
     break;
 
 case 'save':
-    USES_classifieds_class_ad();
     if ($_POST['type'] == 'submission') {   // approving a submission
-        $Ad = new Ad($ad_id, 'ad_submission');
+        $Ad = new Classifieds\Ad($ad_id, 'ad_submission');
         $Ad->isNew = true;
         $Ad->setTable('ad_ads');
         $status = $Ad->Save($_POST);
@@ -254,7 +244,7 @@ case 'save':
         }
         exit;
     } else {
-        $Ad = new Ad($ad_id);
+        $Ad = new Classifieds\Ad($ad_id);
         $status = $Ad->Save($_POST);
         if ($status) {
             echo COM_refresh($_CONF_ADVT['admin_url']);
@@ -266,22 +256,20 @@ case 'save':
    break;
 
 case 'dupad':
-    USES_classifieds_class_ad();
-    $Ad = new Ad($actionval);
+    $Ad = new Classifieds\Ad($actionval);
     $msg = $Ad->Duplicate() ? 14 : 13;
     echo COM_refresh($_CONF_ADVT['admin_url'] . '?plugin=classifieds&msg=' . $msg);
     exit;
     break;
 
 case 'resetcatperms':
-    USES_classifieds_class_category();
     $new_perms = array(
         $_POST['perm_owner'][0],
         $_POST['perm_group'][0],
         $_POST['perm_members'][0],
         $_POST['perm_anon'][0],
     );
-    adCategory::ResetPerms($_POST['group_id'], $new_perms);
+    Classifieds\Category::ResetPerms($_POST['group_id'], $new_perms);
     echo COM_refresh($_CONF_ADVT['admin_url']);
     exit;
     break;
@@ -297,8 +285,7 @@ default:
 switch ($view) {
 case 'editad':
 case 'edit':    // if called from submit.php
-    USES_classifieds_class_ad();
-    $Ad = new Ad(CLASSIFIEDS_getParam('ad_id'));
+    $Ad = new Classifieds\Ad(CLASSIFIEDS_getParam('ad_id'));
     // TODO: What was this for?
     //$Ad->cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $content .= $Ad->Edit();
@@ -306,8 +293,7 @@ case 'edit':    // if called from submit.php
 
 case 'editadtype':
     // Edit an ad type. $actionval contains the type_id value
-    USES_classifieds_class_adtype();
-    $AdType = new adType($actionval);
+    $AdType = new Classifieds\AdType($actionval);
     $content .= CLASSIFIEDS_adminMenu('type');
     $content .= $AdType->ShowForm();
     break;
@@ -315,16 +301,14 @@ case 'editadtype':
 case 'editcat':
     // Display the form to edit a category.
     // $actionval contains the category ID
-    USES_classifieds_class_category();
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $content .= CLASSIFIEDS_adminMenu('cat');
-    $C = new adCategory($cat_id);
+    $C = new Classifieds\Category($cat_id);
     $content .= $C->Edit();
     break;
 
 case 'moderate':
-    USES_classifieds_class_ad();
-    $Ad = new Ad($ad_id, 'ad_submission');
+    $Ad = new Classifieds\Ad($ad_id, 'ad_submission');
     $content .= $Ad->Edit();
     break;
 

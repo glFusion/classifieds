@@ -20,8 +20,6 @@ if (!in_array('classifieds', $_PLUGINS)) {
     exit;
 }
 
-//USES_classifieds_advt_functions();
-
 // Determine if this is an anonymous user, and override the plugin's
 // loginrequired configuration if the global loginrequired is set.
 $isAnon = COM_isAnonUser();
@@ -91,8 +89,7 @@ switch ($mode) {
 case 'submit':
 case 'edit':
     if ($isAnon) COM_404();
-    USES_classifieds_class_ad();
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
     if (isset($_GET['cat_id']) && $Ad->isNew) {
         $Ad->cat_id = $_GET['cat_id'];
     }
@@ -103,10 +100,9 @@ case 'delete':
 case 'deletead':
     if ($isAnon) COM_404();
     if ($id != '') {
-        USES_classifieds_class_ad();
-        $Ad = new Ad($id);
+        $Ad = new Classifieds\Ad($id);
         if ($Ad->canEdit()) {
-            Ad::Delete($id);
+            Classifieds\Ad::Delete($id);
             $msg = '&msg=11';
         } else {
             $msg = '';
@@ -119,8 +115,7 @@ case 'deletead':
 case 'update_account':
     // only valid users allowed
     if ($isAnon) COM_404();
-    USES_classifieds_class_userinfo();
-    $U = new adUserInfo($_USER['uid']);
+    $U = new Classifieds\UserInfo($_USER['uid']);
     $U->SetVars($_POST);
     $U->Save();
     $view = $view == '' ? 'account' : $view;
@@ -135,8 +130,7 @@ echo 'update_ad DEPRECATED'; die;
 
 case 'save':
     if ($isAnon) COM_404();
-    USES_classifieds_class_ad();
-    $Ad = new Ad();
+    $Ad = new Classifieds\Ad();
     if ($Ad->Save($_POST)) {
         COM_refresh($_CONF_ADVT['url'] . '?msg=01');
     } else {
@@ -146,8 +140,7 @@ case 'save':
 
 case 'delete_img':
     if ($isAnon) COM_404();
-    USES_classifieds_class_image();
-    $Image = new adImage($_GET['img_id']);
+    $Image = new Classifieds\Image($_GET['img_id']);
     if ($Image->photo_id > 0) {
         $Image->Delete();
     }
@@ -156,16 +149,14 @@ case 'delete_img':
 
 case 'moredays':
     if ($isAnon) COM_404();
-    USES_classifieds_class_ad();
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
     $Ad->addDays($_POST['add_days']);
     $view = 'manage';
     break;
 
 case 'recent':
     //  Display recent ads
-    USES_classifieds_class_adlist();
-    $L = new AdListRecent();
+    $L = new Classifieds\AdList_Recent();
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['recent_listed']);
     $menu_opt = $LANG_ADVT['mnu_recent'];
@@ -181,8 +172,7 @@ case 'manage':
 
 case 'account':
     if ($isAnon) COM_404();
-    USES_classifieds_class_userinfo();
-    $U = new adUserInfo();
+    $U = new Classifieds\UserInfo();
     $content .= $U->showForm('advt');
     $T->set_var('header', $LANG_ADVT['my_account']);
     $menu_opt = $LANG_ADVT['mnu_account'];
@@ -190,23 +180,20 @@ case 'account':
 
 case 'detail':
     // Display an ad's detail
-    USES_classifieds_class_ad();
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
     $content .= $Ad->Detail();
     break;
 
 case 'editad':
     // Edit an ad.
     if ($isAnon) COM_404();
-    USES_classifieds_class_ad();
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
     $content .= $Ad->Edit();
     break;
 
 case 'byposter':
     // Display all open ads for the specified user ID
-    USES_classifieds_class_adlist();
-    $L = new AdListPoster($_GET['uid']);
+    $L = new Classifieds\AdList_Poster($_GET['uid']);
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['ads_by']. ' '. COM_getDisplayName($uid));
     $menu_opt = $LANG_ADVT['mnu_home'];
@@ -217,13 +204,11 @@ default:
     // Display either the categories, or the ads under a requested
     // category
     if ($id > 0) {
-        USES_classifieds_class_adlist();
-        $L = new AdListCat($id);
+        $L = new Classifieds\AdList_Cat($id);
         $content .= $L->Render();
         $pageTitle = $L->Cat->cat_name;
     } else {
-        USES_classifieds_class_catlist();
-        $content .= adCatList::Render();
+        $content .= Classifieds\CatList::Render();
     }
     $T->set_var('header', $LANG_ADVT['blocktitle']);
     $menu_opt = $LANG_ADVT['mnu_home'];

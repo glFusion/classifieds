@@ -5,17 +5,17 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2012 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.0.5
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-
+namespace Classifieds;
 
 /**
 *   Class for category objects
 */
-class adCategory
+class Category
 {
     private $properties;
     public $isNew;
@@ -242,7 +242,7 @@ class adCategory
                     isset($A['orig_pcat']) &&
                     $A['orig_pcat'] != $this->papa_id) {
                 foreach (self::SubCats($this->cat_id) as $id=>$cat) {
-                    $X = new adCategory($id);
+                    $X = new self($id);
                     $X->Save();
                 }
             }

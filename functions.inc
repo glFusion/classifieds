@@ -70,77 +70,22 @@ SESS_setVar($_CONF_ADVT['pi_name'], array(
     'origpath'      => $_CONF_ADVT['imgpath'],
 ));
 
-
-function USES_classifieds_class_ad()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/Ad.class.php';
-}
-
-function USES_classifieds_class_adtype()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . 'AdType.class.php';
-}
-
-function USES_classifieds_class_upload()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/upload.class.php'; }
-
-function USES_classifieds_class_image()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/image.class.php';
-}
-
-function USES_classifieds_class_userinfo()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/UserInfo.class.php';
-}
-
-function USES_classifieds_class_adlist()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/AdList.class.php';
-}
-
 function USES_classifieds_admin()
 {
     global $_CONF_ADVT;
     require_once $_CONF_ADVT['path'] . '/admin.php';
 }
 
-function USES_classifieds_notify()
+spl_autoload_register(function($class)
 {
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/notify.php';
-}
-
-function USES_classifieds_class_catlist()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['classpath'] . '/CatList.class.php';
-}
-
-function USES_classifieds_detail()
-{
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['path'] . '/detail.php';
-}
-
-function USES_classifieds_class_category()
-{
-    global $_CONF_ADVT;
-   include_once $_CONF_ADVT['classpath'] . '/category.class.php';
-}
-
-function USES_classifieds_class_notify()
-{
-    global $_CONF_ADVT;
-    include_once $_CONF_ADVT['classpath'] . '/notify.class.php';
-}
+    if (strpos($class, 'Classifieds\\') === 0) {
+        $class = str_replace('Classifieds\\', '', $class);
+        $path = __DIR__ . '/classes/' . $class . '.class.php';
+        if (file_exists($path)) {
+            include $path;
+        }
+    }
+});
 
 
 /**
@@ -194,9 +139,6 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     if (!plugin_commentsupport_classifieds())
         return;
 
-    USES_classifieds_class_ad();
-    USES_classifieds_class_notify();
-
     $title = strip_tags($title);
     $pid = COM_applyFilter($pid, true);
     $postmode = COM_applyFilter($postmode);
@@ -212,11 +154,11 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
     }
 
     // success - update the comment counter for this ad
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
     $Ad->updateComments();
 
     // Notify the ad's owner that a comment has been posted.
-    adNotify::Comment($Ad);
+    Classifieds\Notify::Comment($Ad);
 
     return (COM_refresh(CLASSIFIEDS_makeURL('detail', $id)));
 }
@@ -245,8 +187,7 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
     if (!plugin_commentsupport_classifieds())
         return $retval;
 
-    USES_classifieds_class_ad();
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
 
     if (!$Ad->isNew) {
         $delete_option = (plugin_ismoderator_classifieds() ||
@@ -555,15 +496,13 @@ function plugin_subscription_email_format_classifieds($category, $track_id, $pos
 {
     global $_CONF, $_USER, $_TABLES, $LANG01, $LANG03, $LANG04;
 
-    USES_classifieds_class_ad();
-
     $filter = sanitizer::getInstance();
     $AllowedElements = $filter->makeAllowedElements($_CONF['htmlfilter_comment']);
     $filter->setAllowedelements($AllowedElements);
     $filter->setNamespace('classifieds','category');
 
     // Get the ad from the DB and make sure it exists
-    $Ad = new Ad($post_id);
+    $Ad = new Classifieds\Ad($post_id);
     if ($Ad->isNew) return false;
 
     // Sanitize text fields for the message
@@ -885,13 +824,11 @@ function plugin_itemlist_classifieds()
 function plugin_moderationapprove_classifieds($id, $owner_id=0)
 {
     // Notify subscribers.
-    USES_classifieds_class_notify();
-    USES_classifieds_class_ad();
-    $Ad = new Ad($id);
-    adNotify::Approval($Ad, true);
-    adNotify::Subscribers($Ad);
+    $Ad = new Classifieds\Ad($id);
+    Classifieds\Notify::Approval($Ad, true);
+    Classifieds\Notify::Subscribers($Ad);
     // Update the date added to now.
-    Ad::setAddDate($id);
+    Classifieds\Ad::setAddDate($id);
     return '';
 }
 
@@ -909,16 +846,11 @@ function plugin_moderationdelete_classifieds($id)
 {
     global $_TABLES, $_CONF_ADVT;
 
-    USES_classifieds_class_notify();
-    USES_classifieds_class_image();
-    USES_classifieds_class_ad();
-
-    $Ad = new Ad($id, 'ad_submission');
+    $Ad = new Classifieds\Ad($id, 'ad_submission');
 
     // Return the unused days back to the user's account
     if ($_CONF_ADVT['purchase_enabled']) {
-        USES_classifieds_class_userinfo();
-        $User = new adUserInfo($Ad->uid);
+        $User = new Classifieds\UserInfo($Ad->uid);
         /*list($owner_id, $add_date, $exp_date) = DB_fetchArray(DB_query(
             "SELECT uid, add_date, exp_date
             FROM {$_TABLES['ad_submission']}
@@ -928,8 +860,8 @@ function plugin_moderationdelete_classifieds($id)
     }
 
     // Delete uploaded photos from filesystem
-    adImage::DeleteAll($id);
-    adNotify::Approval($Ad, false);
+    Classifieds\Image::DeleteAll($id);
+    Classifieds\Notify::Approval($Ad, false);
     return '';
 }
 
@@ -941,8 +873,7 @@ function plugin_moderationdelete_classifieds($id)
 */
 function plugin_submit_classifieds()
 {
-    USES_classifieds_class_ad();
-    $Ad = new Ad();
+    $Ad = new Classifieds\Ad();
     return $Ad->Edit();
 }
 
@@ -1103,8 +1034,7 @@ echo 'DEPRECATED';die;
         $owner_id = $_USER['uid'];
     }
 
-    USES_classifieds_class_ad();
-    $Ad = new Ad();
+    $Ad = new Classifieds\Ad();
 
     // Initialize error message.  If it's still empty at the end, then
     // the save was successful.  Otherwise, redisplay the submission
@@ -1136,8 +1066,7 @@ echo 'DEPRECATED';die;
 
     if ($errmsg == '') {        // Only save if no errors so far
         if ($_CONF_ADVT['purchase_enabled']) {
-            USES_classifieds_class_userinfo();
-            $User = new adUserInfo($owner_id);
+            $User = new Classifieds\UserInfo($owner_id);
             $ad_days = min((int)$Ad->moredays, $User->getMaxDays());
         } else {
             $ad_days = (int)$Ad->moredays;
@@ -1280,9 +1209,8 @@ function plugin_runScheduledTask_classifieds($standalone=false)
                     WHERE exp_date < $purge_exp_date");
         if ($r) {
             $numrows = DB_numRows($r);
-            USES_classifieds_class_ad();
             while ($row = DB_fetchArray($r, false)) {
-                Ad::Delete($row['ad_id']);
+                Classifieds\Ad::Delete($row['ad_id']);
             }
 
             if ($numrows > 0) {
@@ -1297,8 +1225,7 @@ function plugin_runScheduledTask_classifieds($standalone=false)
 
     // Notify users of impending ad expirations
     if ((int)$_CONF_ADVT['exp_notify_days'] >= 0) {
-        USES_classifieds_class_notify();
-        adNotify::Expiration();
+        Classifieds\Notify::Expiration();
     }
 }
 
@@ -1311,8 +1238,7 @@ function plugin_runScheduledTask_classifieds($standalone=false)
 */
 function plugin_user_create_classifieds($uid)
 {
-    USES_classifieds_class_userinfo();
-    $U = new adUserInfo($uid);
+    $U = new Classifieds\UserInfo($uid);
     $U->Save();
 }
 
@@ -1367,21 +1293,18 @@ function phpblock_classifieds_random()
     if ($n < 1)
         return '';
 
-    USES_classifieds_class_ad();
-
     $id = DB_result($r, 0, 'id');
-    $Ad = new Ad($id);
+    $Ad = new Classifieds\Ad($id);
     if ($Ad->isNew) return '';
 
-    USES_classifieds_class_image();
-    $img_filename = adImage::getFirst($Ad->ad_id);
+    $img_filename = Classifieds\Image::getFirst($Ad->ad_id);
 
     $T = new Template($_CONF_ADVT['path'] . '/templates');
     $T->set_file('rblock', 'randomblock.thtml');
     $T->set_var(array(
         'ad_url'    => CLASSIFIEDS_makeURL('detail', $id),
         'ad_subject' => $Ad->subject,
-        'img_url'   => adImage::thumbUrl($img_filename),
+        'img_url'   => Classifieds\Image::thumbUrl($img_filename),
     ) );
 
     $T->parse('output','rblock');
@@ -1610,8 +1533,7 @@ function plugin_profileedit_classifieds($uid, $panel, $fieldset)
     $retval = '';
 
     if ($panel == '' && $fieldset == '') {
-        USES_classifieds_class_userinfo();
-        $U = new adUserInfo($uid);
+        $U = new Classifieds\UserInfo($uid);
         $retval = $U->ShowForm('account_settings');
     }
 
@@ -1634,8 +1556,7 @@ function plugin_profilesave_classifieds($uid=0)
         return;
     }
 
-    USES_classifieds_class_userinfo();
-    $U = new adUserInfo($uid);
+    $U = new Classifieds\UserInfo($uid);
     $U->SetVars($_POST);
     $U->Save();
 }
@@ -1656,8 +1577,7 @@ function plugin_userchanged_classifieds($uid=0)
         return;
     }
 
-    USES_classifieds_class_userinfo();
-    $U = new adUserInfo($uid);
+    $U = new Classifieds\UserInfo($uid);
     $U->SetVars($_POST);
     $U->Save();
 }
@@ -1824,13 +1744,12 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
 
     $T->set_file('autotag', $template);
     $T->set_block('autotag', 'tag_data', 'TAG');
-    USES_classifieds_class_image();
     while ($A = DB_fetchArray($result, false)) {
         $img_file = DB_getItem($_TABLES['ad_photo'], 'filename',
                 "ad_id='{$A['ad_id']}'");
          if ($img_file != '') {
-            $T->set_var('img_url', adImage::dispUrl($img_file));
-            $T->set_var('tn_url', adImage::thumbUrl($img_file));
+            $T->set_var('img_url', Classifieds\Image::dispUrl($img_file));
+            $T->set_var('tn_url', Classifieds\Image::thumbUrl($img_file));
         } else {
             $T->clear_var('img_url');
             $T->clear_var('tn_url');

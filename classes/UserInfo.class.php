@@ -3,19 +3,20 @@
 *   Class to handle user account info for the Classifieds plugin
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.1.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Classifieds;
 
 /**
  *  Class for user account info
  *  @package classifieds
  */
-class adUserInfo
+class UserInfo
 {
     private $properties;
     private $fields = array(
@@ -222,20 +223,12 @@ class adUserInfo
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
 
-        USES_classifieds_class_category();
-
-        $base_url = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
-
-        $T = new Template($_CONF_ADVT['path'] . '/templates');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
         $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('accountinfo', "account_settings$tpltype.thtml");
-        if ($type == 'advt') {
-            // Called within the plugin
-        //    $T->set_file('accountinfo', "accountinfo$tpltype.thtml");
-        } else {
-            // Called via glFusion account settings
+        if ($type != 'advt') {
+            // Called from the use settings page
             $T->set_var('profileedit', 'true');
-        //    $T->set_file('accountinfo', "account_settings$tpltype.thtml");
         }
 
         $T->set_var(array(
