@@ -2,6 +2,9 @@
 
 ## Version 1.1.3
 Release TBD
+- Disable this plugin if the lgLib plugin is disabled or removed
+- Wrap breadcrumbs on small displays
+- Fix saving comment notification option in account settings
 - Rename classes, use PHP autoloader
 - Implement Classifieds namespace
 - Use glFusion subscription functions
