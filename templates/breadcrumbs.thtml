@@ -1,0 +1,9 @@
+{# begin {templatelocation} #}
+<!-- BEGIN BreadCrumbs -->
+{bc_link}
+{!if last_link}
+{!else}
+ :: 
+{!endif}
+<!-- END BreadCrumbs -->
+{# end {templatelocation} #}

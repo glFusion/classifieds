@@ -424,7 +424,7 @@ class Category
             $this->cat_id = $cat_id;
             $this->Read();
         }
-        $T = new Template($_CONF_ADVT['path'] . '/templates/admin');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates/admin');
         $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('modify', "catEditForm$tpltype.thtml");
 
@@ -544,6 +544,8 @@ class Category
     */
     public static function showBreadCrumbs($map, $showlink=true)
     {
+        global $_CONF_ADVT;
+
         // If $map is not an array, assume it's a json string
         if (!is_array($map)) {
             $map = json_decode($map, true);
@@ -551,18 +553,29 @@ class Category
         // Invalid JSON, start with an empty array
         if (!$map) $map = array();
         $bc = array_reverse($map);
-        $locations = array();
+        $c = count($bc) - 1;
+
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
+        $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
+        $T->set_file('breadcrumbs', "breadcrumbs$tpltype.thtml");
+        $T->set_block('breadcrumbs', 'BreadCrumbs', 'BC');
         foreach ($bc as $id => $parent) {
             if ($showlink) {
-                $locations[] = '<a href="' .
+                $location = '<a href="' .
                     CLASSIFIEDS_makeURL('home', $parent['cat_id']) .
                     '">' . $parent['cat_name'] . '</a>';
             } else {
                 // just get the names, no links, e.g. for notifications
-                $locations[] = $parent['cat_name'];
+                $location = $parent['cat_name'];
             }
+            $T->set_var(array(
+                'bc_link'   => $location,
+                'last_link' => $id == $c ? true : false,
+            ) );
+            $T->parse('BC', 'BreadCrumbs', true);
         }
-        return implode(' :: ', $locations);
+        $T->parse('output', 'breadcrumbs');
+        return $T->finish($T->get_var('output'));
     }
 
 
