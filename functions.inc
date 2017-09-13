@@ -1626,17 +1626,41 @@ function plugin_getconfigelementhelp_classifieds($option, $doclang='english')
 */
 function plugin_enablestatechange_classifieds($enabled)
 {
-    global $_TABLES;
+    global $_TABLES, $_PLUGINS;
 
     $enabled = $enabled == true ? 1 : 0;
-    if ($enabled) {
-        $blocks = array('classifieds_random');
 
+    // If trying to enable the plugin but lgLib is not available,
+    // take no action and return
+    if ($enabled && !in_array('lglib', $_PLUGINS)) {
+        // Re-disable the plugin
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'classifieds');
+        $enabled = 0;
+    }
+
+    if (!$enabled) {
+        $blocks = array('classifieds_random');
         foreach ($blocks as $block) {
-            DB_query("UPDATE {$_TABLES['blocks']}
-                    SET is_enabled=$enabled
-                    WHERE name='$block'");
+            DB_change($_TABLES['blocks'], 'is_enabled', $enabled, 'name', $block);
         }
+    }
+}
+
+
+/**
+*   Receives notification of another plugin's deletion
+*
+*   @param  mixed   $id     Item ID
+*   @param  string  $type   Plugin Name
+*/
+function plugin_itemdeleted_classifieds($id, $type)
+{
+    global $_TABLES;
+
+    // If the lgLib plugin is disabled or removed, disable this plugin
+    if ($type == 'lglib' && $id == '*') {
+        plugin_enablestatechange_classifieds(false);
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'classifieds');
     }
 }
 
