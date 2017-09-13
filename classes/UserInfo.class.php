@@ -80,7 +80,7 @@ class UserInfo
             break;
 
         case 'notify_exp':
-        case 'notify_cmt':
+        case 'notify_comment':
             $this->properties[$key] = $value == 1 ? 1 : 0;
             break;
 
@@ -129,7 +129,7 @@ class UserInfo
         }
 
         foreach ($this->fields as $fld=>$type) {
-            $this->$fld = $A[$pfx.$fld];
+            $this->$fld = isset($A[$pfx.$fld]) ? $A[$pfx.$fld] : '';
         }
 
         // Update the actual max number of days that this user ca
@@ -151,7 +151,7 @@ class UserInfo
         $uid = (int)$uid;
         if ($uid == 0) $uid = $this->uid;
         if ($uid == 0) {
-            return;
+            return false;
         }
 
         $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']}
@@ -159,6 +159,9 @@ class UserInfo
         if ($result && DB_numRows($result) == 1) {
             $row = DB_fetchArray($result, false);
             $this->SetVars($row);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -182,7 +185,7 @@ class UserInfo
                 '" . DB_escapeString($this->tel) . "',
                 '" . DB_escapeString($this->fax) . "',
                 '{$this->notify_exp}',
-                '{$this->notify_cmt}'
+                '{$this->notify_comment}'
             )
             ON DUPLICATE KEY UPDATE
                 address = '" . DB_escapeString($this->address) . "',

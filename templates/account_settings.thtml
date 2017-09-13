@@ -65,6 +65,13 @@
             {exp_notify_checked} />
       </td>
     </tr> 
+    <tr>
+      <td class="label">{$LANG_ADVT['notify_cmt']}</td>
+      <td class="input">
+        <input type=checkbox name="advt_notify_comment" value="1"
+            {cmt_notify_checked} />
+      </td>
+    </tr>
   </table>
 </fieldset>
 {!if profileedit}

@@ -68,6 +68,14 @@
     </div>
   </div> 
 
+  <div class="uk-form-row">
+    <label for="advt_notify_cmt" class="uk-form-label">{$LANG_ADVT['notify_cmt']}</label>
+    <div class="uk-form-controls">
+      <input type="checkbox" id="advt_notify_cmt" name="advt_notify_comment"
+            value="1" {cmt_notify_checked} />
+    </div>
+  </div>
+
 </fieldset>
 {!if profileedit}
 </div>
