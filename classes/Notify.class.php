@@ -114,7 +114,7 @@ class Notify
             'price'     => $Ad->price,
             'cat'       => $Ad->Cat->description,
             'ad_type'   => $Ad->Type->description,
-            'ad_url'    => "{$_CONF_ADVT['url']}/index.php?mode=detail&id=$ad_id",
+            'ad_url'    => "{$_CONF_ADVT['url']}/index.php?mode=detail&id={$Ad->ad_id}",
             'site_name' => $_CONF['site_name'],
         ) );
         $T->parse('output','message');
