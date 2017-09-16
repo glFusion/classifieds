@@ -8,6 +8,7 @@ Release TBD
 - Rename classes, use PHP autoloader
 - Implement Classifieds namespace
 - Use glFusion subscription functions
+- Add global option to automatically (un)subscribe to/from subcategories
 - Fix image deletion from ad edit page
 - Require glFusion 1.6+
 - Use JQuery AJAX functions
