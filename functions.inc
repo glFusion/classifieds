@@ -1014,6 +1014,21 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
 
 
 /**
+*   Get the URL for the item when linked from a comment
+*
+*   @return array   Array of (base url, id string)
+*/
+function plugin_getcommenturlid_classifieds()
+{
+    global $_CONF_ADVT;
+    return array(
+        $_CONF_ADVT['url'] . '?mode=detail',
+        'id',
+    );
+}
+
+
+/**
 *   Returns the number of submissions waiting moderation.
 *
 *   Calculates the number of submissions that are currently waiting
