@@ -54,6 +54,9 @@ if (isset($_REQUEST['id'])) {
 } else {
     $id = COM_applyFilter(COM_getArgument('id'));
 }
+if (empty($mode) && !empty($id)) {
+    $mode = 'detail';
+}
 
 // Set up the basic menu for all users
 $menu_opt = '';
