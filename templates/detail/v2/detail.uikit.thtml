@@ -17,17 +17,6 @@ function advtUpdateImage(filename)
 
 {breadcrumbs}
 <div id="adDetailWrapper" class="adDetailWrapper v2">
-{!if have_userlinks}
-  <div id="adDetailUserLinks">
-{!if have_editlink}
-    <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
-    <a href="{del_link}" data-uk-tooltip
-        onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
-        title="{$LANG_ADVT['del_item']}"
-        ><i class="uk-icon uk-icon-trash uk-icon-danger" style="color:red"></i></a>
-{!endif}
-  </div>
-{!endif}
   <div style="clear:both;margin-top:20px;"></div>
 
 {!if main_img}
@@ -150,6 +139,18 @@ function advtUpdateImage(filename)
 <!-- END HotBlock -->
     </div>
   </div>
+
+{!if have_userlinks}
+  <div id="adDetailUserLinks">
+{!if have_editlink}
+    <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
+    <a href="{del_link}" data-uk-tooltip
+        onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
+        title="{$LANG_ADVT['del_item']}"
+        ><i class="uk-icon uk-icon-trash uk-icon-danger" style="color:red"></i></a>
+{!endif}
+  </div>
+{!endif}
 
 </div>
 
