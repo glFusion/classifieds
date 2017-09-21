@@ -110,6 +110,7 @@ function classifieds_do_upgrade()
     }
     COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
     CTL_clearCache($_CONF_ADVT['pi_name']);
+    return true;
 }
 
 
