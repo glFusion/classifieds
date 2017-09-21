@@ -1,6 +1,6 @@
 # Classifieds Plugin for glFusion - Change Log
 
-## Version 1.1.3
+## Version 1.2.0
 Release TBD
 - Disable this plugin if the lgLib plugin is disabled or removed
 - Wrap breadcrumbs on small displays

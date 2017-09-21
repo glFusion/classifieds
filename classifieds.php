@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.3
+*   @version    1.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -40,7 +40,7 @@ $_TABLES['ad_trans']    = $_AD_table_prefix . 'classified_trans';
 $_TABLES['ad_notice']   = $_AD_table_prefix . 'classified_notice';
 
 $_CONF_ADVT['pi_name'] = 'classifieds';
-$_CONF_ADVT['pi_version'] = '1.1.3';
+$_CONF_ADVT['pi_version'] = '1.2.0';
 $_CONF_ADVT['gl_version'] = '1.6.0';
 $_CONF_ADVT['pi_url'] = 'http://www.leegarner.com';
 $_CONF_ADVT['pi_display_name'] = 'Classified Ads';
