@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.3
+*   @version    1.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -71,9 +71,11 @@ if (!$isAnon) {
     $menu->add_menuitem($LANG_ADVT['mnu_myads'], CLASSIFIEDS_makeURL('manage'));
 }
 if (CLASSIFIEDS_canSubmit()) {
-    $menu->add_menuitem($LANG_ADVT['mnu_submit'],
-        $_CONF_ADVT['url'] . '/index.php?mode=submit');
-        //$_CONF['site_url']. '/submit.php?type='. $_CONF_ADVT['pi_name']);
+    $url = $_CONF_ADVT['url'] . '/index.php?mode=submit';
+    if ($mode == 'home' && !empty($id)) {
+        $url .= "&cat_id=$id";
+    }
+    $menu->add_menuitem($LANG_ADVT['mnu_submit'], $url);
 }
 
 // Establish the output template
