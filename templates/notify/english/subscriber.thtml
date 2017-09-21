@@ -1,4 +1,4 @@
-<p>Hello, {username},</p>
+<p>Greetings,</p>
 <p>There is a new ad listed on {site_name}.</p>
 <p>
 {ad_type}: {subject}<br />
@@ -10,3 +10,5 @@ Price: {price}
 </p>
 <p>Category: {cat}</p>
 <p>Click <a href="{ad_url}">here</a> for more details.</p>
+<p>You are receiving this message because you are currently subscribed to this
+category. You can manage your subscription preferences <a href="https://gldev.leegarner.com/usersettings.php?mode=edit">here</a>.</p>

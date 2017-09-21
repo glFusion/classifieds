@@ -492,7 +492,7 @@ function plugin_searchtypes_classifieds()
 *   @param  mixed   $post_id    Ad ID
 *   @param  integer $uid        Poseter UID
 */
-function plugin_subscription_email_format_classifieds($category, $track_id, $post_id, $uid)
+function plugin_subscription_email_format_classifieds($category, $track_id, $post_id, $post_uid)
 {
     global $_CONF, $_USER, $_TABLES, $LANG01, $LANG03, $LANG04;
 
@@ -507,8 +507,6 @@ function plugin_subscription_email_format_classifieds($category, $track_id, $pos
 
     // Sanitize text fields for the message
     $permalink = CLASSIFIEDS_makeURL('detail', $Ad->ad_id);
-    $name = COM_getDisplayName($Ad->uid);
-    $name = @htmlspecialchars($name, ENT_QUOTES, COM_getEncodingt());
     $title = COM_checkWords($Ad->subject);
     $title = @htmlspecialchars($title, ENT_QUOTES, COM_getEncodingt());
     $text = nl2br($Ad->description);
@@ -520,7 +518,6 @@ function plugin_subscription_email_format_classifieds($category, $track_id, $pos
         'cat'       => $Ad->Cat->BreadCrumbs(),
         'subject'   => $title,
         'description' => $text,
-        'username'  => $name,
         'ad_url'    => $permalink,
         'price'     => $Ad->price,
         'ad_type'   => $Ad->Type->description,

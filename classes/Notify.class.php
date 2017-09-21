@@ -31,7 +31,7 @@ class Notify
     */
     public static function Subscribers($Ad)
     {
-        global $_TABLES,  $_CONF, $_CONF_ADVT;
+        global $_CONF_ADVT;
 
         if (!$Ad->isNew)
             return false;
