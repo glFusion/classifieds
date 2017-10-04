@@ -35,7 +35,8 @@ $NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
     fgcolor varchar(10),
     bgcolor varchar(10),
     parent_map text default NULL,
-    PRIMARY KEY(cat_id))";
+    PRIMARY KEY(cat_id)
+) ENGINE=MyISAM";
 
 // common SQL for ad and ad_submission tables
 $adtable_create = "
@@ -54,7 +55,8 @@ $adtable_create = "
     exp_sent tinyint(1) unsigned NOT NULL default '0',
     comments int(4) unsigned NOT NULL default '0',
     comments_enabled tinyint(1) unsigned NOT NULL default '1',
-    PRIMARY KEY(ad_id))";
+    PRIMARY KEY(ad_id)
+) ENGINE=MyISAM";
 $NEWTABLE['ad_ads'] = "CREATE TABLE {$_TABLES['ad_ads']} 
     $adtable_create";
 $NEWTABLE['ad_submission'] = "CREATE TABLE {$_TABLES['ad_submission']} 
@@ -65,7 +67,8 @@ $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
     ad_id VARCHAR(128) NOT NULL DEFAULT '',
     filename varchar(255),
     PRIMARY KEY(photo_id),
-    KEY `idxAd` (`ad_id`,`photo_id`))";
+    KEY `idxAd` (`ad_id`,`photo_id`)
+) ENGINE=MyISAM";
 
 /*$NEWTABLE['ad_notice'] = "CREATE TABLE {$_TABLES['ad_notice']} (
     cat_id SMALLINT UNSIGNED NOT NULL,
@@ -85,13 +88,15 @@ $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
     notify_exp TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
     notify_comment TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
     days_balance INT(11) DEFAULT 0,
-    PRIMARY KEY(uid))";
+    PRIMARY KEY(uid)
+) ENGINE=MyISAM";
 
 $NEWTABLE['ad_types'] = "CREATE TABLE {$_TABLES['ad_types']} (
     id int(11) NOT NULL auto_increment,
     description varchar(255) default NULL,
     enabled tinyint(1) default '1',
-    PRIMARY KEY  (`id`))";
+    PRIMARY KEY  (`id`)
+) ENGINE=MyISAM";
 
 /*
 $NEWTABLE['ad_trans'] = "CREATE TABLE {$_TABLES['ad_trans']} (
