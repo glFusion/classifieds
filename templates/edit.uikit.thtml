@@ -105,6 +105,7 @@
       <span class="exp_date">{exp_date}</span>&nbsp;&nbsp;&nbsp;{$LANG_ADVT['add']}
       <input id="moredays" type="text" size="10" name="moredays"
           value="{moredays}" />{$LANG_ADVT['days']}
+      <i class="{iconset}-question-circle tooltip" title="{$LANG_ADVT['hlp_add_days']}"></i>
     </div>
 {!endif}
   </div>

@@ -201,6 +201,7 @@ $LANG_ADVT = array (
 'hlp_adtypes'           => 'Verwaltung Typen:  Diese beschreiben den Typ der Kleinanzeige; Zum Beispiel:  "zum Verkauf", "Gesucht", "Beschäftigung", etc.',
 'hlp_cats'              => 'Verwaltung Kategorie:  Hinzufügen, Bearbeiten oder Löschen von Kategorien',
 'hlp_other'             => 'Standardberechtigungen für Kleinanzeigen und Kategorien. Hier können alle Berechtigungen auf Standardwerte zurückgesetzt werden.  Es erfüllt die gleiche Funktion wie die globale Konfiguration dieses Plugins.',
+'hlp_add_days'  => 'Enter a number of days to extend the expiration, up to the maximum allowed.',
 
 'you_are_subscribed'    => 'Benachrichtigungen für diese Kategorie wurden abonniert. Hier klicken um diese abzumelden.',
 'subscribe'             => 'Benachrichtigungen für die Kategorie abonnieren',

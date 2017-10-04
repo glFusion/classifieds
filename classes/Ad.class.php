@@ -376,7 +376,7 @@ class Ad
         }
 
         $add_date = new \Date($this->add_date, $_CONF['timezone']);
-        $exp_date = new \Date($this->add_date, $_CONF['timezone']);
+        $exp_date = new \Date($this->exp_date, $_CONF['timezone']);
 
         if ($this->isNew) {
             $moredays = $_CONF_ADVT['default_duration'];
@@ -407,8 +407,8 @@ class Ad
             'price'         => $this->price,
             'url'           => $this->url,
             'keywords'      => $this->keywords,
-            'exp_date'      => $exp_date->format($_CONF['daytime']),
-            'add_date'      => $add_date->format($_CONF['daytime']),
+            'exp_date'      => $exp_date->format($_CONF['daytime'] . ' T', true),
+            'add_date'      => $add_date->format($_CONF['daytime'] . ' T', true),
             'ad_type_selection' => AdType::makeSelection($this->ad_type),
             'sel_list_catid'    => Category::buildSelection($this->cat_id),
             'saveoption'    => $saveoption,
@@ -419,6 +419,7 @@ class Ad
             'cls_exp_date'  => $this->exp_date < time() ? 'adExpiredText' : '',
             'ownerselect'   => self::userDropdown($this->uid),
             'uid'           => $_USER['uid'],
+            'iconset'       => $_CONF_ADVT['_iconset'],
          ) );
 
         if ($this->isNew) {

@@ -198,6 +198,7 @@ $LANG_ADVT = array (
 'hlp_adtypes' => 'Administer Ad Types.  These indicate the type of ad; for example:  "For Sale", "Wanted", "Work for Hire", etc.',
 'hlp_cats'      => 'Administer ad categories.  Add, Edit and Delete categories',
 'hlp_other'     => 'Here you can reset all ad or category permissions to their default values, as set in the global plugin configuration.',
+'hlp_add_days'  => 'Enter a number of days to extend the expiration, up to the maximum allowed.',
 
 'you_are_subscribed'    => 'You are subcribed to notifications for this category. Click to unsubscribe.',
 'subscribe'     => 'Subscribe to notifications for this category',
