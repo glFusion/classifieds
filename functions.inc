@@ -51,6 +51,7 @@ $_CONF_ADVT['purchase_enabled'] = 0;
 // Mark whether this is a uikit theme. Save to global conf var
 // so it's available where needed.
 $_CONF_ADVT['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
+$_CONF_ADVT['_iconset'] = $_CONF_ADVT['_is_uikit'] ? 'uk-icon' : 'fa fa';
 
 // Language file Include
 $langpath = $_CONF_ADVT['path'] . '/language';
@@ -1183,6 +1184,15 @@ function phpblock_classifieds_random()
 
     $T->parse('output','rblock');
     return $T->finish($T->get_var('output'));
+}
+
+
+/**
+*   Return the template names that support ad blocks
+*/
+function plugin_supportadblock_classifieds()
+{
+    return array('classifieds_detail', 'classifieds_list');
 }
 
 

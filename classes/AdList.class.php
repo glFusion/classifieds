@@ -114,6 +114,7 @@ class AdList
         }
 
         $T->set_block('catlist', 'QueueRow', 'QRow');
+        $counter = 0;
         while ($row = DB_fetchArray($result)) {
             $T->set_var(array(
                 'bgColor'   => $bgColor,
@@ -131,6 +132,7 @@ class AdList
                 'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
                 'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
                 'tn_cellwidth' => $_CONF_ADVT['thumb_max_size'] - 20,
+                'adblock'   => PLG_displayAdBlock('classifieds_list', ++$counter),
             ) );
 
             $photos = Image::GetAll($row['ad_id'], 1);

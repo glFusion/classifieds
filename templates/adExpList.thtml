@@ -47,6 +47,9 @@
       {!endif}
     </td>
   </tr>
+{!if adblock}
+  <tr><td colspan="9" style="text-align:center;">{adblock}</td></tr>
+{!endif}
   <!-- END QueueRow -->
 
   <tr>
