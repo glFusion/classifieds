@@ -186,4 +186,7 @@ function advtUpdateImage(filename)
 <div style="clear:both;">
   {usercomments}
 </div>
+{!if adblock}
+<div class="aligncenter">{adblock}</div>
+{!endif}
 {# end {templatelocation} #}

@@ -579,6 +579,7 @@ class Ad
             'have_userlinks' => 'true',
             'session_id'    => session_id(),
             'timthumb'  => true,
+            'adblock'   => PLG_displayAdBlock('classifieds_detail', 0),
         ) );
 
         // Display a link to email the poster, or other message as needed

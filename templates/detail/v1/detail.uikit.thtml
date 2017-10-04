@@ -151,6 +151,9 @@
     <div style="clear:both;">
     {usercomments}
     </div>
+{!if adblock}
+<div class="aligncenter">{adblock}</div>
+{!endif}
 
 </div>
 {# end {templatelocation} #}
