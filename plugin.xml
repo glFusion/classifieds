@@ -3,7 +3,7 @@
     <name>Classified Ads</name>
     <description>Classified Ads plugin for glFusion.</description>
     <version>1.2.0</version>
-    <glfusionversion>1.6.0</glfusionversion>
+    <glfusionversion>1.7.0</glfusionversion>
     <phpversion>5.6.0</phpversion>
     <url>http://www.leegarner.com</url>
     <maintainer>Lee Garner</maintainer>
