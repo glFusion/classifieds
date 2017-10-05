@@ -1,7 +1,7 @@
 # Classifieds Plugin for glFusion - Change Log
 
 ## Version 1.2.0
-Release TBD
+Release 2017-10-05
 - Disable this plugin if the lgLib plugin is disabled or removed
 - Wrap breadcrumbs on small displays
 - Fix saving comment notification option in account settings
