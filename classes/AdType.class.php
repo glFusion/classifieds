@@ -282,7 +282,7 @@ class AdType
     *   @param  integer $id     Database ID of the ad type
     *   @return string          Ad Type Description
     */
-    public static function GetDescription($id)
+    public static function getDescription($id)
     {
         global $_TABLES;
         static $desc = array();
