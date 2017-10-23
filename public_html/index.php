@@ -135,7 +135,10 @@ echo 'update_ad DEPRECATED'; die;
 
 case 'save':
     if ($isAnon) COM_404();
-    $Ad = new Classifieds\Ad();
+    if (isset($_POST['ad_id']) && !empty($_POST['ad_id'])) {
+        $id = $_POST['ad_id'];
+    }
+    $Ad = new Classifieds\Ad($id);
     if ($Ad->Save($_POST)) {
         COM_refresh($_CONF_ADVT['url'] . '?msg=01');
     } else {
