@@ -166,12 +166,12 @@ class Image
     public static function dispUrl($filename)
     {
         global $_CONF_ADVT;
-        if (function_exists(LGLIB_ImageUrl)) {
-            return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                    $_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
-        } else {
-            return false;
-        }
+        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl',
+            array('',
+                $_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                $_CONF_ADVT['img_max_width'],
+                $_CONF_ADVT['img_max_height'],
+            ) );
     }
 
 
@@ -185,12 +185,12 @@ class Image
     public static function smallUrl($filename)
     {
         global $_CONF_ADVT;
-        if (function_exists(LGLIB_ImageUrl)) {
-            return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                    $_CONF_ADVT['detail_img_width']);
-        } else {
-            return false;
-        }
+        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl',
+            array('',
+                $_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                $_CONF_ADVT['detail_img_width'],
+                0,
+            ) );
     }
 
 
@@ -204,12 +204,12 @@ class Image
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
-        if (function_exists(LGLIB_ImageUrl)) {
-            return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                    $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
-        } else {
-            return false;
-        }
+        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl',
+            array('',
+                $_CONF_ADVT['imgpath'] . '/user/' . $filename,
+                $_CONF_ADVT['thumb_max_size'],
+                $_CONF_ADVT['thumb_max_size'],
+            ) );
     }
 
 }   // class Image
