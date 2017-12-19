@@ -31,7 +31,7 @@ function advtUpdateImage(filename)
 
   <div class="advtThumbnails v2">
 <!-- BEGIN PhotoBlock -->
-    <div class="advtImageThumb v2" style="float:left;width:50px;">
+    <div class="advtImageThumb v2" style="float:left;width:80px;">
       <a data-uk-lightbox-type="image" data-uk-lightbox="{group:'a'}" href="{disp_url}">
 {!if timthumb}
         <img src="{site_url}/lglib/img.php?src={small_imgname}&plugin=classifieds&sess={session_id}&width=75&height=75" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" 
@@ -64,7 +64,7 @@ function advtUpdateImage(filename)
         <div class="label">{$LANG_ADVT['contact']}</div>
         <div class="data">{username}
 {!if ad_uid}
-          <a href="{site_url}/profiles.php?uid={ad_uid}">
+          <a href="{site_url}/profiles.php?uid={ad_uid}&subject={subject}">
             <img name="editbutton"
               alt="{$LANG_ADVT['ask_question']}"
               title="{$LANG_ADVT['ask_question']}" data-uk-tooltip

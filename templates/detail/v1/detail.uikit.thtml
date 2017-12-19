@@ -73,7 +73,7 @@
         <div class="label">{$LANG_ADVT['contact']}</div>
         <div class="data">{username}
 {!if ad_uid}
-          <a href="{site_url}/profiles.php?uid={ad_uid}">
+          <a href="{site_url}/profiles.php?uid={ad_uid}&subject={subject}">
             <img name="editbutton" 
               alt="{$LANG_ADVT['ask_question']}" 
               title="{$LANG_ADVT['ask_question']}" 
