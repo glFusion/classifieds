@@ -65,10 +65,8 @@ function advtUpdateImage(filename)
         <div class="data">{username}
 {!if ad_uid}
           <a href="{site_url}/profiles.php?uid={ad_uid}&subject={subject}">
-            <img name="editbutton"
-              alt="{$LANG_ADVT['ask_question']}"
-              title="{$LANG_ADVT['ask_question']}" data-uk-tooltip
-              src="{site_url}/classifieds/images/mail.png" />
+            <i class="uk-icon uk-icon-envelope" title="{$LANG_ADVT['ask_question']}"
+                data-uk-tooltip></i>
           </a>
 {!else}
           &nbsp;&nbsp;<i>({$LANG_ADVT['login_to_email']})</i>
