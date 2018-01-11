@@ -26,8 +26,7 @@ case 'toggleEnabled':
 
     switch ($_POST['type']) {
     case 'adtype':
-        USES_classifieds_class_adtype();
-        $newval = AdType::toggleEnabled($oldval, $_POST['id']);
+        $newval = Classifieds\AdType::toggleEnabled($oldval, $_POST['id']);
         break;
 
      default:
