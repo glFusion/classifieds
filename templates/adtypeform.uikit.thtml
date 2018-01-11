@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 <form class="uk-form-horizontal" method="post" action="{pi_admin_url}/index.php">
-  <input type="hidden" name="type_id" value="{type_id}" />
+  <input type="hidden" name="id" value="{type_id}" />
   <h2>{lang_header}</h2>
 
   <div class="uk-form-row">
