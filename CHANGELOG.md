@@ -1,7 +1,13 @@
 # Classifieds Plugin for glFusion - Change Log
 
-## Version 1.2.0
-Release 2017-10-05
+## Versino 1.3.0 (Unreleased)
+- Implement Modified Preloaded Tree Traversal for categories
+
+## Version 1.2.1 (Released 2018-01-11)
+- Fix ad type management
+- Remove Dataproxy driver
+
+## Version 1.2.0 (Released 2017-10-05)
 - Disable this plugin if the lgLib plugin is disabled or removed
 - Wrap breadcrumbs on small displays
 - Fix saving comment notification option in account settings
@@ -15,19 +21,14 @@ Release 2017-10-05
 - Enable different versions of Ad templates, configurable globally
 - Reset date added when an ad is approved
 
-## Version 1.1.2
-Released 2017-01-21
+## Version 1.1.2 (Released 2017-01-21)
 - Fix admin menu link
 - Add missing comment count field to submissions table
 
-## Version 1.1.1
-released 2017-01-10
-
+## Version 1.1.1 (released 2017-01-10)
 - Fix SQL error and template for autotags
 
-## Version 1.1.0
-released 2016-12-31
-
+## Version 1.1.0 (Released 2016-12-31)
 Compatibile with glFusion 1.6.0 or higher.
 - Refactor code into classes for different object types
 - Add uikit templates when a uikit-based theme is in use
@@ -40,28 +41,25 @@ Compatibile with glFusion 1.6.0 or higher.
 - Move notification functions to separate class
 - Add AJAX update when adding days to an ad
 
-## glClassifieds - 1.0.4
-Released 2011-09-02
+## Version 1.0.4 (Released 2011-09-02)
 - 0000459: [General] Remove EBay link configuration (lee) - resolved.
 - 0000441: [General] All HTML tags are stripped from the ad text (lee) - resolved.
 - 0000446: [Administration] Pagination in the category administration doesn't work (lee) - resolved.
 - 0000421: [General] Paging isn't working when browsing categories (lee) - resolved.
 - 0000419: [General] Add "expires" meta tag to ad display (lee) - resolved.
 
-## glClassifieds - 1.0.3
-Released 2010-07-09
+## Version 1.0.3 (Released 2010-07-09)
 - 0000411: [General] URL rewrite not working (lee) - resolved.
 
-## glClassifieds - 1.0.2
-Released 2010-05-02, Compatible with glFusion 1.2.0 and up only.
+## Version 1.0.2 (Released 2010-05-02)
+Compatible with glFusion 1.2.0 and up only.
 - 0000407: [General] Dates are always formated as m/d/y (lee) - resolved.
 - 0000389: [General] Add autotag support (lee) - resolved.
 - 0000401: [Administration] Use single config variable to control block display (lee) - resolved.
 - 0000383: [General] Ad titles in what's new block keep getting shorter (lee) - resolved.
 - 0000384: [General] What's new list not correctly formatted. (lee) - resolved.
 
-## glClassifieds - 1.0.1
-Released 2009-12-21
+## Version 1.0.1 (Released 2009-12-21)
 - 0000367: [General] Add option to hide left & right blocks (lee) - closed.
 - 0000369: [General] Unescaped strings are passed to search function (lee) - closed.
 
