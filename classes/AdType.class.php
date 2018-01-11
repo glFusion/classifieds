@@ -146,7 +146,7 @@ class AdType
             $sql3 = '';
         } else {
             $sql1 = "UPDATE {$_TABLES['ad_types']} SET ";
-            $sql3 = "WHERE id=" . $this->id;
+            $sql3 = " WHERE id=" . $this->id;
         }
         $sql2 = "description = '" . DB_escapeString($this->description) . "',
                 enabled = {$this->enabled}";
