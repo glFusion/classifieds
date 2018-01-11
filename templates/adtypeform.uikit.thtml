@@ -1,12 +1,12 @@
 {# begin {templatelocation} #}
 <form class="uk-form-horizontal" method="post" action="{pi_admin_url}/index.php">
   <input type="hidden" name="type_id" value="{type_id}" />
-  <h2>{$LANG_ADVT['editadtypehdr']}</h2>
+  <h2>{lang_header}</h2>
 
   <div class="uk-form-row">
     <label for="description" class="uk-form-label">{$LANG_ADVT['description']}</label>
     <div class="uk-form-controls">
-      <input type="text" id="description" name="description" value="{description}" size="70" 
+      <input required type="text" id="description" name="description" value="{description}" size="70" 
         maxlength="250" />
     </div>
   </div>
@@ -27,7 +27,11 @@
           value="{$LANG_ADMIN['delete']}" 
           onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');">{$LANG_ADMIN['delete']}</button>
 {!endif}
-    </div>
+      <button class="uk-button" type="reset" value="{$LANG_ADMIN['cancel']" name="cancel" data-uk-tooltip="{pos:'left'}" title="{$LANG_ADMIN['cancel']}"
+           onclick="javascript: document.location.href='{site_admin_url}/plugins/classifieds/index.php?admin=type'" />
+          {$LANG_ADMIN['cancel']}
+        </button>
+     </div>
   </div>
 </form>
 {# end {templatelocation} #}

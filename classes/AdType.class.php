@@ -184,7 +184,7 @@ class AdType
         $id = (int)$id;
         if ($id > 0) $this->Read($id);
 
-        $T = new Template($_CONF_ADVT['path'] . '/templates');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
         if ($_CONF_ADVT['_is_uikit']) {
             $T->set_file('admin','adtypeform.uikit.thtml');
         } else {
@@ -192,10 +192,11 @@ class AdType
         }
         $T->set_var(array(
             'pi_admin_url'  => $_CONF_ADVT['admin_url'],
+            'lang_header'   => $id == 0 ? $LANG_ADVT['newadtypehdr'] : $LANG_ADVT['editadtypehdr'],
             'cancel_url'    => $_CONF_ADVT['admin_url'] . '/index.php?admin=type',
             'show_name'     => $this->showName,
             'type_id'       => $this->id,
-            'descriptiuon'  => htmlspecialchars($this->description),
+            'description'   => htmlspecialchars($this->description),
             'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
         ) );
 

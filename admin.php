@@ -26,7 +26,7 @@ USES_lib_admin();
 */
 function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT;
+    global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
 
     $retval = '';
 
@@ -70,27 +70,29 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if ($_CONF_ADVT['_is_uikit']) {
-            $retval .= COM_createLink('',
-                $_CONF_ADVT['admin_url'] .
-                    "/index.php?deleteadtype=x&amp;type_id={$A['id']}",
-                array(
-                    'title' => 'Delete this item',
-                    'class' => 'uk-icon uk-icon-trash advt_icon_danger',
-                    'onclick' => "return confirm('Do you really want to delete this item?');",
-                )
-            );
-        } else {
-            $retval .= '&nbsp;&nbsp;' . COM_createLink(
-                COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
-                    'Delete this item',
-                    array('title' => 'Delete this item',
-                        'class' => 'gl_mootip',
+        if (DB_count($_TABLES['ad_ads'], 'ad_type', $A['id']) == 0) {
+            if ($_CONF_ADVT['_is_uikit']) {
+                $retval .= COM_createLink('',
+                    $_CONF_ADVT['admin_url'] .
+                        "/index.php?deleteadtype=x&amp;type_id={$A['id']}",
+                    array(
+                        'title' => 'Delete this item',
+                        'class' => 'uk-icon uk-icon-trash advt_icon_danger',
                         'onclick' => "return confirm('Do you really want to delete this item?');",
-                    )),
-                $_CONF_ADVT['admin_url'] .
-                    "/index.php?deleteadtype=x&amp;type_id={$A['id']}"
-            );
+                    )
+                );
+            } else {
+                $retval .= '&nbsp;&nbsp;' . COM_createLink(
+                    COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
+                        'Delete this item',
+                        array('title' => 'Delete this item',
+                            'class' => 'gl_mootip',
+                            'onclick' => "return confirm('Do you really want to delete this item?');",
+                        )),
+                    $_CONF_ADVT['admin_url'] .
+                        "/index.php?deleteadtype=x&amp;type_id={$A['id']}"
+                );
+            }
         }
         break;
 
