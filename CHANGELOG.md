@@ -1,6 +1,6 @@
 # Classifieds Plugin for glFusion - Change Log
 
-## Versino 1.3.0 (Unreleased)
+## Version 1.3.0 (Unreleased)
 - Implement Modified Preloaded Tree Traversal for categories
 
 ## Version 1.2.1 (Released 2018-01-11)
