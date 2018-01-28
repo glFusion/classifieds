@@ -44,7 +44,7 @@ class AdList
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('catlist', 'adExpList.thtml');
 
-        // Gt the ads for this category, starting at the requested page
+        // Get the ads for this category, starting at the requested page
         $sql = "SELECT ad.*, ad.add_date as ad_add_date, cat.*
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
@@ -72,23 +72,12 @@ class AdList
         else
             $totalPages = ceil($totalAds / $maxAds);
 
-        $page = COM_applyFilter($_REQUEST['start'], true);
+        $page = isset($_REQUEST['start']) ? (int)$_REQUEST['start'] : 1;
         if ($page < 1 || $page > $totalPages) {
             $page = 1;
         }
-
-        if ($totalAds == 0) {
-            $startEntry = 0;
-        } else {
-            $startEntry = $maxAds * $page - $maxAds + 1;
-        }
-
-        if ($page == $totalPages) {
-            $endEntry = $totalAds;
-        } else {
-            $endEntry = $maxAds * $page;
-        }
-
+        $startEntry = ($totalAds == 0) ? 0 : $maxAds * $page - $maxAds + 1;
+        $endEntry = ($page == $totalPages) ? $totalAds : $maxAds * $page;
         $initAds = $maxAds * ($page - 1);
 
         // Create the page menu string for display if there is more
@@ -115,9 +104,9 @@ class AdList
 
         $T->set_block('catlist', 'QueueRow', 'QRow');
         $counter = 0;
-        while ($row = DB_fetchArray($result)) {
+        while ($row = DB_fetchArray($result, false)) {
             $T->set_var(array(
-                'bgColor'   => $bgColor,
+                'bgColor'   => $row['bgcolor'],
                 'cat_id'    => $row['cat_id'],
                 'subject'   => strip_tags($row['subject']),
                 'ad_id'     => $row['ad_id'],
@@ -128,14 +117,14 @@ class AdList
                 'cat_url'   => CLASSIFIEDS_makeURL('home', $row['cat_id']),
                 'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
                 'descript' => substr(strip_tags($row['description']), 0, 300),
-                'ellipses'  => strlen($row['descript']) > 300 ? '...' : '',
+                'ellipses'  => strlen($row['description']) > 300 ? '...' : '',
                 'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
                 'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
                 'tn_cellwidth' => $_CONF_ADVT['thumb_max_size'] - 20,
                 'adblock'   => PLG_displayAdBlock('classifieds_list', ++$counter),
             ) );
 
-            $photos = Image::GetAll($row['ad_id'], 1);
+            $photos = Image::getAll($row['ad_id'], 1);
             if (empty($photos)) {
                 $filename = current($photos);
                 $T->set_var(array(
@@ -149,19 +138,14 @@ class AdList
                     'thumb_url' => Image::thumbUrl($filename),
                 ) );
             }
-
             $T->parse('QRow', 'QueueRow', true);
-
         }   // while
 
         $T->set_var('totalAds', $totalAds);
         $T->set_var('adsStart', $startEntry);
         $T->set_var('adsEnd', $endEntry);
-
         $T->parse('output', 'catlist');
-
         return $T->finish($T->get_var('output'));
-
     }   // function Render()
 }
 

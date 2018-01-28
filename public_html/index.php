@@ -33,6 +33,7 @@ if ($isAnon && $_CONF_ADVT['loginrequired'] == 1) {
     echo $display;
     exit;
 }
+$pageTitle = '';
 
 // Retrieve and sanitize input variables.  Typically _GET, but may be _POSTed.
 COM_setArgNames(array('mode', 'id', 'query'));
@@ -358,7 +359,7 @@ function CLASSIFIEDS_ManageAds()
         'query_fields' => array(),
         'default_filter' => ''
     );
-
+    $form_arr = array();
     USES_lib_admin();
     $retval .= ADMIN_list('classifieds', 'CLASSIFIEDS_getField_AdList',
             $header_arr, $text_arr, $query_arr, $defsort_arr, '',

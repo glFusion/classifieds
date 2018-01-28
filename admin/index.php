@@ -30,6 +30,7 @@ if (!SEC_hasRights('classifieds.admin')) {
     COM_404();
     exit;
 }
+$admin_mode = '';
 
 /**
 *   Create the admin menu at the top of the list and form pages.

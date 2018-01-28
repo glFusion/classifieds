@@ -107,25 +107,23 @@ class AdList_Cat extends AdList
         $i = 0;
         foreach ($subcats as $row) {
             // for each sub-category, add it to the list for getting ads
-            $cat_for_adlist .= ",{$row['cat_id']}";
-            // only show the category selection for immediate children.
-            if ($row['papa_id'] != $this->cat_id) continue;
+            $cat_for_adlist .= ",{$row->cat_id}";
 
             $T->set_block('header', 'SubCat', 'sCat');
-            if ($row['fgcolor'] == '' || $row['bgcolor'] == '') {
+            if ($row->fgcolor == '' || $row->bgcolor == '') {
                 if ($i >= $max) $i = 0;
                 $T->set_var('bgcolor', $CatListcolors[$i][0]);
                 $T->set_var('fgcolor', $CatListcolors[$i][1]);
                 $i++;
             } else {
-                $T->set_var('bgcolor', $row['bgcolor']);
-                $T->set_var('fgcolor', $row['fgcolor']);
+                $T->set_var('bgcolor', $row->bgcolor);
+                $T->set_var('fgcolor', $row->fgcolor);
             }
 
             $T->set_var('subcat_url',
-                CLASSIFIEDS_makeURL('list', $row['cat_id']));
-            $T->set_var('subcat_name', $row['cat_name']);
-            $T->set_var('subcat_count', Category::TotalAds($row['cat_id']));
+                CLASSIFIEDS_makeURL('list', $row->cat_id));
+            $T->set_var('subcat_name', $row->cat_name);
+            $T->set_var('subcat_count', Category::TotalAds($row->cat_id));
             $T->parse('sCat', 'SubCat', true);
         }
 

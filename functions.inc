@@ -1252,7 +1252,8 @@ function plugin_configmanager_select_detail_tpl_ver_classifieds()
     $A = array();
     $dirs = glob($_CONF_ADVT['path'] . '/templates/detail/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
-        $opt = end(explode('/', $dir));
+        $opt = explode('/', $dir);
+        $opt = end($opt);
         $A[$opt] = $opt;
     }
     return $A;
@@ -1432,6 +1433,8 @@ function plugin_profileedit_classifieds($uid, $panel, $fieldset)
 */
 function plugin_profilesave_classifieds($uid=0)
 {
+    global $_USER;
+
     if ($uid == 0) {
         $uid = (int)$_USER['uid'];
     }
@@ -1496,10 +1499,9 @@ function plugin_getconfigelementhelp_classifieds($option, $doclang='english')
         return false;
 
     if (!empty($option)) {
-        $file .= '#desc_' . $option;
+        $doc_url .= '#desc_' . $option;
     }
-
-    return array($doc_url . $file, 0);
+    return array($doc_url, 0);
 }
 
 
@@ -1635,7 +1637,8 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
         break;
     }
 
-    $sql = "SELECT ad.ad_id
+    //$sql = "SELECT ad.ad_id, ad.uid, c.cat_id
+    $sql = "SELECT ad.*, c.description as type
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} c
                 ON ad.cat_id = c.cat_id
@@ -1662,8 +1665,10 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             $T->clear_var('img_url');
             $T->clear_var('tn_url');
         }
-        if (strlen($A['description']) > $textlen) {
-            $A['description'] = substr($A['description'], 0, $textlen - 3) . ' ...';
+        if (isset($A['description'])) {
+            if (strlen($A['description']) > $textlen) {
+                $A['description'] = substr($A['description'], 0, $textlen - 3) . ' ...';
+            }
         }
         $T->set_var(array(
             'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',

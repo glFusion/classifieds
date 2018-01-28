@@ -252,7 +252,7 @@ class Ad
             // Wouldn't be normal, but if this is being saved with an
             // expiration date in the past then don't tell other plugins
             // about it.
-            if ($this->exp_date < time()) {
+            if ($this->exp_date > time()) {
                 PLG_itemSaved($this->ad_id, $_CONF_ADVT['pi_name']);
             }
         }
@@ -317,10 +317,11 @@ class Ad
         } else {
             // Do the extra cleanup manually, delete any images
             Image::DeleteAll($ad_id);
+            // Notify other plugins only if not a submission
+            PLG_itemDeleted($ad_id, $_CONF_ADVT['pi_name']);
         }
 
         // After the cleanup stuff, delete the ad record itself.
-        PLG_itemDeleted($ad_id, $_CONF_ADVT['pi_name']);
         DB_delete($_TABLES[$table], 'ad_id', $ad_id);
         CLASSIFIEDS_auditLog("Ad {$ad_id} deleted.");
         if (DB_error()) {
@@ -392,14 +393,14 @@ class Ad
             'ad_id'         => $this->ad_id,
             'description'   => htmlspecialchars($this->description),
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
-            'post_options'  => $post_options,
+            //'post_options'  => $post_options,
             'change_editormode'     => 'onchange="change_editmode(this);"',
             'glfusionStyleBasePath' => $_CONF['site_url']. '/fckeditor',
             'gltoken_name'  => CSRF_TOKEN,
             'gltoken'       => SEC_createToken(),
             'has_delbtn'    => 'true',
             'txt_photo'     => "{$LANG_ADVT['photo']}<br />" .
-                    sprintf($LANG_ADVT['image_max'], $img_max),
+                    sprintf($LANG_ADVT['image_max'], (int)$_CONF_ADVT['imagecount']),
             'type'          => $this->isSubmission() ? 'submission' : 'prod',
             'action_url'    => $action_url,
             'max_file_size' => $_CONF['max_image_size'],
@@ -410,8 +411,8 @@ class Ad
             'exp_date'      => $exp_date->format($_CONF['daytime'] . ' T', true),
             'add_date'      => $add_date->format($_CONF['daytime'] . ' T', true),
             'ad_type_selection' => AdType::makeSelection($this->ad_type),
-            'sel_list_catid'    => Category::buildSelection($this->cat_id),
-            'saveoption'    => $saveoption,
+            'sel_list_catid'    => Category::buildSelection($this->cat_id, '', '', 'NOT', '1'),
+            //'saveoption'    => $saveoption,
             'cancel_url'    => $cancel_url,
             'lang_runfor'   => $this->isNew ? $_LANG_ADVT['runfor'] :
                                     $LANG_ADVT['add'],
@@ -544,7 +545,7 @@ class Ad
             $have_editlink = '';
         }
 
-        if ($this->exp_date < $time) {
+        if ($this->exp_date < time()) {
             $T->set_var('is_expired', 'true');
         }
         $add_date = new \Date($this->add_date, $_CONF['timezone']);
@@ -596,6 +597,9 @@ class Ad
         }
 
         $photos = Image::getAll($this->ad_id);
+        $main_img = '';
+        $main_imgname = '';
+        $T->set_block('detail', 'PhotoBlock', 'PBlock');
         foreach ($photos as $img_id=>$filename) {
             $img_small = Image::smallUrl($filename);
             if ($main_img == '') {
@@ -603,9 +607,8 @@ class Ad
                 $main_imgname = 'user/' . $filename;
             }
             if (!empty($img_small)) {
-                $T->set_block('detail', 'PhotoBlock', 'PBlock');
                 $T->set_var(array(
-                    'tn_width'  => $_CONF_ADVT['detail_img_width'],
+                    'tn_width'  => $_CONF_ADVT['detail_img_width'] + 5,
                     'small_url' => $img_small,
                     'disp_url' => Image::dispUrl($filename),
                     'small_imgname' => 'user/' . $filename,

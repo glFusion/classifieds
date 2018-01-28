@@ -249,7 +249,7 @@ function CLASSIFIEDS_adminCategories()
 */
 function CLASSIFIEDS_adminAds()
 {
-    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ADVT;
+    global $_CONF, $_CONF_ADVT, $_TABLES, $LANG_ADMIN, $LANG_ADVT;
 
     $retval = '';
 
@@ -283,10 +283,9 @@ function CLASSIFIEDS_adminAds()
         'query_fields' => array('subject', 'description', 'keywords'),
         'default_filter' => 'WHERE 1=1'
     );
-
-    $retval .= ADMIN_list('classifieds', 'CLASSIFIEDS_getField_ad', $header_arr,
+    $form_arr = array();
+    return ADMIN_list('classifieds', 'CLASSIFIEDS_getField_ad', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '', $options, $form_arr);
-    return $retval;
 }
 
 
