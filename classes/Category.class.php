@@ -26,7 +26,7 @@ class Category
     *
     *   @param  integer $catid  Optional category ID to load
     */
-    public function __construct($catid = 0)
+    public function __construct($catid = 0, $data = NULL)
     {
         global $_CONF_ADVT;
 
@@ -34,7 +34,10 @@ class Category
         $this->imgPath = $_CONF_ADVT['imgpath'] . '/cat/';
         if ($catid > 0) {
             $this->cat_id = $catid;
-            if ($this->Read()) {
+            if ($data !== NULL) {
+                $this->SetVars($data, true);
+                $this->isNew = false;
+            } elseif ($this->Read()) {
                 $this->isNew = false;
             } else {
                 $this->cat_id = 0;
@@ -64,17 +67,19 @@ class Category
         case 'perm_group':
         case 'perm_members':
         case 'perm_anon':
-        case 'add_date':
+        case 'lft':
+        case 'rgt':
             $this->properties[$key] = (int)$value;
             break;
 
         case 'cat_name':
+        case 'disp_name':
         case 'description':
         case 'image':
         case 'keywords':
         case 'fgcolor':
         case 'bgcolor':
-        case 'parent_map':
+        //case 'parent_map':
             $this->properties[$key] = $value;
             break;
         }
@@ -109,13 +114,10 @@ class Category
         $this->cat_id   = $A['cat_id'];
         $this->papa_id  = $A['papa_id'];
         $this->cat_name     = $A['cat_name'];
+        $this->disp_name = isset($A['disp_name']) ? $A['disp_name'] : $A['cat_name'];
         $this->description = $A['description'];
-        $this->add_date = $A['add_date'];
         $this->group_id = $A['group_id'];
         $this->owner_id = $A['owner_id'];
-        $this->price    = $A['price'];
-        $this->ad_type  = $A['ad_type'];
-        $this->keywords = $A['keywords'];
         $this->image    = $A['image'];
         $this->fgcolor  = $A['fgcolor'];
         $this->bgcolor  = $A['bgcolor'];
@@ -124,8 +126,8 @@ class Category
             $this->perm_group = $A['perm_group'];
             $this->perm_members = $A['perm_members'];
             $this->perm_anon = $A['perm_anon'];
-            $this->parent_map = @json_decode($A['parent_map'], true);
-            if ($this->parent_map === NULL) $this->parent_map = array();
+            $this->lft = $A['lft'];
+            $this->rgt = $A['rgt'];
         } else {        // perm values are in arrays from form
             list($perm_owner,$perm_group,$perm_members,$perm_anon) =
                 SEC_getPermissionValues($A['perm_owner'] ,$A['perm_group'],
@@ -134,7 +136,6 @@ class Category
             $this->perm_group = $perm_group;
             $this->perm_members = $perm_members;
             $this->perm_anon = $perm_anon;
-            $this->parent_map = array();
         }
     }
 
@@ -191,7 +192,7 @@ class Category
             }
 
             // If a new image was uploaded, and this is an existing category,
-            // then delete the old image, if any. The DB still has the old 
+            // then delete the old image, if any. The DB still has the old
             // filename at this point.
             if (!$this->isNew) {
                 self::DelImage($this->cat_id);
@@ -201,10 +202,18 @@ class Category
             $img_sql = '';
         }
 
-        $parent_map = DB_escapeString(json_encode($this->MakeBreadcrumbs()));
-
+        //$parent_map = DB_escapeString(json_encode($this->MakeBreadcrumbs()));
         if ($this->isNew) {
-            $sql1 = "INSERT INTO {$_TABLES['ad_category']} SET ";
+            $Parent = new self($this->papa_id);
+            DB_query("UPDATE {$_TABLES['ad_category']}
+                SET rgt = rgt + 2 WHERE rgt >= {$Parent->rgt}");
+            DB_query("UPDATE {$_TABLES['ad_category']}
+                SET lft = lft + 2 WHERE lft >= {$Parent->rgt}");
+            $lft = $Parent->rgt;
+            $rgt = $lft + 1;
+            $sql1 = "INSERT INTO {$_TABLES['ad_category']} SET
+                    lft = $lft,
+                    rgt = $rgt, ";
             $sql3 = '';
         } else {
             $sql1 = "UPDATE {$_TABLES['ad_category']} SET ";
@@ -223,8 +232,8 @@ class Category
             perm_members = {$this->perm_members},
             perm_anon = {$this->perm_anon},
             fgcolor = '{$this->fgcolor}',
-            bgcolor = '{$this->bgcolor}',
-            parent_map = '$parent_map'";
+            bgcolor = '{$this->bgcolor}'";
+            //parent_map = '$parent_map'";
         $sql = $sql1 . $sql2 . $sql3;
 
         // Propagate the permissions, if requested
@@ -237,14 +246,13 @@ class Category
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
         } else {
             // When updating, check if the parent category has changed.
-            // If so, update the breadcrumbs for any subcategories.
-            if (!$this->isNew && 
+            // If so, rebuild the entire tree since we don't know how much
+            // changed.
+            if (!$this->isNew &&
                     isset($A['orig_pcat']) &&
                     $A['orig_pcat'] != $this->papa_id) {
-                foreach (self::SubCats($this->cat_id) as $id=>$cat) {
-                    $X = new self($id);
-                    $X->Save();
-                }
+                self::rebuildTree(1, 1);
+                PLG_itemSaved($this->cat_id, 'classifieds_category');
             }
             return '';      // no actual return if this function works ok
         }
@@ -282,40 +290,33 @@ class Category
         global $_TABLES, $_CONF_ADVT;
 
         $id = (int)$id;
-        // find all sub-categories of this one and delete them.
-        $sql = "SELECT cat_id FROM {$_TABLES['ad_category']}
-                WHERE papa_id=$id";
-        $result = DB_query($sql);
-
-        if ($result) {
-            while ($row = DB_fetcharray($result)) {
-                if (!self::Delete($row['cat_id']))
-                    return false;
+        $lft = 0;
+        $rgt = 0;
+        $width = 0;
+        $Cats = self::getTree($id); // get all categories under this one
+        if (!isset($Cats[$id])) {
+            return false;           // Category not found
+        } else {
+            $lft = $Cats[$id]->lft;
+            $rgt = $Cats[$id]->rgt;
+            $width = ($rgt - $lft) + 1;
+        }
+        if ($lft == 0 || $rgt == 0 || $width == 0) return false;    // errora
+        $cat_sql = implode(',', $Cats);
+        foreach ($Cats as $Cat) {
+            $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']} WHERE cat_id IN ($cat_sql)";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                Ad::Delete($A['ad_id']);
             }
+            // Delete ads associated with this or any sub-categories
+            //DB_delete($_TABLES['ad_ads'], 'cat_id', $Cat->cat_id);
         }
 
-        // now delete any ads associated with this category
-        $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']}
-             WHERE cat_id=$id";
-        $result = DB_query($sql);
-
-        if ($result) {
-            while ($row = DB_fetcharray($result)) {
-                if (adDelete($row['ad_id'], true) != 0) {
-                    return false;
-                }
-            }
-        }
-
-        // Delete this category
-        // First, see if there's an image to delete
-        $img_name = DB_getItem($_TABLES['ad_category'], 'image', "cat_id=$id");
-        if ($img_name != '' && file_exists($this->imgPath . $img_name)) {
-            unlink($this->imgPath . $img_name);
-        }
-        DB_delete($_TABLES['ad_category'], 'cat_id', $id);
-
-        // If we made it this far, must have worked ok
+        DB_query("DELETE FROM {$_TABLES['ad_category']} WHERE lft BETWEEN $lft AND $rgt");
+        DB_query("UPDATE {$_TABLES['ad_category']} SET rgt = rgt - $width WHERE rgt > $rgt");
+        DB_query("UPDATE {$_TABLES['ad_category']} SET lft = lft - $width WHERE lft > $rgt");
+        PLG_itemDeleted($id, 'classifieds_category');
         return true;
     }
 
@@ -448,6 +449,7 @@ class Category
             'cat_id'    => $this->cat_id,
             'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?admin=cat',
             'img_url'   => self::thumbUrl($this->image),
+            'image'     => $this->image,
             'can_delete' => $this->isUsed() ? '' : 'true',
             'owner_dropdown' => COM_optionList($_TABLES['users'],
                     'uid,username', $this->owner_id, 1, 'uid > 1'),
@@ -455,15 +457,12 @@ class Category
             'ownername' => COM_getDisplayName($_USER['uid']),
             'permissions_editor' => SEC_getPermissionsHTML($this->perm_owner,
                     $this->perm_group, $this->perm_members, $this->perm_anon),
-            'sel_parent_cat' => self::buildSelection($this->papa_id, 0, '',
-                    'NOT', $this->cat_id),
+            'sel_parent_cat' => self::buildSelection(self::getParent($this->cat_id), $this->cat_id),
             'have_propagate' => $this->isNew ? '' : 'true',
             'orig_pcat' => $this->papa_id,
         ) );
         $T->parse('output','modify');
-        $display .= $T->finish($T->get_var('output'));
-        return $display;
-
+        return $T->finish($T->get_var('output'));
     }   // function Edit()
 
 
@@ -472,19 +471,40 @@ class Category
     *   sorted by id.
     *
     *   @param integer  $sel        Category ID to be selected in list
-    *   @param integer  $papa_id    Parent category ID
-    *   @param string   $char       Separator characters
+    *   @param integer  $root       Root category ID
+    *   @param string   $char       Indenting characters
     *   @param string   $not        'NOT' to exclude $items, '' to include
     *   @param string   $items      Optional comma-separated list of items to include or exclude
     *   @return string              HTML option list, without <select> tags
     */
-    public static function buildSelection($sel=0, $papa_id=0, $char='',
-            $not='', $items='')
+    public static function buildSelection($sel=0, $self=0)
     {
-        global $_TABLES, $_GROUPS;
+        global $_TABLES;
 
         $str = '';
+        $root = 1;
+        $Cats = self::getTree($root);
+        foreach ($Cats as $Cat) {
+            if ($Cat->cat_id == $root) {
+                continue;       // Don't include the root category
+            } elseif ($self == $Cat->cat_id) {
+                // Exclude self when building parent list
+                $disabled = 'disabled="disabled"';
+            } elseif (SEC_hasAccess($Cat->owner_id, $Cat->group_id,
+                    $Cat->perm_owner, $Cat->perm_group,
+                    $Cat->perm_members, $Cat->perm_anon) < 3) {
+                $disabled = 'disabled="disabled"';
+            } else {
+                $disabled = '';
+            }
+            $selected = $Cat->cat_id == $sel ? 'selected="selected"' : '';
+            $str .= "<option value=\"{$Cat->cat_id}\" $selected $disabled>";
+            $str .= $Cat->disp_name;
+            $str .= "</option>\n";
+        }
+        return $str;
 
+    
         // Locate the parent category of this one, or the root categories
         // if papa_id is 0.
         $sql = "SELECT cat_id, cat_name, papa_id, owner_id, group_id,
@@ -526,11 +546,9 @@ class Category
             $str .= self::buildSelection($sel, $row['cat_id'], $char.'-',
                     $not, $items);
         }
-
         //echo $str;die;
         return $str;
-
-    }   // function buildSelection()
+    }
 
 
     /**
@@ -542,35 +560,38 @@ class Category
     *   @param  boolean $showlink   True to add links, False for text only
     *   @return string          Breadcrumbs
     */
-    public static function showBreadCrumbs($map, $showlink=true)
+    public static function showBreadCrumbs($cat_id, $showlink=true)
     {
-        global $_CONF_ADVT;
+        global $_CONF_ADVT, $_TABLES;
 
-        // If $map is not an array, assume it's a json string
-        if (!is_array($map)) {
-            $map = json_decode($map, true);
-        }
-        // Invalid JSON, start with an empty array
-        if (!$map) $map = array();
-        $bc = array_reverse($map);
-        $c = count($bc) - 1;
-
+        $cat_id = (int)$cat_id;
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
         $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
         $T->set_file('breadcrumbs', "breadcrumbs$tpltype.thtml");
         $T->set_block('breadcrumbs', 'BreadCrumbs', 'BC');
-        foreach ($bc as $id => $parent) {
+        
+        $sql = "SELECT parent.cat_name, parent.cat_id
+            FROM {$_TABLES['ad_category']} AS node,
+                {$_TABLES['ad_category']} AS parent
+            WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                AND node.cat_id = $cat_id
+            ORDER BY parent.lft";
+        $res = DB_query($sql);
+        $c = DB_numRows($res);
+        $i = 0;
+        while ($A = DB_fetchArray($res, false)) {
+            $i++;
             if ($showlink) {
                 $location = '<a href="' .
-                    CLASSIFIEDS_makeURL('home', $parent['cat_id']) .
-                    '">' . $parent['cat_name'] . '</a>';
+                    CLASSIFIEDS_makeURL('home', $A['cat_id']) .
+                    '">' . $A['cat_name'] . '</a>';
             } else {
                 // just get the names, no links, e.g. for notifications
-                $location = $parent['cat_name'];
+                $location = $A['cat_name'];
             }
             $T->set_var(array(
                 'bc_link'   => $location,
-                'last_link' => $id == $c ? true : false,
+                'last_link' => $i == $c ? true : false,
             ) );
             $T->parse('BC', 'BreadCrumbs', true);
         }
@@ -590,16 +611,7 @@ class Category
     */
     public function BreadCrumbs($showlink=true, $raw = false)
     {
-        // There should always be at least two elements in the map.
-        // The current category and "Home"
-        if ($this->parent_map == array()) {
-            $this->Save();      // Save will call MakeBreadcrumbs() and save
-        }
-        if ($raw) {
-            return $this->parent_map;
-        } else {
-            return self::showBreadCrumbs($this->parent_map, $showlink);
-        }
+        return self::showBreadCrumbs($this->cat_id, $showlink);
     }
 
 
@@ -643,50 +655,52 @@ class Category
     *   Calls itself recursively to find all sub-categories.
     *   Stores an array of category information in $subcats.
     *
-    *   @param  integer $id         Current Category ID
-    *   @param  integer $master_id  ID of top-level category being searched
-    *   @return string              HTML for breadcrumbs
+    *   @param  integer $id     Top-level Category ID
+    *   @return array           Array of category objects
     */
-    public static function SubCats($id, $master_id=0)
+    public static function SubCats($id = 0)
     {
         global $_TABLES, $LANG_ADVT;
         static $subcats = array();
 
         $id = (int)$id;
-        if ($id == 0) return array();   // must have a valid category ID
-
-        // On the initial call, $master_id is normally blank so set it to
-        // the current $id. For recursive calls, $master_id will be provided.
-        $master_id = (int)$master_id;
-        if ($master_id == 0) $master_id = $id;
-
         if (isset($subcats[$id])) {
             return $subcats[$id];
         } else {
             $subcats[$id] = array();
         }
 
-        $sql = "SELECT cat_name, cat_id, fgcolor, bgcolor, papa_id, description
-                FROM {$_TABLES['ad_category']}
-                WHERE papa_id=$id";
+        if ($id == 0) {
+            $sql = "SELECT * FROM {$_TABLES['ad_category']}
+                    WHERE papa_id = 0
+                    ORDER BY lft";
+        } else {
+            $sql = "SELECT node.*, (COUNT(parent.cat_name) - (sub_tree.depth + 1)) AS depth
+                FROM {$_TABLES['ad_category']} AS node,
+                    {$_TABLES['ad_category']} AS parent,
+                    {$_TABLES['ad_category']} AS sub_parent,
+                (
+                    SELECT node.cat_id, node.cat_name, (COUNT(parent.cat_name) - 1) AS depth
+                    FROM {$_TABLES['ad_category']} AS node,
+                        {$_TABLES['ad_category']} AS parent
+                    WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                        AND node.cat_id = $id
+                    GROUP BY node.cat_name
+                    ORDER BY node.lft
+                ) AS sub_tree
+                WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                    AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+                    AND sub_parent.cat_id = sub_tree.cat_id
+                GROUP BY node.cat_name
+                HAVING depth = 1
+                ORDER BY node.lft";
+        }
         //echo $sql;die;
-        $result = DB_query($sql);
-        if (!$result) {
-            return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $subcats[$id][$A['cat_id']] = new self($A['cat_id'], $A);
         }
-
-        while ($row = DB_fetchArray($result, false)) {
-            $subcats[$master_id][$row['cat_id']] = $row;
-            $subcats[$id][$row['cat_id']]['total_ads'] =
-                    self::TotalAds($row['cat_id']);
-
-            $A = self::SubCats($row['cat_id'], $master_id);
-            if (!empty($A)) {
-                array_merge($subcats[$id], $A);
-            }
-        }
-
-        return $subcats[$master_id];
+        return $subcats[$id];
     }
 
 
@@ -702,32 +716,27 @@ class Category
     {
         global $_TABLES;
 
-        $time = time();     // to compare to ad expiration
-        $totalAds = 0;
         $cat_id = (int)$cat_id;
         $current = $current == true ? true : false;
         $sub = $sub == true ? true : false;
 
-        // find all the subcategories
-        if ($sub) {
-            $sql = "SELECT cat_id FROM {$_TABLES['ad_category']}
-                    WHERE papa_id=$cat_id";
-            $result = DB_query($sql);
-            while ($row = DB_fetchArray($result, false)) {
-                $totalAds += self::TotalAds($row['cat_id'], $current, $sub);
-            }
-        }
-        // Now check the current category
-        $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']}
-            WHERE cat_id = $cat_id";
+        $ad_q_fld = array('cat_id');
         if ($current) {
             $now = time();
-            $sql .= " AND exp_date > $now";
         }
-        $res = DB_query($sql);
-        $totalAds += DB_numRows($res);
+        $Cats = self::getTree($cat_id);
+        $totalAds = 0;
+        foreach ($Cats as $Cat) {
+            if ($current) {
+                $totalAds += (int)DB_getItem($_TABLES['ad_ads'], 'count(*)',
+                        "cat_id = '{$Cat->cat_id}' AND exp_date > $now");
+            } else {
+                $totalAds += DB_count($_TABLES['ad_ads'], 'cat_id', $Cat->cat_id);
+            }
+            if (!$sub) break;   // Just getting the first cat_id count
+        }
         return $totalAds;
-    }   // function TotalAds()
+    }
 
 
     /**
@@ -740,7 +749,6 @@ class Category
     {
         global $_TABLES;
 
-        $id = (int)$id;
         foreach (array('ad_ads', 'ad_submission') as $tbl_id) {
             if (DB_count($_TABLES[$tbl_id], 'cat_id', $this->cat_id) > 0) {
                 return true;
@@ -759,6 +767,8 @@ class Category
     */
     public function checkAccess($required = 3)
     {
+        global $_CONF_ADVT;
+
         if (SEC_hasRights($_CONF_ADVT['pi_name']. '.admin')) {
             // Admin rights trump all
             return true;
@@ -855,7 +865,7 @@ class Category
             }
             return PLG_unsubscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id);
         }
-    }   // function Subscribe
+    }
 
 
     /**
@@ -868,7 +878,7 @@ class Category
     *   @param  integer $id     Database ID of the ad type
     *   @return string          Ad Type Description
     */
-    public static function GetDescription($id)
+    public static function XX_GetDescription($id)
     {
         global $_TABLES;
         static $desc = array();
@@ -915,6 +925,151 @@ class Category
             perm_anon = {$perms[3]},
             group_id = $gid";
         DB_query($sql);
+    }
+
+
+    /**
+    *   Read all the categories into a static array.
+    *
+    *   @param  integer $root   Root category ID
+    *   @return array           Array of category objects
+    */
+    public static function getTree($root=0, $prefix='&nbsp;')
+    {
+        global $_TABLES;
+
+        $All = array();
+
+        if (!empty($root)) {
+            $result = DB_query("SELECT lft, rgt FROM {$_TABLES['ad_category']}
+                        WHERE cat_id = $root");
+            $row = DB_fetchArray($result, false);
+            $between = ' AND parent.lft BETWEEN ' . (int)$row['lft'] .
+                        ' AND ' . (int)$row['rgt'];
+        }
+
+        $prefix = DB_escapeString($prefix);
+        $sql = "SELECT node.*, CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
+            FROM {$_TABLES['ad_category']} AS node,
+                {$_TABLES['ad_category']} AS parent
+            WHERE node.lft BETWEEN parent.lft AND parent.rgt
+            $between
+            GROUP BY node.cat_name
+            ORDER BY node.lft";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $All[$A['cat_id']] = new self($A['cat_id'], $A);
+        }
+        return $All;
+    }
+
+
+    /**
+    *   Get a category and all its children
+    *
+    *   @param  integer $root   Root category ID, empty to start with Root
+    *   @param  string  $prefix String to prepend to child category display names
+    *   @return array           Array of categrory objects
+    */
+    public static function XgetTree($root = NULL, $prefix = '-')
+    {
+        if (empty($root)) $root = 1;
+        $allcats = self::getAll();
+        $cat = $allcats[$root];
+        $cats = array();
+        foreach ($allcats as $cat_id=>$cat_obj) {
+            if ($cat_id >= $cat->lft && $cat_id <= $cat->rgt) {
+                $cats[$cat_id] = $cat_obj;
+            }
+        }
+        return $cats;
+    }
+
+
+    /**
+    *   Given a child category ID, get the complete path back to the Root
+    *
+    *   @param  integer $child  Child category ID
+    *   @return array           Array of category objects starting at the root
+    */
+    public static function getPath($child)
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $sql = "SELECT parent.cat_id, parent.cat_name
+                FROM {$_TABLES['ad_category']} AS node,
+                    {$_TABLES['ad_category']} AS parent
+                WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                AND node.cat_id = $child
+                ORDER BY parent.lft";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $retval[] = new self($A['cat_id'], $A);
+        }
+        return $retval;
+    }
+
+
+    /**
+    *   Rebuild the MPT tree starting at a given parent and "left" value
+    *
+    *   @param  integer $parent     Starting category ID
+    *   @param  integer $left       Left value of the given category
+    *   @return integer         New Right value (only when called recursively)
+    */
+    public static function rebuildTree($parent, $left)
+    {
+        global $_TABLES;
+
+        // the right value of this node is the left value + 1
+        $right = $left + 1;
+
+        // get all children of this node
+        $sql = "SELECT cat_id FROM {$_TABLES['ad_category']}
+                WHERE papa_id ='$parent'";
+        $result = DB_query($sql);
+        while ($row = DB_fetchArray($result, false)) {
+            // recursive execution of this function for each
+            // child of this node
+            // $right is the current right value, which is
+            // incremented by the rebuild_tree function
+            $right = self::rebuildTree($row['cat_id'], $right);
+        }
+
+        // we've got the left value, and now that we've processed
+        // the children of this node we also know the right value
+        $sql1 = "UPDATE {$_TABLES['ad_category']}
+                SET lft = '$left', rgt = '$right'
+                WHERE cat_id = '$parent'";
+        DB_query($sql1);
+
+        // return the right value of this node + 1
+        return $right + 1;
+    }
+
+
+    /**
+    *   Get the ID of the immediate parent for a given category.
+    *
+    *   @param  integer $cat_id     Current category ID
+    *   @return integer     ID of parent category.
+    */
+    public static function getParent($cat_id)
+    {
+        global $_TABLES;
+
+        $cat_id = (int)$cat_id;
+        $res = DB_query("SELECT parent.cat_id, parent.cat_name
+                FROM {$_TABLES['ad_category']} AS node,
+                    {$_TABLES['ad_category']} AS parent
+                WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                AND node.cat_id = $cat_id
+                ORDER BY parent.lft DESC LIMIT 2");
+        while ($A = DB_fetchArray($res, false)) {
+            $parent_id = $A['cat_id'];
+        }
+        return ($parent_id == $cat_id) ? NULL : $parent_id;
     }
 
 }

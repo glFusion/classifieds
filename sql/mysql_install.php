@@ -19,23 +19,25 @@ global $NEWTABLE;
 $NEWTABLE = array();
 
 $NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
-    cat_id SMALLINT UNSIGNED NOT NULL auto_increment,
-    papa_id SMALLINT UNSIGNED NOT NULL,
-    cat_name varchar(40) NOT NULL,
-    description varchar(255) DEFAULT '',
-    add_date INT NOT NULL DEFAULT '0',
-    group_id mediumint(8) unsigned NOT NULL default '1',
-    owner_id mediumint(8) unsigned NOT NULL default '1',
-    perm_owner tinyint(1) unsigned NOT NULL default '3',
-    perm_group tinyint(1) unsigned NOT NULL default '3',
-    perm_members tinyint(1) unsigned NOT NULL default '2',
-    perm_anon tinyint(1) unsigned NOT NULL default '2',
-    keywords varchar(255),
-    image varchar(100),
-    fgcolor varchar(10),
-    bgcolor varchar(10),
-    parent_map text default NULL,
-    PRIMARY KEY(cat_id)
+  `cat_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `papa_id` smallint(5) unsigned NOT NULL,
+  `cat_name` varchar(40) NOT NULL,
+  `description` varchar(255) DEFAULT '',
+  `group_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
+  `owner_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
+  `perm_owner` tinyint(1) unsigned NOT NULL DEFAULT '3',
+  `perm_group` tinyint(1) unsigned NOT NULL DEFAULT '3',
+  `perm_members` tinyint(1) unsigned NOT NULL DEFAULT '2',
+  `perm_anon` tinyint(1) unsigned NOT NULL DEFAULT '2',
+  `keywords` varchar(255) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `fgcolor` varchar(10) DEFAULT NULL,
+  `bgcolor` varchar(10) DEFAULT NULL,
+  `lft` int(5) unsigned NOT NULL DEFAULT '0',
+  `rgt` int(5) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`cat_id`),
+  KEY `lft` (`lft`),
+  KEY `rgt` (`rgt`)
 ) ENGINE=MyISAM";
 
 // common SQL for ad and ad_submission tables
@@ -123,11 +125,11 @@ $DEFVALUES['ad_types'] = "INSERT INTO {$_TABLES['ad_types']}
         ('Wanted')
     ";
 $DEFVALUES['category'] = "INSERT INTO {$_TABLES['ad_category']} (
-        papa_id, cat_name, description, add_date,
+        papa_id, cat_name, description,
         group_id, owner_id, perm_owner, perm_group, perm_members, perm_anon,
         keywords, image, fgcolor, bgcolor
     ) VALUES (
-        0, 'Miscellaneous', 'Miscellaneous Items', UNIX_TIMESTAMP(),
+        0, 'Miscellaneous', 'Miscellaneous Items',
         13, 2, 3, 3, 2, 2,
         '', '', '#000066', '#6699ff'
     )";

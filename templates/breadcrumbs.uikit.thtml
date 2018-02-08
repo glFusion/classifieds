@@ -1,11 +1,12 @@
 {# begin {templatelocation} #}
 <ul class="uk-breadcrumb uk-margin-remove">
+  <li><a href="{site_url}/classifieds/index.php">{$LANG_ADVT['home']}</a></li>
 <!-- BEGIN BreadCrumbs -->
-  <li
 {!if last_link}
-  class="uk-active"
+  <li class="uk-active">{bc_link}</li>
+{!else}
+  <li>{bc_link}</li>
 {!endif}
->{bc_link}</li>
 <!-- END BreadCrumbs -->
 </ul>
 {# end {templatelocation} #}

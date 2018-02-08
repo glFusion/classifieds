@@ -99,6 +99,11 @@ function classifieds_do_upgrade()
         if (!classifieds_upgrade_1_1_3()) return false;
     }
 
+    if (!COM_checkVersion($current_ver, '1.3.0')) {
+        $current_ver = '1.3.0';
+        if (!classifieds_upgrade_1_3_0()) return false;
+    }
+
     // Final version update to catch updates that don't go through
     // any of the update functions, e.g. code-only updates
     if (!COM_checkVersion($current_ver, $installed_ver)) {
@@ -649,6 +654,31 @@ function classifieds_upgrade_1_1_3()
     );
     if (!classifieds_do_upgrade_sql('1.1.3', $sql)) return false;
     return classifieds_do_set_version('1.1.3');
+}
+
+
+/**
+*   Update to version 1.3.0
+*   Adds modified preorder tree traversal to category table
+*/
+function classifieds_upgrade_1_3_0()
+{
+    global $_TABLES;
+
+    $sql = array(
+        // Add tree fields, drop auto_increment key for renumbering
+        "ALTER TABLE {$_TABLES['ad_category']}
+            ADD lft int(5) unsigned NOT NULL default 0,
+            ADD rgt int(5) unsigned NOT NULL default 0,
+            DROP parent_map,
+            DROP add_date,
+            ADD KEY (lft),
+            ADD KEY (rgt)",
+    );
+    if (!classifieds_do_upgrade_sql('1.3.0', $sql)) return false;
+    // Populate the tree values
+    Classifieds\Category::rebuildTree(0, 0);
+    return classifieds_do_set_version('1.3.0');
 }
 
 

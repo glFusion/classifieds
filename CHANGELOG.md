@@ -1,6 +1,7 @@
 # Classifieds Plugin for glFusion - Change Log
 
 ## Version 1.3.0 (Unreleased)
+- Remove date-added field for categories, not used
 - Implement Modified Preloaded Tree Traversal for categories
 
 ## Version 1.2.1 (Released 2018-01-11)
