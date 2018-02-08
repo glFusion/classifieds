@@ -166,12 +166,11 @@ class Image
     public static function dispUrl($filename)
     {
         global $_CONF_ADVT;
-        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl',
-            array('',
-                $_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                $_CONF_ADVT['img_max_width'],
-                $_CONF_ADVT['img_max_height'],
-            ) );
+        $args = array();
+        $args[1] = $_CONF_ADVT['imgpath'] . '/user/' . $filename;
+        $args[2] = $_CONF_ADVT['img_max_width'];
+        $args[3] = $_CONF_ADVT['img_max_height'];
+        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl', $args);
     }
 
 
@@ -185,12 +184,11 @@ class Image
     public static function smallUrl($filename)
     {
         global $_CONF_ADVT;
-        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl',
-            array('',
-                $_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                $_CONF_ADVT['detail_img_width'],
-                0,
-            ) );
+        $args = array();
+        $args[1] = $_CONF_ADVT['imgpath'] . '/user/' . $filename;
+        $args[2] = $_CONF_ADVT['detail_img_width'];
+        $args[3] = 0;
+        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl', $args);
     }
 
 
@@ -204,12 +202,11 @@ class Image
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
-        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl',
-            array('',
-                $_CONF_ADVT['imgpath'] . '/user/' . $filename,
-                $_CONF_ADVT['thumb_max_size'],
-                $_CONF_ADVT['thumb_max_size'],
-            ) );
+        $args = array();
+        $args[1] = $_CONF_ADVT['imgpath'] . '/user/' . $filename;
+        $args[2] = $_CONF_ADVT['thumb_max_size'];
+        $args[3] = $_CONF_ADVT['thumb_max_size'];
+        return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl', $args);
     }
 
 }   // class Image
