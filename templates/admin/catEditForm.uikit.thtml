@@ -17,7 +17,6 @@
     <label class="uk-form-label" for="papa_id">{$LANG_ADVT['parent_cat']}:</label>
     <div class="uk-form-controls">
       <select name="papa_id" id="papa_id">
-          <option value="0">--{$LANG_ADVT['none']}--</option>
           {sel_parent_cat}
         </select>
     </div>
@@ -43,6 +42,7 @@
   <div class="uk-form-row">
     <label class="uk-form-label" for="imagefile">{$LANG_ADVT['icon_desc']}:</label>
     <div class="uk-form-controls">
+      <input type="hidden" name="image" value="{image}" />
       <input type="file" id="imagefile" name="imagefile" />
       {!if img_url}
       <img src="{img_url}" width="48" height="48" />
@@ -80,7 +80,7 @@
     <label class="uk-form-label" for="group">{$LANG_ACCESS['group']}:</label>
     <div class="uk-form-controls"> 
       {group_dropdown}
-    </div
+    </div>
   </div>
 
   <div class="uk-form-row">

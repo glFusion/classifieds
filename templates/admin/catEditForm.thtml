@@ -29,7 +29,6 @@ window.addEvent('domready',function() {
       </td>
       <td>
         <select name="papa_id">
-          <option value="0">--{$LANG_ADVT['none']}--</option>
           {sel_parent_cat}
         </select>
       </td>
@@ -55,6 +54,7 @@ window.addEvent('domready',function() {
       <td><b>{$LANG_ADVT['image']}:</b><br />{$LANG_ADVT['icon_desc']}</td>
       <td>
         <input type="file" name="imagefile" />
+        <input type="hidden" name="image" value="{image}" />
       </td>
       {!if img_url}
       <td>
