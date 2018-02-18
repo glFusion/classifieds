@@ -1155,7 +1155,7 @@ function phpblock_classifieds_random()
     if ($_CONF_ADVT['loginrequired'] == 1 && COM_isAnonUser())
         return $retval;
 
-    $sql = "SELECT ad.ad_id as id, ad.subject as subject
+    $sql = "SELECT ad.*
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON cat.cat_id = ad.cat_id
@@ -1164,12 +1164,9 @@ function phpblock_classifieds_random()
             . ' ORDER BY RAND() LIMIT 1';
     //echo $sql;
     $r = DB_query($sql);
-    $n = DB_numRows($r);
-    if ($n < 1)
-        return '';
-
-    $id = DB_result($r, 0, 'id');
-    $Ad = new Classifieds\Ad($id);
+    $A = DB_fetchArray($r, false);
+    if (!$A) return '';
+    $Ad = new Classifieds\Ad($A);
     if ($Ad->isNew) return '';
 
     $img_filename = Classifieds\Image::getFirst($Ad->ad_id);
@@ -1177,7 +1174,7 @@ function phpblock_classifieds_random()
     $T = new Template($_CONF_ADVT['path'] . '/templates');
     $T->set_file('rblock', 'randomblock.thtml');
     $T->set_var(array(
-        'ad_url'    => CLASSIFIEDS_makeURL('detail', $id),
+        'ad_url'    => CLASSIFIEDS_makeURL('detail', $Ad->ad_id),
         'ad_subject' => $Ad->subject,
         'img_url'   => Classifieds\Image::thumbUrl($img_filename),
     ) );

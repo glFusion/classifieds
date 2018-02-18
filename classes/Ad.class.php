@@ -54,7 +54,7 @@ class Ad
     *   Reads in the specified class, if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
-    *   @param  string  $id     Optional Ad ID
+    *   @param  mixed   $id     Optional Ad ID or array of values
     *   @param  string  $table  Table Name, default to production
     */
     public function __construct($id='', $table='ad_ads')
@@ -66,6 +66,11 @@ class Ad
             $this->ad_id = '';
             $this->subject = '';
             $this->description = '';
+        } elseif (is_array($id)) {
+            $this->setVars($id);
+            $this->Cat = new Category($this->cat_id);
+            $this->Type= new AdType($this->ad_type);
+            $this->isNew = false;   // normally this comes from the DB
         } else {
             $this->ad_id = $id;
             $this->Read();
@@ -140,7 +145,7 @@ class Ad
     *   Sets all variables to the matching values from $rows
     *   @param array $row Array of values, from DB or $_POST
     */
-    public function SetVars($row)
+    public function setVars($row)
     {
         if (!is_array($row)) return;
 
@@ -168,7 +173,7 @@ class Ad
                             WHERE ad_id = '{$this->ad_id}'");
         $row = DB_fetchArray($result, false);
         if ($row) {
-            $this->SetVars($row);
+            $this->setVars($row);
             $this->isNew = false;
             $this->Cat = new Category($this->cat_id);
             $this->Type= new AdType($this->ad_type);
@@ -188,7 +193,7 @@ class Ad
 
         // If an array of values is provided, set them in this object
         if (!empty($A)) {
-            $this->SetVars($A);
+            $this->setVars($A);
         }
 
         if ($this->isNew) {
