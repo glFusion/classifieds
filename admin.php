@@ -213,32 +213,26 @@ function CLASSIFIEDS_adminCategories()
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS,
             $_CONF_ADVT, $LANG_ADVT;
 
-    $retval = '';
-
     $header_arr = array(      # display 'text' and use table field 'field'
         array('text' => $LANG_ADVT['edit'], 'field' => 'edit', 'sort' => false),
         array('text' => $LANG_ADVT['name'], 'field' => 'cat_name', 'sort' => true),
         array('text' => $LANG_ADVT['parent_cat'], 'field' => 'parent', 'sort' => true),
         array('text' => $LANG_ADVT['delete'], 'field' => 'delete', 'sort' => false),
     );
-
     $defsort_arr = array('field' => 'cat_name', 'direction' => 'asc');
-
     $text_arr = array(
         'has_extras' => true,
         'form_url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=cat',
     );
-
     $query_arr = array('table' => 'ad_category',
         'sql' => "SELECT * FROM {$_TABLES['ad_category']}",
         'query_fields' => array(),
         'default_filter' => ''
     );
-
-    $retval .= ADMIN_list('classifieds', 'plugin_getListField_AdCategories',
+    $form_arr = array();
+    return ADMIN_list('classifieds', 'plugin_getListField_AdCategories',
                 $header_arr, $text_arr, $query_arr, $defsort_arr,
                 '', '', '', $form_arr);
-    return $retval;
 }
 
 
