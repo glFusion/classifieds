@@ -528,7 +528,12 @@ function plugin_subscription_email_format_classifieds($category, $track_id, $pos
 
     $html2txt = new Html2Text\Html2Text($message, false);
     $messageText = $html2txt->get_text();
-    return array($message, $messageText, array());
+    return array(
+        'msgtext' => $messageText,
+        'msghtml' => $message,
+        'imagetdata' => array(),
+        'subject' => $title,
+    );
 }
 
 
@@ -699,8 +704,8 @@ function plugin_getheaderjs_classifieds()
     $js_dir = $_CONF_ADVT['path'] . '/js/';
 
     $files = array(
-        "$js_dir/catfldsxml.js",
-        "$js_dir/picker.js",
+        //"$js_dir/catfldsxml.js",
+        //"$js_dir/picker.js",
         "$js_dir/toggleEnabled.js",
         "$js_dir/catsub.js",
         "$js_dir/moredays.js",
@@ -1648,46 +1653,47 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
         return $content;
     }
     // No results found is a normal condition
-    if (DB_numRows($result) < 1) return $content;
+    if (DB_numRows($result) > 0) {
 
-    $T->set_file('autotag', $template);
-    $T->set_block('autotag', 'tag_data', 'TAG');
-    while ($A = DB_fetchArray($result, false)) {
-        $img_file = DB_getItem($_TABLES['ad_photo'], 'filename',
-                "ad_id='{$A['ad_id']}'");
-         if ($img_file != '') {
-            $T->set_var('img_url', Classifieds\Image::dispUrl($img_file));
-            $T->set_var('tn_url', Classifieds\Image::thumbUrl($img_file));
-        } else {
-            $T->clear_var('img_url');
-            $T->clear_var('tn_url');
-        }
-        if (isset($A['description'])) {
-            if (strlen($A['description']) > $textlen) {
-                $A['description'] = substr($A['description'], 0, $textlen - 3) . ' ...';
+        $T->set_file('autotag', $template);
+        $T->set_block('autotag', 'tag_data', 'TAG');
+        while ($A = DB_fetchArray($result, false)) {
+            $img_file = DB_getItem($_TABLES['ad_photo'], 'filename',
+                    "ad_id='{$A['ad_id']}'");
+             if ($img_file != '') {
+                $T->set_var('img_url', Classifieds\Image::dispUrl($img_file));
+                $T->set_var('tn_url', Classifieds\Image::thumbUrl($img_file));
+            } else {
+                $T->clear_var('img_url');
+                $T->clear_var('tn_url');
             }
-        }
-        $T->set_var(array(
-            'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
-            'ad_id'     => $A['ad_id'],
-            'cat_id'    => $A['cat_id'],
-            'uid'       => $A['uid'],
-            'subject'   => htmlspecialchars($A['subject']),
-            'description'  => htmlspecialchars($A['description']),
-            'url'       => COM_sanitizeURL($A['url']),
-            'add_date'  => COM_getUserDateTimeFormat($A['add_date']),
-            'exp_date'  => COM_getUserDateTimeFormat($A['exp_date']),
-            'ad_type'   => htmlspecialchars($A['type']),
-            'pi_url'    => $_CONF_ADVT['url'],
-            'ad_url'    => COM_buildUrl($_CONF_ADVT['url']
+            if (isset($A['description'])) {
+                if (strlen($A['description']) > $textlen) {
+                    $A['description'] = substr($A['description'], 0, $textlen - 3) . ' ...';
+                }
+            }
+            $T->set_var(array(
+                'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
+                'ad_id'     => $A['ad_id'],
+                'cat_id'    => $A['cat_id'],
+                'uid'       => $A['uid'],
+                'subject'   => htmlspecialchars($A['subject']),
+                'description'  => htmlspecialchars($A['description']),
+                'url'       => COM_sanitizeURL($A['url']),
+                'add_date'  => COM_getUserDateTimeFormat($A['add_date']),
+                'exp_date'  => COM_getUserDateTimeFormat($A['exp_date']),
+                'ad_type'   => htmlspecialchars($A['type']),
+                'pi_url'    => $_CONF_ADVT['url'],
+                'ad_url'    => COM_buildUrl($_CONF_ADVT['url']
                         . '/index.php?mode=detail&id=' . urlencode($ad_id)),
-
-        ) );
-        $T->parse('TAG', 'tag_data', true);
+            ) );
+            $T->parse('TAG', 'tag_data', true);
+        }
+        $T->parse('output', 'autotag');
+        $tag_data = $T->finish($T->get_var('output'));
+    } else {
+        $tag_data = '';
     }
-
-    $T->parse('output', 'autotag');
-    $tag_data = $T->finish($T->get_var('output'));
     $content = str_replace($autotag['tagstr'], $tag_data, $content);
     return $content;
 }

@@ -905,8 +905,10 @@ class Ad
 
         if ($this->uid == $_USER['uid']) {
             return true;
-        } else {
+        } elseif ($this->Cat) {
             return $this->Cat->canView();
+        } else {
+            return true;
         }
     }
 
