@@ -56,14 +56,9 @@
     <div class="uk-form-controls">
       {$LANG_ADVT['foreground']}: <input name="fgcolor" type="text" id="fgcolor" size="7" maxlength="7" 
             value="{fgcolor}" style="background:{fgcolor}" /> 
-        <span onclick="openPicker('fgcolor')">
-          <img src="{site_url}/classifieds/images/colors.png">
-        </span>
       {$LANG_ADVT['background']}: <input name="bgcolor" type="text" id="bgcolor" size="7" maxlength="7" 
             value="{bgcolor}" style="background:{bgcolor}" /> 
-        <span onclick="openPicker('bgcolor')">
-          <img src="{site_url}/classifieds/images/colors.png" />
-        </span>
+      &nbsp;&nbsp;&nbsp;<span id="sample" style="background-color:{bgcolor};color:{fgcolor};">{$LANG_ADVT['sample']}</span>
     </div>
   </div>
 
@@ -101,7 +96,7 @@
 {!endif}
   <div class="uk-form-row">
     <div class="uk-form-controls">
-      <button type="submit" class="uk-button uk-button-success" name="savecat" value="{$LANG_ADVT['upd_cat']}">{$LANG_ADVT['upd_cat']}</button>
+      <button type="submit" class="uk-button uk-button-success" name="savecat" value="{$LANG_ADMIN['save']}">{$LANG_ADMIN['save']}</button>
       <button type="reset" class="uk-button uk-button-primary" value="{$LANG_ADVT['reset']}">{$LANG_ADVT['reset']}</button>
       <button type="reset" class="uk-button" value="{$LANG_ADMIN['cancel']}" name="cancel" 
         onclick="javascript: document.location.href='{cancel_url}'">{$LANG_ADMIN['cancel']}</button>
@@ -125,4 +120,5 @@
   </table>
 </form>-->
 {!endif}
+{colorpicker}
 {# begin {templatelocation} #}

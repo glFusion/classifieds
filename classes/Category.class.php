@@ -460,6 +460,13 @@ class Category
             'sel_parent_cat' => self::buildSelection(self::getParent($this->cat_id), $this->cat_id),
             'have_propagate' => $this->isNew ? '' : 'true',
             'orig_pcat' => $this->papa_id,
+            'colorpicker' => LGLIB_colorpicker(array(
+                    'fg_id'     => 'fgcolor',
+                    'fg_color'  => $this->fgcolor,
+                    'bg_id'     => 'bgcolor',
+                    'bg_color'  => $this->bgcolor,
+                    'sample_id' => 'sample',
+                )),
         ) );
         $T->parse('output','modify');
         return $T->finish($T->get_var('output'));
@@ -1060,12 +1067,14 @@ class Category
         global $_TABLES;
 
         $cat_id = (int)$cat_id;
-        $res = DB_query("SELECT parent.cat_id, parent.cat_name
+        $sql = "SELECT parent.cat_id, parent.cat_name
                 FROM {$_TABLES['ad_category']} AS node,
                     {$_TABLES['ad_category']} AS parent
                 WHERE node.lft BETWEEN parent.lft AND parent.rgt
                 AND node.cat_id = $cat_id
-                ORDER BY parent.lft DESC LIMIT 2");
+                ORDER BY parent.lft DESC LIMIT 2";
+        $res = DB_query($sql);
+        $parent_id = NULL;
         while ($A = DB_fetchArray($res, false)) {
             $parent_id = $A['cat_id'];
         }

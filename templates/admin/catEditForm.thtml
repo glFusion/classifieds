@@ -113,7 +113,7 @@ window.addEvent('domready',function() {
 
   <p>
     <input type="hidden" name="owner_id" value="{owner_id}" />
-    <input type="submit" class="lgButton green" name="savecat" value="{$LANG_ADVT['upd_cat']}" />
+    <input type="submit" class="lgButton green" name="savecat" value="{$LANG_ADMIN['save']}" />
     <input type="reset" class="lgButton blue" value="{$LANG_ADVT['reset']}" />
     <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel" 
         onclick="javascript: document.location.href='{cancel_url}'" />
