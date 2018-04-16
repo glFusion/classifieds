@@ -27,7 +27,7 @@ window.addEvent('domready',function() {
       <tr>
         <td align="right"><b>{$LANG_ADVT['category']}</b></td>
         <td align="left">
-          <select name="catid" onchange="updateCat(this.value, '{site_url}');">
+          <select name="catid">
             {sel_list_catid}
           </select>
         </td>

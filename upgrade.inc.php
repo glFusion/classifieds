@@ -113,6 +113,7 @@ function classifieds_do_upgrade()
             return false;
         }
     }
+    classifieds_remove_old_files();
     COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
     CTL_clearCache($_CONF_ADVT['pi_name']);
     return true;
@@ -707,6 +708,29 @@ function classifieds_do_set_version($ver)
         return false;
     } else {
         return true;
+    }
+}
+
+
+/**
+*   Remove deprecated files.
+*   No return, and errors here don't really matter
+*/
+function classifieds_remove_old_files()
+{
+    global $_CONF;
+
+    $old_files = array(
+        __DIR__ => array(
+            'js/picker.js',     // 1.2.2
+            'js/catfldxml.js',  // 1.4.0
+        ),
+    );
+
+    foreach ($old_files as $path=>$files) {
+        foreach ($files as $file) {
+            @unlink "$path/$file";
+        }
     }
 }
 

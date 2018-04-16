@@ -16,7 +16,7 @@
   <div class="uk-form-row">
     <label for="cat_id" class="uk-form-label">{$LANG_ADVT['category']}</label>
     <div class="uk-form-controls">
-      <select id="cat_id" name="cat_id" onchange="updateCat(this.value, '{site_url}');">
+      <select id="cat_id" name="cat_id">
         {sel_list_catid}
       </select>
     </div>
