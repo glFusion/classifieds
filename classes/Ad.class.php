@@ -419,7 +419,7 @@ class Ad
             'sel_list_catid'    => Category::buildSelection($this->cat_id, '', '', 'NOT', '1'),
             //'saveoption'    => $saveoption,
             'cancel_url'    => $cancel_url,
-            'lang_runfor'   => $this->isNew ? $_LANG_ADVT['runfor'] :
+            'lang_runfor'   => $this->isNew ? $LANG_ADVT['runfor'] :
                                     $LANG_ADVT['add'],
             'moredays'      => $moredays,
             'cls_exp_date'  => $this->exp_date < time() ? 'adExpiredText' : '',
