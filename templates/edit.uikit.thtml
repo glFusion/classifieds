@@ -44,8 +44,7 @@
     <label for="description" class="uk-form-label">{$LANG_ADVT['description']}</label>
     <div class="uk-form-controls">
       <textarea required class="fValidate['required']" id="description" rows="8" 
-          name="description" cols="40" style="width:100%" 
-          maxlength="1000">{description}</textarea>
+          name="description" cols="40" style="width:100%">{description}</textarea>
     </div>
   </div>
 
