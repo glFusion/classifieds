@@ -1,6 +1,7 @@
 # Classifieds Plugin for glFusion - Change Log
 
 ## Version 1.3.0 (Unreleased)
+- Require LGLib 1.0.7 for new colorpicker
 - Remove date-added field for categories, not used
 - Implement Modified Preloaded Tree Traversal for categories
 

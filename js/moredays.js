@@ -1,3 +1,9 @@
+/**
+*   Add more days to an ad's run.
+*
+*   @param  string  id      Ad ID
+*   @param  integer days    Number of days to add.
+*/
 function ADVTmoreDays(id, days)
 {
     var dataS = {

@@ -1,6 +1,9 @@
-/*  Subscribe and unsubscribe from category notifications.
+/**
+*   Subscribe and unsubscribe from category notifications.
+*
+*   @param  integer id      Category ID
+*   @param  boolean do_sub  True to subscribe, False to unsubscribe
 */
-var xmlHttp;
 var ADVTcatSub = function(id, do_sub)
 {
     var dataS = {
