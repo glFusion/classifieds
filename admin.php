@@ -144,8 +144,7 @@ function CLASSIFIEDS_adminAdTypes()
 }
 
 
-function plugin_getListField_AdCategories(
-    $fieldname, $fieldvalue, $A, $icon_arr)
+function plugin_getListField_AdCategories($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
 
@@ -170,6 +169,10 @@ function plugin_getListField_AdCategories(
         break;
 
     case 'delete':
+        if ($A['cat_id'] == 1) {
+            $retval = '';
+            break;
+        }
         if ($_CONF_ADVT['_is_uikit']) {
             $retval .= COM_createLink('',
                 $_CONF_ADVT['admin_url'] .
