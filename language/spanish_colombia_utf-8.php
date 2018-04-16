@@ -244,6 +244,7 @@ $LANG_ADVT = array (
 'msg_catunsub' => 'You have unsubscribed from this category',
 'msg_error' => 'There has been an error processing your request',
 'no_ads_listed_cat' => 'There are no ads listed under this category',
+'sample' => 'Sample',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Su Clasificado ha sido enviado y está en <b>espera de aprobación</b>.';

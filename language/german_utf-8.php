@@ -249,6 +249,7 @@ $LANG_ADVT = array (
 'msg_catunsub'          => 'Du hast Dich von dieser Kategorie abgemeldet',
 'msg_error'             => 'Leider gab es einen Fehler bei Deiner Anfrage',
 'no_ads_listed_cat' => 'There are no ads listed under this category',
+'sample' => 'Sample',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';
