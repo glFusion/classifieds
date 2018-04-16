@@ -109,14 +109,6 @@ $NEWTABLE['ad_trans'] = "CREATE TABLE {$_TABLES['ad_trans']} (
     `days` int(10) NOT NULL default '0',
     PRIMARY KEY  (`tid`))";
 */
-$DEFVALUES['block1'] = "INSERT INTO {$_TABLES['blocks']}
-        (is_enabled,name,type,title,tid,blockorder,onleft,phpblockfn,group_id,
-        owner_id,perm_owner,perm_group,perm_members,perm_anon)
-    VALUES
-        ('1','classifieds_random','phpblock',
-        '{$LANG_ADVT['random_ad']}','all',0,0,
-        'phpblock_classifieds_random',2,2,3,3,2,2)
-;";
 
 $DEFVALUES['ad_types'] = "INSERT INTO {$_TABLES['ad_types']}
         (description)
@@ -129,7 +121,7 @@ $DEFVALUES['category'] = "INSERT INTO {$_TABLES['ad_category']} (
         group_id, owner_id, perm_owner, perm_group, perm_members, perm_anon,
         keywords, image, fgcolor, bgcolor
     ) VALUES (
-        0, 'Miscellaneous', 'Miscellaneous Items',
+        1, 'Root', 'Root Category',
         13, 2, 3, 3, 2, 2,
         '', '', '#000066', '#6699ff'
     )";

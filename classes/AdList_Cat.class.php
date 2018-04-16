@@ -101,7 +101,8 @@ class AdList_Cat extends AdList
         $cat_for_adlist = $this->cat_id;
 
         // Get the sub-categories which have this category as their parent
-        $subcats = Category::SubCats($this->cat_id);
+        // Use a large depth to get counts and ads from sub-sub-categories
+        $subcats = Category::SubCats($this->cat_id, 99);
         $listvals = '';
         $max = count($CatListcolors);
         $i = 0;

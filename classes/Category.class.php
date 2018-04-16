@@ -3,9 +3,9 @@
 *   Class for managing categories
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2012 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2012-2018 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.3
+*   @version    1.4.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -30,6 +30,9 @@ class Category
     {
         global $_CONF_ADVT;
 
+        // Set default colors. Other fields can be empty
+        $this->fgcolor = '#000000';
+        $this->bgcolor = '#FFFFFF';
         $catid = (int)$catid;
         $this->imgPath = $_CONF_ADVT['imgpath'] . '/cat/';
         if ($catid > 0) {
@@ -151,9 +154,7 @@ class Category
         global $_TABLES;
 
         if ($id != 0) {
-            if (is_object($this)) {
-                $this->cat_id = $id;
-            }
+            $this->cat_id = $id;
         }
         if ($this->cat_id == 0) return false;
 
@@ -176,7 +177,6 @@ class Category
         global $_TABLES, $_CONF_ADVT;
 
         if (!empty($A)) $this->SetVars($A);
-
         $time = time();
 
         // Handle the uploaded category image, if any.  We don't want to delete
@@ -205,10 +205,17 @@ class Category
         //$parent_map = DB_escapeString(json_encode($this->MakeBreadcrumbs()));
         if ($this->isNew) {
             $Parent = new self($this->papa_id);
-            DB_query("UPDATE {$_TABLES['ad_category']}
-                SET rgt = rgt + 2 WHERE rgt >= {$Parent->rgt}");
-            DB_query("UPDATE {$_TABLES['ad_category']}
-                SET lft = lft + 2 WHERE lft >= {$Parent->rgt}");
+            if ($Parent->isNew) {
+                return CLASSIFIEDS_errorMsg($LANG_ADVT['invalid_category'], 'alert');
+            }
+            $sql = "UPDATE {$_TABLES['ad_category']}
+                SET rgt = rgt + 2 WHERE rgt >= {$Parent->rgt}";
+            //echo $sql;die;
+            DB_query($sql);
+            $sql = "UPDATE {$_TABLES['ad_category']}
+                SET lft = lft + 2 WHERE lft >= {$Parent->rgt}";
+            //echo $sql;die;
+            DB_query($sql);
             $lft = $Parent->rgt;
             $rgt = $lft + 1;
             $sql1 = "INSERT INTO {$_TABLES['ad_category']} SET
@@ -235,12 +242,7 @@ class Category
             bgcolor = '{$this->bgcolor}'";
             //parent_map = '$parent_map'";
         $sql = $sql1 . $sql2 . $sql3;
-
-        // Propagate the permissions, if requested
-        if (isset($_POST['propagate'])) {
-            $this->propagatePerms();
-        }
-
+        //echo $sql;die;
         $result = DB_query($sql);
         if (!$result) {
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
@@ -252,6 +254,11 @@ class Category
                     isset($A['orig_pcat']) &&
                     $A['orig_pcat'] != $this->papa_id) {
                 self::rebuildTree(1, 1);
+                // Propagate the permissions, if requested
+                if (isset($_POST['propagate'])) {
+                    $this->Read();  // Re-read to get new left/right values
+                    $this->propagatePerms();
+                }
                 PLG_itemSaved($this->cat_id, 'classifieds_category');
             }
             return '';      // no actual return if this function works ok
@@ -290,6 +297,7 @@ class Category
         global $_TABLES, $_CONF_ADVT;
 
         $id = (int)$id;
+        if ($id == 1) return false;     // can't delete root category
         $lft = 0;
         $rgt = 0;
         $width = 0;
@@ -301,16 +309,17 @@ class Category
             $rgt = $Cats[$id]->rgt;
             $width = ($rgt - $lft) + 1;
         }
-        if ($lft == 0 || $rgt == 0 || $width == 0) return false;    // errora
-        $cat_sql = implode(',', $Cats);
+        if ($lft == 0 || $rgt == 0 || $width == 0) return false;    // error
+        $cat_ids = array();
         foreach ($Cats as $Cat) {
-            $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']} WHERE cat_id IN ($cat_sql)";
-            $res = DB_query($sql);
-            while ($A = DB_fetchArray($res, false)) {
-                Ad::Delete($A['ad_id']);
-            }
-            // Delete ads associated with this or any sub-categories
-            //DB_delete($_TABLES['ad_ads'], 'cat_id', $Cat->cat_id);
+            $cat_ids[] = $Cat->cat_id;
+        }
+        $cat_sql = implode(',', $cat_ids);
+        $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']} WHERE cat_id IN ($cat_sql)";
+        $res = DB_query($sql);
+        // Delete ads associated with this category
+        while ($A = DB_fetchArray($res, false)) {
+            Ad::Delete($A['ad_id']);
         }
 
         DB_query("DELETE FROM {$_TABLES['ad_category']} WHERE lft BETWEEN $lft AND $rgt");
@@ -355,13 +364,25 @@ class Category
     */
     private function propagatePerms()
     {
-        $perms = array(
+        global $_TABLES;
+
+        $sql = "UPDATE {$_TABLES['ad_category']} SET
+                perm_owner = {$this->perm_owner},
+                perm_group = {$this->perm_group},
+                perm_members = {$this->perm_members},
+                perm_anon = {$this->perm_anon},
+                owner_id = {$this->owner_id},
+                group_id = {$this->group_id}
+            WHERE lft > {$this->lft} AND rgt < {$this->rgt}";
+        //echo $sql;die;
+        DB_query($sql);
+        /*$perms = array(
             'perm_owner'    => $this->perm_owner,
             'perm_group'    => $this->perm_group,
             'perm_members'  => $this->perm_members,
             'perm_anon'     => $this->perm_anon,
         );
-        self::_propagatePerms($this->cat_id, $perms);
+        self::_propagatePerms($this->cat_id, $perms);*/
     }
 
 
@@ -369,10 +390,11 @@ class Category
     *   Recursive function to propagate permissions from a category to all
     *   sub-categories.
     *
+    *   @deprecated
     *   @param  integer $id     ID of top-level category
     *   @param  array   $perms  Associative array of permissions to apply
     */
-    private static function _propagatePerms($id, $perms)
+    private static function X_propagatePerms($id, $perms)
     {
         global $_TABLES;
 
@@ -492,14 +514,16 @@ class Category
         $root = 1;
         $Cats = self::getTree($root);
         foreach ($Cats as $Cat) {
-            if ($Cat->cat_id == $root) {
-                continue;       // Don't include the root category
-            } elseif ($self == $Cat->cat_id) {
+            //if ($Cat->cat_id == $root) {
+            //    continue;       // Don't include the root category
+            //} elseif ($self == $Cat->cat_id) {
+            if ($self == $Cat->cat_id) {
                 // Exclude self when building parent list
                 $disabled = 'disabled="disabled"';
             } elseif (SEC_hasAccess($Cat->owner_id, $Cat->group_id,
                     $Cat->perm_owner, $Cat->perm_group,
                     $Cat->perm_members, $Cat->perm_anon) < 3) {
+                // Current user can't access the category
                 $disabled = 'disabled="disabled"';
             } else {
                 $disabled = '';
@@ -665,7 +689,7 @@ class Category
     *   @param  integer $id     Top-level Category ID
     *   @return array           Array of category objects
     */
-    public static function SubCats($id = 0)
+    public static function SubCats($id = 0, $depth = 1)
     {
         global $_TABLES, $LANG_ADVT;
         static $subcats = array();
@@ -678,6 +702,7 @@ class Category
         }
 
         if ($id == 0) {
+            // Get only root categories
             $sql = "SELECT * FROM {$_TABLES['ad_category']}
                     WHERE papa_id = 0
                     ORDER BY lft";
@@ -699,7 +724,7 @@ class Category
                     AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
                     AND sub_parent.cat_id = sub_tree.cat_id
                 GROUP BY node.cat_name
-                HAVING depth = 1
+                HAVING depth > 0 AND depth <= $depth
                 ORDER BY node.lft";
         }
         //echo $sql;die;
@@ -755,6 +780,11 @@ class Category
     public function isUsed()
     {
         global $_TABLES;
+
+        if ($this->cat_id == 1) {
+            // Fake to treat root category as used, preventing deletion
+            return true;
+        }
 
         foreach (array('ad_ads', 'ad_submission') as $tbl_id) {
             if (DB_count($_TABLES[$tbl_id], 'cat_id', $this->cat_id) > 0) {
@@ -947,14 +977,14 @@ class Category
 
         $All = array();
 
-        if (!empty($root)) {
+        //if (!empty($root)) {
+        if ($root > 0) {
             $result = DB_query("SELECT lft, rgt FROM {$_TABLES['ad_category']}
                         WHERE cat_id = $root");
             $row = DB_fetchArray($result, false);
             $between = ' AND parent.lft BETWEEN ' . (int)$row['lft'] .
                         ' AND ' . (int)$row['rgt'];
         }
-
         $prefix = DB_escapeString($prefix);
         $sql = "SELECT node.*, CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
             FROM {$_TABLES['ad_category']} AS node,
