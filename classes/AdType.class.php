@@ -82,7 +82,7 @@ class AdType
 
         $this->id = $row['id'];
         $this->description = $row['description'];
-        $this->enabled = $row['enabled'];
+        $this->enabled = isset($row['enabled']) && $row['enabled'] ? 1 : 0;
     }
 
 
@@ -207,8 +207,7 @@ class AdType
             $T->set_var('show_del_btn', '');
         }
         $T->parse('output','admin');
-        $display .= $T->finish($T->get_var('output'));
-        return $display;
+        return $T->finish($T->get_var('output'));
     }   // function showForm()
 
 
