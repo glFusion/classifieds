@@ -808,7 +808,7 @@ function plugin_itemlist_classifieds()
                     uid
                 FROM {$_TABLES['ad_submission']}";
         $plugin->addSubmissionHeading($LANG_ADVT['subject']);
-        $plugin->addSubmissionHeading($LANG_ADVT['date']);
+        $plugin->addSubmissionHeading($LANG_ADVT['added_on']);
         $plugin->addSubmissionHeading($LANG_ADVT['price']);
 
         return $plugin;

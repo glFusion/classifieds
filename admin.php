@@ -3,14 +3,13 @@
 *   Create administration lists for ad elements
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
-*   @version    1.1.0
+*   @version    1.3.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 
 // Include required admin functions
 USES_lib_admin();
@@ -138,7 +137,7 @@ function CLASSIFIEDS_adminAdTypes()
         'query_fields' => array(),
         'default_filter' => ''
     );
-
+    $form_arr = '';
     $retval .= ADMIN_list('classifieds', 'plugin_getListField_AdTypes', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '', '', $form_arr);
     return $retval;

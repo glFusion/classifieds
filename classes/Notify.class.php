@@ -259,7 +259,7 @@ class Notify
             return true;        // Fake success if nobody to notify
         $groupList = implode(',',$groups);
 
-        $sql = "SELECT DISTINCT u.uid, u.email
+        $sql = "SELECT DISTINCT u.uid, u.email, u.username
                 FROM {$_TABLES['group_assignments']} ga
                 LEFT JOIN {$_TABLES['users']} u
                     ON u.uid = ga.ug_uid
