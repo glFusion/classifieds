@@ -99,7 +99,7 @@ class Notify
         // Pick the template based on approval status and language
         $template_base = $_CONF_ADVT['path'] . '/templates/notify';
 
-        if (file_exists("$template_base/{$language}/$template_file")) {
+        if (file_exists("$template_base/{$user['language']}/$template_file")) {
             $template_dir = "$template_base/{$language}";
         } else {
             $template_dir = "$template_base/english";
@@ -379,7 +379,7 @@ class Notify
     */
     public static function loadLanguage($requested='')
     {
-        global $_CONF;
+        global $_CONF, $_CONF_ADVT;
 
         // Set the language to the user's selected language, unless
         // otherwise specified.
