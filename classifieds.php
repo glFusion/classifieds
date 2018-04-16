@@ -51,7 +51,6 @@ $_CONF_ADVT['pi_display_name'] = 'Classified Ads';
 global $_CONF;
 $_CONF_ADVT['path'] = __DIR__;
 $_CONF_ADVT['imgpath'] = $_CONF['path'] . 'data/classifieds/images';
-$_CONF_ADVT['classpath'] = $_CONF_ADVT['path'] . '/classes/';
 $_CONF_ADVT['url'] = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
 $_CONF_ADVT['admin_url'] = $_CONF['site_admin_url'] . '/plugins/' . $_CONF_ADVT['pi_name'];
 
