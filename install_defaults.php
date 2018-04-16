@@ -41,14 +41,6 @@ $_ADVT_DEFAULT['newcatdays'] = 3;      // days to consider a category as new
 $_ADVT_DEFAULT['newadsinterval']    = 14; // days to consider an ad as new
 $_ADVT_DEFAULT['hidenewads']    = 0;    // 1 = hide from the What's New block
 
-// Paths
-$path_html = $_CONF['path_html'] . $_CONF_ADVT['pi_name'];
-$_ADVT_DEFAULT['image_dir'] = $path_html . '/images/user';
-$_ADVT_DEFAULT['image_url'] = $_CONF['site_url'] . '/classifieds/images/user';
-$_ADVT_DEFAULT['catimgpath'] = $path_html . '/images/cat';
-$_ADVT_DEFAULT['catimgurl'] = $_CONF['site_url'] . '/classifieds/images/cat';
-
-
 /**
  *  Notify admins of new submissions
  *      0 - never notify admins
