@@ -245,6 +245,7 @@ class Ad
             // Category object needed for notifications, but is not yet
             // set in the current Ad object
             $this->Cat = new Category($this->cat_id);
+            $this->Type = new AdType($this->ad_type);
             if ($this->isNew) {
                 if ($this->isSubmission()) {
                     // Submission, notify moderators
