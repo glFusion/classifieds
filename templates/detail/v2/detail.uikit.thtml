@@ -56,6 +56,10 @@ function advtUpdateImage(filename)
       <span class="title">{$LANG_ADVT['price']}:</span>{price}
       </p>
     {!endif}
+
+{# Begin full-width description #}
+<div class="advtFullDescrip v2">{description}</div>
+
     <hr width="100%" />
 
     <p class="title">{$LANG_ADVT['contact_info']}</p>
@@ -151,9 +155,6 @@ function advtUpdateImage(filename)
 {!endif}
 
 </div>
-
-{# Begin full-width description #}
-<div style="clear:both; margin-top: 20px;">{description}</div>
 
 <div>
 <small>
