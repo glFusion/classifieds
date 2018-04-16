@@ -19,11 +19,11 @@
   <tr class="detail">
     <td height="25" align="left">{ad_type}:
     </td>
-    <td height="25" bgcolor="{bgColor}">
+    <td height="25">
       <a href="{ad_url}">{subject}</a>
       <!--<a href="?page=detail&cat={cat_id}&id={ad_id}">{subject}</a>-->
     </td>
-    <td><small><a href="{cat_url}">{cat_name}</a></small></td>
+    <td style="background:{bgColor}"><small><a style="color:{fgColor}" href="{cat_url}">{cat_name}</a></small></td>
     <td height="25" align="center"><small>{add_date}</small>&nbsp;&nbsp;</td>
   </tr>
   <tr>

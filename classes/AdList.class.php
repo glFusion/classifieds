@@ -106,6 +106,7 @@ class AdList
         $counter = 0;
         while ($row = DB_fetchArray($result, false)) {
             $T->set_var(array(
+                'fgColor'   => $row['fgcolor'],
                 'bgColor'   => $row['bgcolor'],
                 'cat_id'    => $row['cat_id'],
                 'subject'   => strip_tags($row['subject']),
