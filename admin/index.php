@@ -210,6 +210,7 @@ case 'savecat':
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $C = new Classifieds\Category($cat_id);
     $C->Save($_POST);
+    echo COM_refresh($_CONF['site_admin_url'] . '/plugins/classifieds/index.php?admin=cat');
     $view = 'admin';
     $actionval = 'cat';
     break;
