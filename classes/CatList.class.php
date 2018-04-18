@@ -147,7 +147,7 @@ class CatList
         $cats = DB_query($sql);
         if (!$cats) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
         */
-        $Cats = Category::SubCats();
+        $Cats = Category::SubCats(1);
         // If no root categories exist, display just return a message
         if (count($Cats) == 0) {
             $T->set_var('no_cat_found', 
@@ -160,13 +160,13 @@ class CatList
         $max = count($CatListcolors);
 
         $i = 0;
-        //while ($catsrow = DB_fetchArray($cats)) {
         foreach ($Cats as $Cat) {
+            // Get the colors for the blocks from the global var if not set
+            // for the category
             if ($Cat->fgcolor == '' || $Cat->bgcolor == '') {
                 if ($i >= $max) $i = 0;
                 $bgcolor = $CatListcolors[$i][0];
                 $fgcolor = $CatListcolors[$i][1];
-                $hdcolor = $CatListcolors[$i][2];
                 $i++;
             } else {
                 $fgcolor = $Cat->fgcolor;
