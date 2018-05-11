@@ -28,6 +28,7 @@ class Ad
     private $properties;
     private $table;
     private $isAdmin;
+    private static $tag = 'ad_';
 
     // Database fields
     private $fields = array(
@@ -182,6 +183,28 @@ class Ad
 
 
     /**
+    *   Get an instance of an ad.
+    *   Retrieves and caches ads.
+    *
+    *   @param  mixed   $id     Ad ID, or array of ad values
+    *   @return object      Ad object
+    */
+    public static function getInstance($id)
+    {
+        static $ads = array();
+        if (!isset($ads[$id])) {
+            $key = Cache::makeKey(self::$tag . $id);
+            $ads[$id] = Cache::get($key);
+            if (!$ads[$id]) {
+                $ads[$id] = new self($id);
+            }
+            Cache::set($key, $ads[$id], 'ads');
+        }
+        return $ads[$id];
+    }
+
+
+    /**
     *   Save the current values to the database.
     *
     *   @param  array   $A      Optional array of values, e.g. from $_POST
@@ -255,6 +278,7 @@ class Ad
                     Notify::Subscribers($this);
                 }
             }
+            Cache::clear();
             // Wouldn't be normal, but if this is being saved with an
             // expiration date in the past then don't tell other plugins
             // about it.
@@ -300,6 +324,7 @@ class Ad
                 if (DB_error()) return NULL;
             }
         }
+        Cache::clear();
         return $this->ad_id;
     }
 
@@ -321,6 +346,7 @@ class Ad
             // Do the normal plugin rejection stuff
             plugin_moderationdelete_classifieds($ad_id);
         } else {
+            Cache::clear();
             // Do the extra cleanup manually, delete any images
             Image::DeleteAll($ad_id);
             // Notify other plugins only if not a submission
@@ -804,17 +830,15 @@ class Ad
         $retval = '';
 
         // Find users, excluding anonymous
-        $sql = "SELECT uid FROM {$_TABLES['users']}
-            WHERE uid > 1";
+        $sql = "SELECT uid, username, fullname FROM {$_TABLES['users']}
+                WHERE uid > 1";
         $result = DB_query($sql, 1);
         while ($row = DB_fetchArray($result, false)) {
-            $name = COM_getDisplayName($row['uid']);
-            $sel = $row['uid'] == $selId ? 'selected' : '';
-            $retval .= "<option value=\"{$row['uid']}\" $sel>$name</option>\n";
+            $name = COM_getDisplayName($row['uid'], $row['username'], $row['fullname']);
+            $sel = $row['uid'] == $selId ? 'selected="selected"' : '';
+            $retval .= "<option value=\"{$row['uid']}\" $sel>$name</option>" . LB;
         }
-
         return $retval;
-
     }   // function userDropdown()
 
 
@@ -917,6 +941,7 @@ class Ad
     /**
     *   Get an array of popular ads.
     *   Returns up to the top X ads (default 4)
+    *   Requires at least 2 views to be considered.
     *
     *   @param  int     $num    Max number of ads to get
     *   @return array       Array of ad details
