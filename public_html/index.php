@@ -212,11 +212,14 @@ case 'home':
 default:
     // Display either the categories, or the ads under a requested
     // category
-    if ($id > 0) {
+    $C = new Classifieds\Category($id);
+    if ($C->papa_id > 0) {
+        // A sub-category, display the ads
         $L = new Classifieds\AdList_Cat($id);
         $content .= $L->Render();
         $pageTitle = $L->Cat->cat_name;
     } else {
+        // The root category, display the sub-categories
         $content .= Classifieds\CatList::Render();
     }
     $T->set_var('header', $LANG_ADVT['blocktitle']);
