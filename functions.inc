@@ -1481,9 +1481,21 @@ function plugin_user_delete_classifieds($uid)
 {
     global $_TABLES;
 
-    $uid = (int)$uid;
-    $sql = "DELETE FROM {$_TABLES['ad_uinfo']} WHERE uid = $uid";
-    DB_query($sql);
+    Classifieds\UserInfo::Delete($uid);
+
+    // Delete all current ads for the user
+    $sql = "SELECT ad_id FROM {$_TABLES['ad_ads']} WHERE uid = '$uid'";
+    $res = DB_query($sql);
+    while ($A = DB_fetchArray($res, false)) {
+        Classifieds\Ad::Delete($A['ad_id']);
+    }
+
+    // Now delete all submissions for the user
+    $sql = "SELECT ad_id FROM {$_TABLES['ad_submission']} WHERE uid = '$uid'";
+    $res = DB_query($sql);
+    while ($A = DB_fetchArray($res, false)) {
+        Classifieds\Ad::Delete($A['ad_id'], 'ad_submission');
+    }
 }
 
 
@@ -1696,6 +1708,29 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
     }
     $content = str_replace($autotag['tagstr'], $tag_data, $content);
     return $content;
+}
+
+
+/**
+*   Export user data when requested.
+*
+*   @param  integer $uid        User ID
+*   @param  string  $email      User Email Address (not used)
+*   @param  string  $username   User Name (not used)
+*   @param  string  $ip         IP address (not used)
+*   @return string              XML-formatted data
+*/
+function plugin_privacy_export_classifieds($uid,$email='',$username='',$ip='')
+{
+    $U = new Classifieds\UserInfo($uid);
+    $retval = "<classifieds>\n";
+    $retval .= $U->Export();
+    $retval .= "</profile>\n";
+
+    if ( function_exists('tidy_repair_string')) {
+        $retval = tidy_repair_string($retval, array('input-xml' => 1));
+    }
+    return $retval;
 }
 
 

@@ -205,14 +205,12 @@ class UserInfo
     /**
     *   Delete the current user info record from the database
     */
-    public function Delete()
+    public static function Delete($uid)
     {
         global $_TABLES;
 
-        if ($this->uid > 0)
-            DB_delete($_TABLES['ad_uinfo'], 'id', $this->uid);
-
-        $this->uid = 0;
+        $uid = (int)$uid;
+        DB_delete($_TABLES['ad_uinfo'], 'uid', $uid);
     }
 
 
@@ -313,6 +311,28 @@ class UserInfo
 
         // Otherwise, use the current user's balance
         $this->max_ad_days = $this->days_balance;
+    }
+
+
+    /**
+    *   Perform privacy export of user fields.
+    *   Only exports fields containing data, and does not provide the
+    *   top-level wrapper tag.
+    *
+    *   @return string      XML-formatted user data
+    */
+    public function Export()
+    {
+        $retval = '';
+        foreach ($this->fields as $name=>$type) {
+            // Don't need to export these:
+            if ($name == 'uid' || $name == 'days_bal') continue;
+            $d = addSlashes(htmlentities($this->$name));
+            if (!empty($d)) {
+                $retval .= '<'.$name.'>'.$d.'</'.$name.">\n";
+            }
+        }
+        return $retval;
     }
 
 }   // class UserInfo
