@@ -193,9 +193,9 @@ class Ad
     {
         static $ads = array();
         if (!isset($ads[$id])) {
-            $key = Cache::makeKey(self::$tag . $id);
+            $key = 'ad_' . $id;
             $ads[$id] = Cache::get($key);
-            if (!$ads[$id]) {
+            if ($ads[$id] === NULL) {
                 $ads[$id] = new self($id);
             }
             Cache::set($key, $ads[$id], 'ads');
