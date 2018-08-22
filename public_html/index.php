@@ -95,7 +95,7 @@ switch ($mode) {
 case 'submit':
 case 'edit':
     if ($isAnon) COM_404();
-    $Ad = new Classifieds\Ad($id);
+    $Ad = new \Classifieds\Ad($id);
     if (isset($_GET['cat_id']) && $Ad->isNew) {
         $Ad->cat_id = $_GET['cat_id'];
     }
@@ -106,9 +106,9 @@ case 'delete':
 case 'deletead':
     if ($isAnon) COM_404();
     if ($id != '') {
-        $Ad = new Classifieds\Ad($id);
+        $Ad = new \Classifieds\Ad($id);
         if ($Ad->canEdit()) {
-            Classifieds\Ad::Delete($id);
+            \Classifieds\Ad::Delete($id);
             $msg = '&msg=11';
         } else {
             $msg = '';
@@ -121,7 +121,7 @@ case 'deletead':
 case 'update_account':
     // only valid users allowed
     if ($isAnon) COM_404();
-    $U = new Classifieds\UserInfo($_USER['uid']);
+    $U = new \Classifieds\UserInfo($_USER['uid']);
     $U->SetVars($_POST);
     $U->Save();
     $view = $view == '' ? 'account' : $view;
@@ -139,7 +139,7 @@ case 'save':
     if (isset($_POST['ad_id']) && !empty($_POST['ad_id'])) {
         $id = $_POST['ad_id'];
     }
-    $Ad = new Classifieds\Ad($id);
+    $Ad = new \Classifieds\Ad($id);
     if ($Ad->Save($_POST)) {
         COM_refresh($_CONF_ADVT['url'] . '?msg=01');
     } else {
@@ -149,7 +149,7 @@ case 'save':
 
 case 'delete_img':
     if ($isAnon) COM_404();
-    $Image = new Classifieds\Image($_GET['img_id']);
+    $Image = new \Classifieds\Image($_GET['img_id']);
     if ($Image->photo_id > 0) {
         $Image->Delete();
     }
@@ -158,14 +158,14 @@ case 'delete_img':
 
 case 'moredays':
     if ($isAnon) COM_404();
-    $Ad = new Classifieds\Ad($id);
+    $Ad = new \Classifieds\Ad($id);
     $Ad->addDays($_POST['add_days']);
     $view = 'manage';
     break;
 
 case 'recent':
     //  Display recent ads
-    $L = new Classifieds\AdList_Recent();
+    $L = new \Classifieds\AdList_Recent();
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['recent_listed']);
     $menu_opt = $LANG_ADVT['mnu_recent'];
@@ -181,7 +181,7 @@ case 'manage':
 
 case 'account':
     if ($isAnon) COM_404();
-    $U = new Classifieds\UserInfo();
+    $U = new \Classifieds\UserInfo();
     $content .= $U->showForm('advt');
     $T->set_var('header', $LANG_ADVT['my_account']);
     $menu_opt = $LANG_ADVT['mnu_account'];
@@ -189,20 +189,20 @@ case 'account':
 
 case 'detail':
     // Display an ad's detail
-    $Ad = new Classifieds\Ad($id);
+    $Ad = new \Classifieds\Ad($id);
     $content .= $Ad->Detail();
     break;
 
 case 'editad':
     // Edit an ad.
     if ($isAnon) COM_404();
-    $Ad = new Classifieds\Ad($id);
+    $Ad = new \Classifieds\Ad($id);
     $content .= $Ad->Edit();
     break;
 
 case 'byposter':
     // Display all open ads for the specified user ID
-    $L = new Classifieds\AdList_Poster($_GET['uid']);
+    $L = new \Classifieds\AdList_Poster($_GET['uid']);
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['ads_by']. ' '. COM_getDisplayName($uid));
     $menu_opt = $LANG_ADVT['mnu_home'];
@@ -212,15 +212,15 @@ case 'home':
 default:
     // Display either the categories, or the ads under a requested
     // category
-    $C = new Classifieds\Category($id);
+    $C = new \Classifieds\Category($id);
     if ($C->papa_id > 0) {
         // A sub-category, display the ads
-        $L = new Classifieds\AdList_Cat($id);
+        $L = new \Classifieds\AdList_Cat($id);
         $content .= $L->Render();
         $pageTitle = $L->Cat->cat_name;
     } else {
         // The root category, display the sub-categories
-        $content .= Classifieds\CatList::Render();
+        $content .= \Classifieds\CatList::Render();
     }
     $T->set_var('header', $LANG_ADVT['blocktitle']);
     $menu_opt = $LANG_ADVT['mnu_home'];

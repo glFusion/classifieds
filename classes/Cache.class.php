@@ -31,16 +31,13 @@ class Cache
     *   @param  mixed   $tag    Tag, or array of tags.
     *   @param  integer $cache_mins Cache minutes
     */
-    public static function set($key, $data, $tag='', $cache_mins=0)
+    public static function set($key, $data, $tag='', $cache_mins=1440)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
-            return;     // caching requires glFusion 1.8.0 or higher
+            return;     // glFusion version does not support caching
         }
 
         $cache_mins = (int)$cache_mins;
-        if ($cache_mins < 10) {     // 10-minute minimum
-            $cache_mins = 30;       // 30-minute default
-        }
         // Always make sure the base tag is included
         $tags = array(self::TAG);
         if (!empty($tag)) {
@@ -61,7 +58,7 @@ class Cache
     public static function delete($key)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
-            return;     // caching requires glFusion 1.8.0 or higher
+            return;     // glFusion version does not support caching
         }
         $key = self::makeKey($key);
         \glFusion\Cache::getInstance()->delete($key);
@@ -77,7 +74,7 @@ class Cache
     public static function clear($tag = array())
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
-            return;     // caching requires glFusion 1.8.0 or higher
+            return;     // glFusion version does not support caching
         }
         $tags = array(self::TAG);
         if (!empty($tag)) {
@@ -111,7 +108,7 @@ class Cache
     public static function get($key)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
-            return NULL;     // caching requires glFusion 1.8.0 or higher
+            return;     // glFusion version does not support caching
         }
         $key = self::makeKey($key);
         if (\glFusion\Cache::getInstance()->has($key)) {

@@ -114,6 +114,7 @@ function classifieds_do_upgrade()
         }
     }
     classifieds_remove_old_files();
+    \Classifieds\Cache::clear();
     COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
     CTL_clearCache($_CONF_ADVT['pi_name']);
     return true;
@@ -678,7 +679,7 @@ function classifieds_upgrade_1_3_0()
     );
     if (!classifieds_do_upgrade_sql('1.3.0', $sql)) return false;
     // Populate the tree values
-    Classifieds\Category::rebuildTree(0, 0);
+    \Classifieds\Category::rebuildTree(0, 0);
     return classifieds_do_set_version('1.3.0');
 }
 

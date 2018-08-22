@@ -5,7 +5,7 @@
 *   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    0.3.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -26,7 +26,7 @@ case 'toggleEnabled':
 
     switch ($_POST['type']) {
     case 'adtype':
-        $newval = Classifieds\AdType::toggleEnabled($oldval, $_POST['id']);
+        $newval = \Classifieds\AdType::toggleEnabled($oldval, $_POST['id']);
         break;
 
      default:

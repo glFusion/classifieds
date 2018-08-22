@@ -5,7 +5,7 @@
 *   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    0.3.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -18,7 +18,7 @@ require_once '../lib-common.php';
 switch ($_REQUEST['action']) {
 case 'catsub':
     if (!isset($_POST['id'])) exit;
-    $C = new Classifieds\Category($_POST['id']);
+    $C = new \Classifieds\Category($_POST['id']);
     $status = $C->Subscribe(true);
     $result = array(
         'cat_id' => $_POST['id'],
@@ -30,7 +30,7 @@ case 'catsub':
 
 case 'catunsub':
     if (!isset($_POST['id'])) exit;
-    $C = new Classifieds\Category($_POST['id']);
+    $C = new \Classifieds\Category($_POST['id']);
     $status = $C->Subscribe(false);
     $result = array(
         'cat_id' => $_POST['id'],
@@ -42,7 +42,7 @@ case 'catunsub':
 
 case 'moredays':
     if (!isset($_POST['id'])) exit;
-    $Ad = new Classifieds\Ad($_POST['id']);
+    $Ad = new \Classifieds\Ad($_POST['id']);
     if ($Ad->isNew) exit;
     $maxdays = $Ad->addDays($_POST['days']);
     $dt = new Date($Ad->exp_date, $_CONF['timezone']);

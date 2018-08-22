@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    classifieds
 *   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -136,7 +136,7 @@ $A = array();       // initialize array for form vars
 
 switch ($action) {
 case 'deleteimage': // delete an image
-    $Image = new Classifieds\Image($actionval);
+    $Image = new \Classifieds\Image($actionval);
     $Image->Delete();
     $actionval = $ad_id;
     $view = 'editad';
@@ -145,14 +145,14 @@ case 'deleteimage': // delete an image
 case 'deletecat':   // delete a single category
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     if ($cat_id > 0) {
-        Classifieds\Category::Delete($_REQUEST['cat_id']);
+        \Classifieds\Category::Delete($_REQUEST['cat_id']);
         $view = 'admin';
     }
     break;
 
 case 'delbutton_x':
     foreach ($_POST['delitem'] as $ad_id) {
-        Classifieds\Ad::Delete($ad_id);
+        \Classifieds\Ad::Delete($ad_id);
     }
     COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=ad');
     break;
@@ -160,14 +160,14 @@ case 'delbutton_x':
 case 'deletead':
     $ad_id = $actionval;
     $type = CLASSIFIEDS_getParam('type', 'string');
-    if ($type == 'submission' || $type == 'editsubmission' || 
+    if ($type == 'submission' || $type == 'editsubmission' ||
             $type == 'moderate') {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
-        Classifieds\Ad::Delete($ad_id, 'ad_submission');
+        \Classifieds\Ad::Delete($ad_id, 'ad_submission');
         echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
         exit;
     } else {
-        Classifieds\Ad::Delete($ad_id);
+        \Classifieds\Ad::Delete($ad_id);
         echo COM_refresh($_CONF_ADVT['admin_url'] . '/index.php');
         exit;
     }
@@ -175,7 +175,7 @@ case 'deletead':
 
 case 'saveadtype':
     $type_id = CLASSIFIEDS_getParam('type_id', 'int');
-    $AdType = new Classifieds\AdType($type_id);
+    $AdType = new \Classifieds\AdType($type_id);
     if (!$AdType->Save($_POST)) {
         COM_errorLog("Error saving ad type");
         COM_errorLog("Type info:" . print_r($AdType,true));
@@ -185,7 +185,7 @@ case 'saveadtype':
 
 case 'deleteadtype':
     $type_id = CLASSIFIEDS_getParam('type_id', 'int');
-    $AdType = new Classifieds\AdType($type_id);
+    $AdType = new \Classifieds\AdType($type_id);
     $view = 'admin';
     $actionval = 'type';
     if ($AdType->isUsed()) {
@@ -208,7 +208,7 @@ case 'deleteadtype':
 case 'savecat':
     // Insert or update a category record from form vars
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
-    $C = new Classifieds\Category($cat_id);
+    $C = new \Classifieds\Category($cat_id);
     $C->Save($_POST);
     echo COM_refresh($_CONF['site_admin_url'] . '/plugins/classifieds/index.php?admin=cat');
     $view = 'admin';
@@ -217,7 +217,7 @@ case 'savecat':
 
 case 'delcat':
     // Insert or update a category record from form vars
-    Classifieds\Category::DeleteMulti($_POST['c']);
+    \Classifieds\Category::DeleteMulti($_POST['c']);
     $view = 'admin';
     $actionval = 'cat';
     break;
@@ -226,14 +226,14 @@ case 'delcatimg':
     // Delete a category image
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     if ($cat_id > 0) {
-        Classifieds\Category::DelImage($cat_id);
+        \Classifieds\Category::DelImage($cat_id);
     }
     $view = 'editcat';
     break;
 
 case 'save':
     if ($_POST['type'] == 'submission') {   // approving a submission
-        $Ad = new Classifieds\Ad($ad_id, 'ad_submission');
+        $Ad = new \Classifieds\Ad($ad_id, 'ad_submission');
         $Ad->isNew = true;
         $Ad->setTable('ad_ads');
         $status = $Ad->Save($_POST);
@@ -246,7 +246,7 @@ case 'save':
         }
         exit;
     } else {
-        $Ad = new Classifieds\Ad($ad_id);
+        $Ad = new \Classifieds\Ad($ad_id);
         $status = $Ad->Save($_POST);
         if ($status) {
             echo COM_refresh($_CONF_ADVT['admin_url']);
@@ -258,7 +258,7 @@ case 'save':
    break;
 
 case 'dupad':
-    $Ad = new Classifieds\Ad($actionval);
+    $Ad = new \Classifieds\Ad($actionval);
     $msg = $Ad->Duplicate() ? 14 : 13;
     echo COM_refresh($_CONF_ADVT['admin_url'] . '?plugin=classifieds&msg=' . $msg);
     exit;
@@ -271,7 +271,7 @@ case 'resetcatperms':
         $_POST['perm_members'][0],
         $_POST['perm_anon'][0],
     );
-    Classifieds\Category::ResetPerms($_POST['group_id'], $new_perms);
+    \Classifieds\Category::ResetPerms($_POST['group_id'], $new_perms);
     echo COM_refresh($_CONF_ADVT['admin_url']);
     exit;
     break;
@@ -287,7 +287,7 @@ default:
 switch ($view) {
 case 'editad':
 case 'edit':    // if called from submit.php
-    $Ad = new Classifieds\Ad(CLASSIFIEDS_getParam('ad_id'));
+    $Ad = new \Classifieds\Ad(CLASSIFIEDS_getParam('ad_id'));
     // TODO: What was this for?
     //$Ad->cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $content .= $Ad->Edit();
@@ -295,7 +295,7 @@ case 'edit':    // if called from submit.php
 
 case 'editadtype':
     // Edit an ad type. $actionval contains the type_id value
-    $AdType = new Classifieds\AdType($actionval);
+    $AdType = new \Classifieds\AdType($actionval);
     $content .= CLASSIFIEDS_adminMenu('type');
     $content .= $AdType->ShowForm();
     break;
@@ -305,12 +305,12 @@ case 'editcat':
     // $actionval contains the category ID
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $content .= CLASSIFIEDS_adminMenu('cat');
-    $C = new Classifieds\Category($cat_id);
+    $C = new \Classifieds\Category($cat_id);
     $content .= $C->Edit();
     break;
 
 case 'moderate':
-    $Ad = new Classifieds\Ad($ad_id, 'ad_submission');
+    $Ad = new \Classifieds\Ad($ad_id, 'ad_submission');
     $content .= $Ad->Edit();
     break;
 
@@ -358,7 +358,7 @@ default:
     $content .= CLASSIFIEDS_adminAds();
     break;
 }
- 
+
 // Generate the common header for all admin pages
 echo CLASSIFIEDS_siteHeader();
 $T = new Template($_CONF_ADVT['path'] . '/templates/admin/');
