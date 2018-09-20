@@ -599,7 +599,7 @@ class Ad
             'uinfo_postcode' => $uinfo->postcode,
             'uinfo_tel'     => $uinfo->tel,
             'uinfo_fax'     => $uinfo->fax,
-            'price'         => COM_numberFormat($price, 2),
+            'price'         => $price,
             'ad_id'         => $this->ad_id,
             'ad_url'        => $url,
             'username'      => $_CONF_ADVT['disp_fullname'] == 1 ?
