@@ -423,6 +423,7 @@ function plugin_whatsnewsupported_classifieds()
 
 /**
  * Get the new ads to display in the What's New block.
+ * Caches the count and block contents for 2 hours.
  *
  * @param   boolean $countonly  True to just count, false to get the list
  * @return  string  Formatted list of items & urls
@@ -431,14 +432,23 @@ function plugin_getwhatsnew_classifieds($countonly = false)
 {
     global $_CONF, $_TABLES, $_USER, $_CONF_ADVT, $LANG_ADVT;
 
-    $time = time();
-    $retval = '';
-    static $result = NULL;
-    static $nrows = 0;
+    $cachekey_blk = 'whatsnew_blk';
+    $cachekey_count = 'whatsnew_count';
+    if ($countonly) {
+        // Just getting the count for the whatsnew_supported function
+        $count = \Classifieds\Cache::get($cachekey_count);
+        if ($count !== NULL) {
+            return (int)$count;
+        }
+    } else {
+        $block = \Classifieds\Cache::get($cachekey_blk);
+        if ($block !== NULL) {
+            return $block;
+        }
+    }
 
-    if ($result === NULL) {
-        // Get newest ads
-        $sql = "SELECT a.ad_id, a.cat_id, a.subject
+    // Fall through here if the cache isn't valid
+    $sql = "SELECT a.ad_id, a.cat_id, a.subject
             FROM {$_TABLES['ad_ads']} a
             RIGHT JOIN {$_TABLES['ad_category']} c
                 ON a.cat_id = c.cat_id
@@ -448,15 +458,9 @@ function plugin_getwhatsnew_classifieds($countonly = false)
                 COM_getPermSQL('AND', 0, 2, 'c') .
             ' ORDER BY a.add_date DESC
             LIMIT 10';
-        //echo $sql;die;
-        $result = DB_query($sql);
-        $nrows = DB_numRows($result);
-    }
-
-    if ($countonly) {
-        // Just getting the count for the whatsnew_supported function
-        return $nrows;
-    }
+    //echo $sql;die;
+    $result = DB_query($sql);
+    $nrows = DB_numRows($result);
 
     $title_len = $_CONF['title_trim_length'];
 
@@ -475,12 +479,22 @@ function plugin_getwhatsnew_classifieds($countonly = false)
                 htmlspecialchars($title) . "</a>\n";
         }
 
-        $retval .= COM_makeList($newads, 'list-new-ads');
+        $block = COM_makeList($newads, 'list-new-ads');
     } else {
-        $retval .= $LANG_ADVT['no_new_ads'] . '<br />' . LB;
+        $block = $LANG_ADVT['no_new_ads'] . '<br />' . LB;
     }
 
-    return $retval;
+    // Set the block and count into the cache. Tag as "ads" so these will
+    // be deleted when ads are updated.
+    \Classifieds\Cache::set($cachekey_count, $nrows, 'ads', 120);
+    \Classifieds\Cache::set($cachekey_blk, $block, 'ads', 120);
+
+    if ($countonly) {
+        // Just getting the count for the whatsnew_supported function
+        return $nrows;
+    } else {
+        return $block;
+    }
 }
 
 
@@ -1093,11 +1107,18 @@ function plugin_runScheduledTask_classifieds($standalone=false)
     if (!$standalone && $_CONF_ADVT['use_gl_cron'] == 0)
         return;
 
+    $purge_cache = false;   // assume there's nothing to delete
+
     // Other plugins should consider expired ads as "deleted"
     $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']}
                 WHERE exp_date < " . time());
     while ($A = DB_fetchArray($r, false)) {
+        $purge_cache = true;    // Flag to clear cache
         PLG_itemDeleted($A['ad_id'], $_CONF_ADVT['pi_name']);
+    }
+    if ($purge_cache) {
+        // Clear the cache to force recreation of lists and blocks
+        \Classifieds\Cache::clear('ads');
     }
 
     // Check if purging is disabled
@@ -1301,8 +1322,6 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 {
     global $_TABLES;
 
-    $A = array();
-
     $query = "SELECT grp_id, grp_name FROM {$_TABLES['groups']}";
 
     // If a group list is specified, add it as a condition with the
@@ -1311,13 +1330,18 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
         $query .= " WHERE grp_name $NOT IN ($grplist)";
     }
 
-    $result = DB_query($query);
-    if ($result && DB_numRows($result) > 0) {
-        while ($row = DB_fetchArray($result)) {
-            $A[$row['grp_name']] = $row['grp_id'];
+    $cache_key = md5($query);
+    $A = \Classifieds\Cache::get($cache_key);
+    if ($A === NULL) {
+        $A = array();
+        $result = DB_query($query);
+        if ($result && DB_numRows($result) > 0) {
+            while ($row = DB_fetchArray($result)) {
+                $A[$row['grp_name']] = $row['grp_id'];
+            }
         }
+        \Classifieds\Cache::set($cache_key, $A, 'groups');
     }
-
     return $A;
 }
 
