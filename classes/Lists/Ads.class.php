@@ -1,35 +1,45 @@
 <?php
 /**
-*   List ads.  By category, recent submissions, etc.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
-namespace Classifieds;
+ * List ads.  By category, recent submissions, etc.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
+namespace Classifieds\Lists;
 
 /**
-*   @class AdList
-*   @package classifieds
-*   Create a listing of ads
-*/
-class AdList
+ * Base class to create ad listings.
+ * @package classifieds
+ */
+class Ads
 {
+    /** List name used in URL references.
+     * @var string */
     protected $pagename = '';
+
+    /** Category ID being listed.
+     * @var integer */
     protected $cat_id = 0;
+
+    /** SQL where clause to select ads.
+     * @vqr string */
     protected $where_clause = '';
+
+    /** SQL limit clause to limit results.
+     * @var string */
     protected $limit_clause = '';
 
 
     /**
-    *  Display an expanded ad listing.
-    *
-    *  @return string                  Page Content
-    */
+     * Display an expanded ad listing.
+     *
+     * @return  string      Page Content
+     */
     public function Render()
     {
         global $_TABLES, $LANG_ADVT, $_CONF, $_USER, $_CONF_ADVT;
@@ -113,7 +123,7 @@ class AdList
                 'ad_id'     => $row['ad_id'],
                 'ad_url'    => CLASSIFIEDS_makeURL('detail', $row['ad_id']),
                 'add_date'  => date($_CONF['shortdate'], $row['ad_add_date']),
-                'ad_type'   => AdType::getDescription($row['ad_type']),
+                'ad_type'   => \Classifieds\AdType::getDescription($row['ad_type']),
                 'cat_name'  => $row['cat_name'],
                 'cat_url'   => CLASSIFIEDS_makeURL('home', $row['cat_id']),
                 'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
@@ -125,7 +135,7 @@ class AdList
                 'adblock'   => PLG_displayAdBlock('classifieds_list', ++$counter),
             ) );
 
-            $photos = Image::getAll($row['ad_id'], 1);
+            $photos = \Classifieds\Image::getAll($row['ad_id'], 1);
             if (empty($photos)) {
                 $filename = current($photos);
                 $T->set_var(array(
@@ -135,8 +145,8 @@ class AdList
             } else {
                 $filename = current($photos);
                 $T->set_var(array(
-                    'img_url'   => Image::dispUrl($filename),
-                    'thumb_url' => Image::thumbUrl($filename),
+                    'img_url'   => \Classifieds\Image::dispUrl($filename),
+                    'thumb_url' => \Classifieds\Image::thumbUrl($filename),
                 ) );
             }
             $T->parse('QRow', 'QueueRow', true);

@@ -71,22 +71,41 @@ SESS_setVar($_CONF_ADVT['pi_name'], array(
     'origpath'      => $_CONF_ADVT['imgpath'],
 ));
 
+spl_autoload_register(function ($class)
+{
+    // project-specific namespace prefix
+    $prefix = 'Classifieds\\';
+
+    // does the class use the namespace prefix?
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        // no, move to the next registered autoloader
+        return;
+    }
+
+    // base directory for the namespace prefix
+    $base_dir = __DIR__ . '/classes/';
+
+    // get the relative class name
+    $relative_class = substr($class, $len);
+
+    // replace the namespace prefix with the base directory, replace namespace
+    // separators with directory separators in the relative class name, append
+    // with .php
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.class.php';
+
+    // if the file exists, require it
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+
 /** Import administrative functions */
 function USES_classifieds_admin()
 {
     require_once __DIR__ . '/admin.php';
 }
-
-spl_autoload_register(function($class)
-{
-    if (strpos($class, 'Classifieds\\') === 0) {
-        $class = str_replace('Classifieds\\', '', $class);
-        $path = __DIR__ . '/classes/' . $class . '.class.php';
-        if (file_exists($path)) {
-            include $path;
-        }
-    }
-});
 
 
 /**

@@ -1,31 +1,30 @@
 <?php
 /**
-*   List categories on the home page
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.2.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
-namespace Classifieds;
+ * List categories on the home page.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.2.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
+namespace Classifieds\Lists;
 
 /**
-*   @class CatList
-*   @package classifieds
-*   Create a listing of ads
-*/
-class CatList
+ * Create a listing of categories.
+ * @package classifieds
+ */
+class Categories
 {
     /**
-    *   When no category is given, show a table of all categories
-    *   along with the count of ads for each.  
-    *   Returns the results from the category
-    *   list function, chosen based on the display mode
-    *   @return string      HTML for category listing page
-    */
+     * When no category is given, show a table of all categories
+     * along with the count of ads for each.
+     * Returns the results from the category
+     * list function, chosen based on the display mode
+     * @return string      HTML for category listing page
+     */
     public static function Render()
     {
         global $_CONF_ADVT;
@@ -42,10 +41,10 @@ class CatList
 
 
     /**
-    *   Create a "normal" list of categories, using text links
-    *
-    *   @return string      HTML for category listing page
-    */
+     * Create a "normal" list of categories, using text links.
+     *
+     * @return  string      HTML for category listing page
+     */
     private static function _Normal()
     {
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT;
@@ -54,16 +53,16 @@ class CatList
         $T->set_file('page', 'catlist.thtml');
 
         // Get all the root categories
-        /*$sql = "SELECT * FROM {$_TABLES['ad_category']} 
+        /*$sql = "SELECT * FROM {$_TABLES['ad_category']}
                 WHERE papa_id = 0 " . COM_getPermSQL('AND', 0, 2) .
                 " ORDER BY cat_name ASC";
         $cats = DB_query($sql);
         if (!$cats) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');*/
-        $Cats = Category::SubCats();
+        $Cats = \Classifieds\Category::SubCats();
         // If no root categories exist, display just return a message
         //if (DB_numRows($cats) == 0) {
         if (count($Cats) == 0) {
-            $T->set_var('no_cat_found', 
+            $T->set_var('no_cat_found',
                 "<p align=\"center\" class=\"headmsg\">
                 $LANG_ADVT[no_cat_found]</p>\n");
             $T->parse('output', 'page');
@@ -82,12 +81,12 @@ class CatList
                 'rowstart'  => $i % 2 == 1 ? "<tr>\n" : '',
                 'cat_url'   => CLASSIFIEDS_makeUrl('home', $Cat->cat_id),
                 'cat_name'  => $Cat->cat_name,
-                'cat_ad_count' => Category::TotalAds($Cat->cat_id),
-                'image' => $Cat->image ? Category::thumbUrl($Cat->image) : '',
+                'cat_ad_count' => \Classifieds\Category::TotalAds($Cat->cat_id),
+                'image' => $Cat->image ? \Classifieds\Category::thumbUrl($Cat->image) : '',
             ) );
 
-            $SubCats = Category::SubCats($Cat->cat_id);
-            /*$sql = "SELECT * FROM {$_TABLES['ad_category']} 
+            $SubCats = \Classifieds\Category::SubCats($Cat->cat_id);
+            /*$sql = "SELECT * FROM {$_TABLES['ad_category']}
                     WHERE papa_id={$catsrow['cat_id']} " .
                         COM_getPermSQL('AND', 0, 2) . "
                     ORDER BY cat_name ASC";
@@ -103,12 +102,12 @@ class CatList
             $j = 1;
             //while ($subcatsrow = DB_fetchArray($subcats)) {
             foreach ($SubCats as $SubCat) {
-                $isnew = $SubCat->add_date > $newtime ? 
+                $isnew = $SubCat->add_date > $newtime ?
                     "<img src=\"{$_CONF['site_url']}/{$_CONF_ADVT['pi_name']}/images/new.gif\" align=\"top\">" : '';
                 $subcatlist .= '<a href="'.
                         CLASSIFIEDS_makeURL('home', $SubCat->cat_id). '">'.
                         "{$SubCat->cat_name}</a>&nbsp;(" .
-                        Category::TotalAds($SubCat->cat_id). ")&nbsp;{$isnew}";
+                        \Classifieds\Category::TotalAds($SubCat->cat_id). ")&nbsp;{$isnew}";
 
                 if ($num != $j)
                     $subcatlist .= ", ";
@@ -126,10 +125,10 @@ class CatList
 
 
     /**
-    *   Create a category listing page showing the categories in block styling.
-    *
-    *   @return string      HTML for category listing page
-    */
+     * Create a category listing page showing the categories in block styling.
+     *
+     * @return  string      HTML for category listing page
+     */
     private static function _Blocks()
     {
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT;
@@ -139,7 +138,7 @@ class CatList
         $T->set_file('page', 'catlist_blocks.thtml');
 
         // Get all the root categories
-        /*$sql = "SELECT * FROM {$_TABLES['ad_category']} 
+        /*$sql = "SELECT * FROM {$_TABLES['ad_category']}
                 WHERE papa_id = 1 " .
                     COM_getPermSQL('AND', 0, 2) .
                 " ORDER BY cat_name ASC";
@@ -147,10 +146,10 @@ class CatList
         $cats = DB_query($sql);
         if (!$cats) return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
         */
-        $Cats = Category::SubCats(1);
+        $Cats = \Classifieds\Category::SubCats(1);
         // If no root categories exist, display just return a message
         if (count($Cats) == 0) {
-            $T->set_var('no_cat_found', 
+            $T->set_var('no_cat_found',
                 "<p align=\"center\" class=\"headmsg\">
                 $LANG_ADVT[no_cat_found]</p>\n");
             $T->parse('output', 'page');
@@ -171,7 +170,7 @@ class CatList
             } else {
                 $fgcolor = $Cat->fgcolor;
                 $bgcolor = $Cat->bgcolor;
-            } 
+            }
 
             // For each category, find the total ad count (including subcats)
             // and display the subcats below it.
@@ -182,8 +181,8 @@ class CatList
                 'cat_url'   => CLASSIFIEDS_makeUrl('home', $Cat->cat_id),
                 'cat_name'  => $Cat->cat_name,
                 'cat_desc'  => $Cat->description,
-                'cat_ad_count' => Category::TotalAds($Cat->cat_id),
-                'image' => Category::thumbUrl($Cat->image),
+                'cat_ad_count' => \Classifieds\Category::TotalAds($Cat->cat_id),
+                'image' => \Classifieds\Category::thumbUrl($Cat->image),
             ) );
             $T->parse('Div', 'CatDiv', true);
         }

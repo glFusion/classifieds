@@ -165,7 +165,7 @@ case 'moredays':
 
 case 'recent':
     //  Display recent ads
-    $L = new \Classifieds\AdList_Recent();
+    $L = new \Classifieds\Lists\Ads\Recent();
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['recent_listed']);
     $menu_opt = $LANG_ADVT['mnu_recent'];
@@ -202,7 +202,7 @@ case 'editad':
 
 case 'byposter':
     // Display all open ads for the specified user ID
-    $L = new \Classifieds\AdList_Poster($_GET['uid']);
+    $L = new \Classifieds\Lists\Ads\byPoster($_GET['uid']);
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['ads_by']. ' '. COM_getDisplayName($uid));
     $menu_opt = $LANG_ADVT['mnu_home'];
@@ -215,12 +215,13 @@ default:
     $C = new \Classifieds\Category($id);
     if ($C->papa_id > 0) {
         // A sub-category, display the ads
-        $L = new \Classifieds\AdList_Cat($id);
+        //$L = new \Classifieds\AdList_Cat($id);
+        $L = new \Classifieds\Lists\Ads\byCat($id);
         $content .= $L->Render();
         $pageTitle = $L->Cat->cat_name;
     } else {
         // The root category, display the sub-categories
-        $content .= \Classifieds\CatList::Render();
+        $content .= \Classifieds\Lists\Categories::Render();
     }
     $T->set_var('header', $LANG_ADVT['blocktitle']);
     $menu_opt = $LANG_ADVT['mnu_home'];
@@ -327,7 +328,7 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
- * Create admin list of Ad Types.
+ * Create admin list of Ads to manage.
  *
  * @return  string  HTML for admin list
  */
@@ -338,17 +339,34 @@ function CLASSIFIEDS_ManageAds()
 
     $retval = '';
 
-    $header_arr = array(      # display 'text' and use table field 'field'
-        array('text' => $LANG_ADVT['edit'], 'field' => 'edit',
-            'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['description'], 'field' => 'subject',
-            'sort' => true),
-        array('text' => $LANG_ADVT['added'], 'field' => 'add_date',
-            'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['expires'], 'field' => 'exp_date',
-            'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_ADVT['delete'], 'field' => 'delete',
-            'sort' => false, 'align' => 'center'),
+    $header_arr = array(
+        array(
+            'text'  => $LANG_ADVT['edit'],
+            'field' => 'edit',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => $LANG_ADVT['description'],
+            'field' => 'subject',
+            'sort'  => true,
+        ),
+        array(
+            'text'  => $LANG_ADVT['added'],
+            'field' => 'add_date',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => $LANG_ADVT['expires'],
+            'field' => 'exp_date',
+            'sort'  => false,
+            'align' => 'center'),
+        array(
+            'text'  => $LANG_ADVT['delete'],
+            'field' => 'delete',
+            'sort'  => false,
+            'align' => 'center'),
     );
 
     $defsort_arr = array('field' => 'add_date', 'direction' => 'asc');
@@ -358,7 +376,8 @@ function CLASSIFIEDS_ManageAds()
         'form_url' => $_CONF_ADVT['url'] . '/index.php',
     );
 
-    $query_arr = array('table' => 'ad_ads',
+    $query_arr = array(
+        'table' => 'ad_ads',
         'sql' => "SELECT * FROM {$_TABLES['ad_ads']} WHERE uid = {$_USER['uid']}",
         'query_fields' => array(),
         'default_filter' => ''
@@ -368,7 +387,6 @@ function CLASSIFIEDS_ManageAds()
     $retval .= ADMIN_list('classifieds', 'CLASSIFIEDS_getField_AdList',
             $header_arr, $text_arr, $query_arr, $defsort_arr, '',
             '', '', $form_arr);
-
     return $retval;
 }
 
