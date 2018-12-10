@@ -166,10 +166,17 @@ class UserInfo
             return false;
         }
 
-        $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']}
-                            WHERE uid=$uid");
-        if ($result && DB_numRows($result) == 1) {
-            $row = DB_fetchArray($result, false);
+        $cache_key = 'uid_' . $uid;
+        $row = Cache::get($cache_key);
+        if ($row === NULL) {
+            $result = DB_query("SELECT * from {$_TABLES['ad_uinfo']}
+                                WHERE uid=$uid");
+            if ($result && DB_numRows($result) == 1) {
+                $row = DB_fetchArray($result, false);
+            }
+        }
+        if (is_array($row)) {
+            Cache::set($cache_key, $row, 'users');
             $this->SetVars($row);
             return true;
         } else {
@@ -211,6 +218,7 @@ class UserInfo
             ";
         //echo $sql;die;
         DB_query($sql);
+        Cache::delete('uid_' . $this->uid);
     }
 
 
@@ -225,6 +233,7 @@ class UserInfo
 
         $uid = (int)$uid;
         DB_delete($_TABLES['ad_uinfo'], 'uid', $uid);
+        Cache::delete('uid_' . $uid);
     }
 
 
@@ -297,6 +306,7 @@ class UserInfo
             WHERE uid = $uid";
         //echo $sql;die;
         DB_query($sql);
+        Cache::delete('uid_' . $uid);
     }
 
 
