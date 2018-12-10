@@ -1,24 +1,24 @@
 <?php
 /**
-*   Common functions for the Classifieds plugin
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Common functions for the Classifieds plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined('GVERSION')) {
     die('This file can not be used on its own.');
 }
 
 /**
-*   Plugin-specific configuration items
-*   @global array $_CONF_ADVT
-*/
+ * Plugin-specific configuration items,
+ * @global array $_CONF_ADVT
+ */
 global $_CONF_ADVT;
 
 //  Check and see if we need to load the plugin configuration
@@ -71,10 +71,10 @@ SESS_setVar($_CONF_ADVT['pi_name'], array(
     'origpath'      => $_CONF_ADVT['imgpath'],
 ));
 
+/** Import administrative functions */
 function USES_classifieds_admin()
 {
-    global $_CONF_ADVT;
-    require_once $_CONF_ADVT['path'] . '/admin.php';
+    require_once __DIR__ . '/admin.php';
 }
 
 spl_autoload_register(function($class)
@@ -90,13 +90,13 @@ spl_autoload_register(function($class)
 
 
 /**
-*   Returns the items for this plugin that should appear on the main menu
-*
-*   NOTE: this MUST return the url/value pairs in the following format
-*      $<arrayname>[<label>] = <url>
-*
-*   @return    array   Associative array of menu items to be added to menu
-*/
+ * Returns the items for this plugin that should appear on the main menu.
+ *
+ * NOTE: this MUST return the url/value pairs in the following format
+ *      $<arrayname>[<label>] = <url>
+ *
+ * @return  array   Associative array of menu items to be added to menu
+ */
 function plugin_getmenuitems_classifieds()
 {
     global $LANG_ADVT, $_CONF_ADVT;
@@ -108,10 +108,10 @@ function plugin_getmenuitems_classifieds()
 
 
 /**
-*   Check to see if this Plugin uses comments
-*
-*   @return   boolean true or false
-*/
+ * Check to see if this Plugin uses comments.
+ *
+ * @return  boolean     True if comment support is configured
+ */
 function plugin_commentsupport_classifieds()
 {
     global $_CONF_ADVT;
@@ -120,17 +120,17 @@ function plugin_commentsupport_classifieds()
 
 
 /**
-*   Save a comment.
-*   Saves the comment, updates the comment counter in the ad record,
-*   and notifies the ad owner that a new comment has been posted.
-*
-*   @param   string  $title  comment title
-*   @param   string  $comment comment text
-*   @param   string  $id     Item id to which $cid belongs
-*   @param   int     $pid    comment parent
-*   @param   string  $postmode 'html' or 'text'
-*   @return  mixed   false for failure, HTML string (redirect?) for success
-*/
+ * Save a comment.
+ * Saves the comment, updates the comment counter in the ad record,
+ * and notifies the ad owner that a new comment has been posted.
+ *
+ * @param   string  $title      Comment title
+ * @param   string  $comment    Comment text
+ * @param   string  $id         Item id to which $cid belongs
+ * @param   int     $pid        Comment parent
+ * @param   string  $postmode   'html' or 'text'
+ * @return  mixed   false for failure, HTML string (redirect?) for success
+ */
 function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
 {
     global $_CONF, $LANG03, $_TABLES, $LANG_ADVT, $_USER;
@@ -166,17 +166,17 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
 
 
 /**
-*   How the plugin will display specific comments
-*
-*   @param   string  $id     Unique idenifier for item comment belongs to
-*   @param   int     $cid    Comment id to display
-*   @param   string  $title  Page/comment title
-*   @param   string  $order  'ASC' or 'DSC' or blank
-*   @param   string  $format 'threaded', 'nested', or 'flat'
-*   @param   int     $page   Page number of comments to display
-*   @param   boolean $view   True to view comment (by cid), false to display (by $pid)
-*   @return  mixed   results of calling the plugin_displaycomment_ function
-*/
+ * How the plugin will display specific comments.
+ *
+ * @param   string  $id     Unique idenifier for item comment belongs to
+ * @param   int     $cid    Comment id to display
+ * @param   string  $title  Page/comment title
+ * @param   string  $order  'ASC' or 'DSC' or blank
+ * @param   string  $format 'threaded', 'nested', or 'flat'
+ * @param   int     $page   Page number of comments to display
+ * @param   boolean $view   True to view comment (by cid), false to display (by $pid)
+ * @return  mixed   results of calling the plugin_displaycomment_ function
+ */
 function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $page, $view)
 {
     global $LANG_ACCESS, $_USER;
@@ -207,13 +207,13 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
 
 
 /**
-*   Delete a single comment.
-*
-*   @since  version 1.0.0
-*   @param  int     $cid    Comment to be deleted
-*   @param  string  $id     Item id to which $cid belongs
-*   @return mixed   false for failure, HTML string (redirect?) for success
-*/
+ * Delete a single comment.
+ *
+ * @since   v1.0.0
+ * @param   integer $cid    Comment to be deleted
+ * @param   string  $id     Item id to which $cid belongs
+ * @return  mixed   false for failure, HTML string (redirect?) for success
+ */
 function plugin_deletecomment_classifieds($cid, $id)
 {
     global $_CONF, $_TABLES;
@@ -240,13 +240,13 @@ function plugin_deletecomment_classifieds($cid, $id)
 
 
 /**
-*   Handle any post-processing for an edited comment.
-*   Just redirects back to the ad detail page.  The comment is actually
-*   saved in comment.php.
-*
-*   @param  integer $cid    Comment ID
-*   @param  mixed   $id     Item ID
-*/
+ * Handle any post-processing for an edited comment.
+ * Just redirects back to the ad detail page.  The comment is actually
+ * saved in comment.php.
+ *
+ * @param   integer $cid    Comment ID
+ * @param   mixed   $id     Item ID
+ */
 function plugin_editcomment_classifieds($cid, $id)
 {
     echo COM_refresh(CLASSIFIEDS_makeURL('detail', $id));
@@ -255,26 +255,25 @@ function plugin_editcomment_classifieds($cid, $id)
 
 
 /**
-*   Shows the statistics for the plugin on stats.php.  If
-*   $showsitestats is 1 then we are to only print the overall stats in the 'site
-*   statistics' box otherwise we show the detailed stats for the plugin
-*
-*   @param    int showsitestate   Flag to let us know which stats to get
-*   @return   string  returns formatted HTML to insert in stats page
-*/
+ * Shows the statistics for the plugin on stats.php.
+ * If $showsitestats is 1 then we are to only print the overall stats in the 'site
+ * statistics' box otherwise we show the detailed stats for the plugin
+ *
+ * @param    int showsitestate   Flag to let us know which stats to get
+ * @return   string  returns formatted HTML to insert in stats page
+ */
 function plugin_showstats_classifieds($showsitestats)
 {
     return '';
 }
 
 /**
-*   This will put an option for the plugin in the command and control
-*   block on moderation.php.
-*   Add the plugin name, icon and link to the command and control block
-*   in moderation.php
-*
-*   @return   array   Array containing (plugin name, admin url, url of plugin icon)
-*/
+ * This will put an option for the plugin in the command and control area.
+ * Add the plugin name, icon and link to the command and control block
+ * in moderation.php
+ *
+ * @return  array   Array containing (plugin name, admin url, url of plugin icon)
+ */
 function plugin_cclabel_classifieds()
 {
     global $LANG_ADVT, $_CONF_ADVT;
@@ -292,10 +291,10 @@ function plugin_cclabel_classifieds()
 
 
 /**
-*   Returns the URL of the plugin's icon.
-*
-*   @return   string      URL of the icon
-*/
+ * Returns the URL of the plugin's icon.
+ *
+ * @return  string      URL of the icon
+ */
 function plugin_geticon_classifieds()
 {
     global $_CONF_ADVT;
@@ -304,11 +303,11 @@ function plugin_geticon_classifieds()
 
 
 /**
-*   Returns the administrative option for this plugin
-*   Adds the plugin to the Admin menu
-*
-*   @return   array   Array containing (plugin name, plugin admin url, # of items in plugin or '')
-*/
+ * Returns the administrative option for this plugin.
+ * Adds the plugin to the Admin menu.
+ *
+ * @return  array   Array of (plugin name, plugin admin url, # of items in plugin or '')
+ */
 function plugin_getadminoption_classifieds()
 {
     global $_TABLES, $LANG_ADVT, $_CONF_ADVT;
@@ -326,11 +325,11 @@ function plugin_getadminoption_classifieds()
 
 
 /**
-*   Returns the user option for this plugin
-*   Adds the plugin to the user menu
-*
-*   @return   array   Array containing (plugin name, plugin user url, 0)
-*/
+ * Returns the user option for this plugin.
+ * Adds the plugin to the user menu.
+ *
+ * @return  array   Array containing (plugin name, plugin user url, 0)
+ */
 function plugin_getuseroption_classifieds()
 {
     global $LANG_ADVT, $_CONF_ADVT;
@@ -349,10 +348,10 @@ function plugin_getuseroption_classifieds()
 
 
 /**
-*   Automatically uninstall the plugin
-*
-*   @return array Array of plugin elements to remove
-*/
+ * Automatically uninstall the plugin.
+ *
+ * @return  array   Array of plugin elements to remove
+ */
 function plugin_autouninstall_classifieds()
 {
     global $_CONF_ADVT;
@@ -379,10 +378,10 @@ function plugin_autouninstall_classifieds()
 
 
 /**
-*   Returns the block title for the What's New block, if supported.
-*
-*   @return mixed   Array of title info, false if unsupported or nothing to show
-*/
+ * Returns the block title for the What's New block, if supported.
+ *
+ * @return  mixed   Array of title info, false if unsupported or nothing to show
+ */
 function plugin_whatsnewsupported_classifieds()
 {
     global $_CONF_ADVT, $LANG_ADVT, $LANG_WHATSNEW;
@@ -404,11 +403,11 @@ function plugin_whatsnewsupported_classifieds()
 
 
 /**
-*   Get the new ads to display in the What's New block.
-*
-*   @param  boolean $countonly  True to just count, false to get the list
-*   @return string  Formatted list of items & urls
-*/
+ * Get the new ads to display in the What's New block.
+ *
+ * @param   boolean $countonly  True to just count, false to get the list
+ * @return  string  Formatted list of items & urls
+ */
 function plugin_getwhatsnew_classifieds($countonly = false)
 {
     global $_CONF, $_TABLES, $_USER, $_CONF_ADVT, $LANG_ADVT;
@@ -467,10 +466,10 @@ function plugin_getwhatsnew_classifieds($countonly = false)
 
 
 /**
-*   Get the search types for the site search.
-*
-*   @return mixed   Array of typeID=>typeName, or empty string for none.
-*/
+ * Get the search types for the site search.
+ *
+ * @return  mixed   Array of typeID=>typeName, or empty string for none.
+ */
 function plugin_searchtypes_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $LANG_ADVT;
@@ -486,13 +485,13 @@ function plugin_searchtypes_classifieds()
 
 
 /**
-*   Get the formatted email message for subscription notifications.
-*
-*   @param  string  $category   Type of item, always 'category'
-*   @param  mixed   $track_id   Category ID
-*   @param  mixed   $post_id    Ad ID
-*   @param  integer $uid        Poseter UID
-*/
+ * Get the formatted email message for subscription notifications.
+ *
+ * @param   string  $category   Type of item, always 'category'
+ * @param   mixed   $track_id   Category ID
+ * @param   mixed   $post_id    Ad ID
+ * @param   integer $post_uid   Poseter UID
+ */
 function plugin_subscription_email_format_classifieds($category, $track_id, $post_id, $post_uid)
 {
     global $_CONF, $_USER, $_TABLES, $LANG01, $LANG03, $LANG04;
@@ -538,22 +537,21 @@ function plugin_subscription_email_format_classifieds($category, $track_id, $pos
 
 
 /**
-*   This searches for ads matching the user query and returns an array for the
-*   header and table rows back to search.php where it will be formated
-*   and printed
-*
-*   @param    string  $query      Keywords user is looking for
-*   @param    date    $datestart  Start date to get results for
-*   @param    date    $dateend    End date to get results for
-*   @param    string  $topic      The topic they were searching in
-*   @param    string  $type       Type of items they are searching, or 'all'
-*   @param    int     $author     Get all results by this author
-*   @param    string  $keyType    search key type: 'all', 'phrase', 'any'
-*   @param    int     $page       page number of current search
-*   @param    int     $perpage    number of results per page
-*   @return   object              search result object
-*
-*/
+ * This searches for ads matching the user query.
+ * Returns an array for the header and table rows back to search.php
+ * where it will be formated and printed.
+ *
+ * @param   string  $query      Keywords user is looking for
+ * @param   date    $datestart  Start date to get results for
+ * @param   date    $dateend    End date to get results for
+ * @param   string  $topic      The topic they were searching in
+ * @param   string  $type       Type of items they are searching, or 'all'
+ * @param   integer $author     Get all results by this author
+ * @param   string  $keyType    search key type: 'all', 'phrase', 'any'
+ * @param   integer $page       page number of current search
+ * @param   integer $perpage    number of results per page
+ * @return  object              search result object
+ */
 function plugin_dopluginsearch_classifieds(
     $query,
     $datestart,
@@ -609,10 +607,10 @@ function plugin_dopluginsearch_classifieds(
 
 
 /**
-*   Returns additional code to be placed in the HTML header.
-*
-*   @return string Additional Header Code
-*/
+ * Returns additional code to be placed in the HTML header.
+ *
+ * @return  string  Additional Header Code
+ */
 function plugin_getheadercode_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $_TABLES;
@@ -661,11 +659,11 @@ function plugin_getheadercode_classifieds()
 
 
 /**
-*   Returns additional CSS files to be imported.
-*   Checks first for a layout-specific version, then loads the default if none.
-*
-*   @return array   Array of filenames
-*/
+ * Returns additional CSS files to be imported.
+ * Checks first for a layout-specific version, then loads the default if none.
+ *
+ * @return  array   Array of filenames
+ */
 function plugin_getheadercss_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $_PLUGINS;
@@ -693,10 +691,10 @@ function plugin_getheadercss_classifieds()
 
 
 /**
-*   Get additional Javascript files to import in the header.
-*
-*   @return array Array of filenames to import
-*/
+ * Get additional Javascript files to import in the header.
+ *
+ * @return  array   Array of filenames to import
+ */
 function plugin_getheaderjs_classifieds()
 {
     global $_CONF, $_CONF_ADVT;
@@ -715,10 +713,10 @@ function plugin_getheaderjs_classifieds()
 
 
 /**
-*   Selection dropdown to pick groups in the configuration manager.
-*
-*   @return Array Associative array of grp_name=>grp_id
-*/
+ * Selection dropdown to pick groups in the configuration manager.
+ *
+ * @return  array   Associative array of grp_name=>grp_id
+ */
 function plugin_configmanager_select_grp_classifieds()
 {
     global $_TABLES;
@@ -736,10 +734,10 @@ function plugin_configmanager_select_grp_classifieds()
 
 
 /**
-*   Upgrade the plugin.
-*
-*   @return boolean True on success, code for error message otherwise
-*/
+ * Upgrade the plugin.
+ *
+ * @return  boolean True on success, False on error
+ */
 function plugin_upgrade_classifieds()
 {
     require_once __DIR__ . '/upgrade.inc.php';
@@ -748,14 +746,13 @@ function plugin_upgrade_classifieds()
 
 
 /**
-*   Returns list of moderation values
-*
-*   The array returned contains (in order): the row 'id' label, main plugin
-*   table, moderation fields (comma seperated), and plugin submission table
-*
-*   @return       array        Returns array of useful moderation values
-*
-*/
+ * Returns list of moderation values.
+ *
+ * The array returned contains (in order): the row 'id' label, main plugin
+ * table, moderation fields (comma seperated), and plugin submission table
+ *
+ * @return  array   Returns array of useful moderation values
+ */
 function plugin_moderationvalues_classifieds()
 {
     global $_TABLES;
@@ -770,13 +767,13 @@ function plugin_moderationvalues_classifieds()
 
 
 /**
-*   Returns the current user's ability to moderate the plugin
-*
-*   Checks that the current user has the rights to moderate the
-*   plugin, returns true if this is the case, false otherwise
-*
-*   @return        boolean       Returns true if moderator
-*/
+ * Returns the current user's ability to moderate the plugin.
+ *
+ * Checks that the current user has the rights to moderate the
+ * plugin, returns true if this is the case, false otherwise
+ *
+ * @return  boolean     Returns true if moderator
+ */
 function plugin_ismoderator_classifieds()
 {
     static $isMod = NULL;
@@ -788,13 +785,13 @@ function plugin_ismoderator_classifieds()
 
 
 /**
-*   Show items for moderation on submissions page
-*
-*   Uses the Plugin class to return data required by moderation.php to list
-*   plugin objects that need to be moderated.
-*
-*   @return       Plugin       return Plugin class containing submission data
-*/
+ * Show items for moderation on submissions page.
+ *
+ * Uses the Plugin class to return data required by moderation.php to list
+ * plugin objects that need to be moderated.
+ *
+ * @return  object  Plugin object containing submission data
+ */
 function plugin_itemlist_classifieds()
 {
     global $_TABLES, $LANG_ADVT;
@@ -817,13 +814,13 @@ function plugin_itemlist_classifieds()
 
 
 /**
-*   Performs plugin exclusive work for items approved by moderation.
-*   Notifies users of approval/denial, and subscribers if approved.
-*
-*   @param  string  $id         ID of the ad
-*   @param  integer $owner_id   Optional ad owner ID
-*   @return string              Empty string.
-*/
+ * Performs plugin exclusive work for items approved by moderation.
+ * Notifies users of approval/denial, and subscribers if approved.
+ *
+ * @param   string  $id         ID of the ad
+ * @param   integer $owner_id   Optional ad owner ID
+ * @return  string              Empty string.
+ */
 function plugin_moderationapprove_classifieds($id, $owner_id=0)
 {
     // Notify subscribers.
@@ -837,14 +834,14 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
 
 
 /**
-*   Performs plugin exclusive work for items deleted by moderation.
-*   The ad submission record is already deleted.
-*   Delete uploaded images, notify submitter of denial.
-*   Can't notify the submitter since the data has already been deleted.
-*
-*   @param  string  $id     ID of the ad deleted.
-*   @return string          Any wanted HTML output
-*/
+ * Performs plugin exclusive work for items deleted by moderation.
+ * The ad submission record is already deleted.
+ * Delete uploaded images, notify submitter of denial.
+ * Can't notify the submitter since the data has already been deleted.
+ *
+ * @param   string  $id     ID of the ad deleted.
+ * @return  string          Any wanted HTML output
+ */
 function plugin_moderationdelete_classifieds($id)
 {
     global $_TABLES, $_CONF_ADVT;
@@ -870,10 +867,10 @@ function plugin_moderationdelete_classifieds($id)
 
 
 /**
-*   Returns the plugins submission form
-*
-*   @return       string       The HTML form
-*/
+ * Returns the plugins submission form.
+ *
+ * @return  string      The HTML form
+ */
 function plugin_submit_classifieds()
 {
     $Ad = new \Classifieds\Ad();
@@ -882,14 +879,14 @@ function plugin_submit_classifieds()
 
 
 /**
-*   Provides the getItemInfo function for classified ads
-*
-*   @param  string  $id         Product ID
-*   @param  string  $fields     Comma-separated list of fields to return
-*   @param  integer $uid        User ID
-*   @param  array   $options    Not used
-*   @return array           Array of product information
-*/
+ * Provides the getItemInfo function for classified ads.
+ *
+ * @param   string  $id         Product ID
+ * @param   string  $what       Comma-separated list of fields to return
+ * @param   integer $uid        User ID
+ * @param   array   $options    Not used
+ * @return  array           Array of product information
+ */
 function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
 {
     global $_TABLES, $_CONF, $LANG_ADVT;
@@ -1017,10 +1014,10 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
 
 
 /**
-*   Get the URL for the item when linked from a comment
-*
-*   @return array   Array of (base url, id string)
-*/
+ * Get the URL for the item when linked from a comment.
+ *
+ * @return  array   Array of (base url, id string)
+ */
 function plugin_getcommenturlid_classifieds()
 {
     global $_CONF_ADVT;
@@ -1032,14 +1029,14 @@ function plugin_getcommenturlid_classifieds()
 
 
 /**
-*   Returns the number of submissions waiting moderation.
-*
-*   Calculates the number of submissions that are currently waiting
-*   to be moderated and returns that number.
-*
-*   @since  version 0.1.2
-*   @return int     Number of submissions awaiting moderation
-*/
+ * Returns the number of submissions waiting moderation.
+ *
+ * Calculates the number of submissions that are currently waiting
+ * to be moderated and returns that number.
+ *
+ * @since   v0.1.2
+ * @return  integer     Number of submissions awaiting moderation
+ */
 function plugin_submissioncount_classifieds()
 {
     global $_TABLES, $_CONF_ADVT;
@@ -1054,9 +1051,10 @@ function plugin_submissioncount_classifieds()
 
 
 /**
-*   Get the currently installed version
-*   @return string Plugin version
-*/
+ * Get the currently installed version.
+ *
+ * @return  string  Plugin version
+ */
 function plugin_chkVersion_classifieds()
 {
     global $_CONF_ADVT;
@@ -1065,9 +1063,10 @@ function plugin_chkVersion_classifieds()
 
 
 /**
-*   Perform scheduled functions, such as notifications and ad purging
-*   @param boolean $standalone TRUE if this is run via a standalone script
-*/
+ * Perform scheduled functions, such as notifications and ad purging.
+ *
+ * @param   boolean $standalone TRUE if this is run via a standalone script
+ */
 function plugin_runScheduledTask_classifieds($standalone=false)
 {
     global $_TABLES, $_CONF_ADVT, $_CONF, $LANG_ADVT;
@@ -1111,11 +1110,11 @@ function plugin_runScheduledTask_classifieds($standalone=false)
 
 
 /**
-*   Action to take when a new user is created.
-*   Creates a record in the "userinfo" table for the new user.
-*
-*   @param  integer $uid    User ID
-*/
+ * Action to take when a new user is created.
+ * Creates a record in the "userinfo" table for the new user.
+ *
+ * @param   integer $uid    User ID
+ */
 function plugin_user_create_classifieds($uid)
 {
     $U = new \Classifieds\UserInfo($uid);
@@ -1124,11 +1123,11 @@ function plugin_user_create_classifieds($uid)
 
 
 /**
-*   Support merging local accounts into remote accounts
-*
-*   @param  integer $origUID    Original (remote) user ID
-*   @param  integer $destUID    Merged (local) user ID
-*/
+ * Support merging local accounts into remote accounts.
+ *
+ * @param   integer $origUID    Original (remote) user ID
+ * @param   integer $destUID    Merged (local) user ID
+ */
 function plugin_user_move_classifieds($origUID, $destUID)
 {
     global $_TABLES;
@@ -1146,10 +1145,10 @@ function plugin_user_move_classifieds($origUID, $destUID)
 
 
 /**
-*   Display a random ad in a block.
-*
-*   @return string HTML code for the block
-*/
+ * Display a random ad in a block.
+ *
+ * @return  string  HTML code for the block
+ */
 function phpblock_classifieds_random()
 {
     global $_TABLES, $LANG_ADVT, $_CONF_ADVT;
@@ -1190,8 +1189,10 @@ function phpblock_classifieds_random()
 
 
 /**
-*   Return the template names that support ad blocks
-*/
+ * Return the template names that support ad blocks.
+ *
+ * @return  array   Array of template names
+ */
 function plugin_supportadblock_classifieds()
 {
     return array('classifieds_detail', 'classifieds_list');
@@ -1199,16 +1200,16 @@ function plugin_supportadblock_classifieds()
 
 
 /**
-*   Shortcut function to create a URL using COM_buildUrl.  This
-*   ensures that the url is properly formatted with at least a
-*   'mode' value, and arguments are in the right order.  This is important
-*   when url_rewrite is on.
-*
-*   @param  string  $mode   Mode (action) parameter
-*   @param  string  $id     Ad or Category ID (optional)
-*   @param  string  $other  Other miscellaneous options
-*   @return string  Complete url string
-*/
+ * Shortcut function to create a URL using COM_buildUrl.
+ * This ensures that the url is properly formatted with at least a
+ * 'mode' value, and arguments are in the right order.  This is important
+ * when url_rewrite is on.
+ *
+ * @param   string  $mode   Mode (action) parameter
+ * @param   string  $id     Ad or Category ID (optional)
+ * @param   string  $other  Other miscellaneous options
+ * @return  string  Complete url string
+ */
 function CLASSIFIEDS_makeURL($mode='home', $id='', $other = '')
 {
     global $_CONF_ADVT;
@@ -1229,14 +1230,22 @@ function CLASSIFIEDS_makeURL($mode='home', $id='', $other = '')
 }
 
 
-// Select default group for ad access (viewing and editing)
+/**
+ * Select default group for ad access (viewing and editing).
+ *
+ * @return  array   Array of group names, not including All Users
+ */
 function plugin_configmanager_select_defgrpad_classifieds()
 {
     return CLASSIFIEDS_getGroups('\'All Users\'', 'NOT');
 }
 
 
-// Select default group for category access (submission and viewing)
+/**
+ * Select default group for category access (submission and viewing).
+ *
+ * @return  array   Array of group names, not including All Users
+ */
 function plugin_configmanager_select_defgrpcat_classifieds()
 {
     return CLASSIFIEDS_getGroups('\'All Users\'', 'NOT');
@@ -1244,10 +1253,10 @@ function plugin_configmanager_select_defgrpcat_classifieds()
 
 
 /**
-*   Select the template to use for product detail pages, by default
-*
-*   @return array   $option => path
-*/
+ * Select the template to use for product detail pages, by default.
+ *
+ * @return  array   $option => path
+ */
 function plugin_configmanager_select_detail_tpl_ver_classifieds()
 {
     global $_CONF_ADVT;
@@ -1262,15 +1271,13 @@ function plugin_configmanager_select_detail_tpl_ver_classifieds()
 }
 
 
-
 /**
-*   Gets all the groups in the glFusion groups table to prepare a
-*   selection list.
-*
-*   @param  string  $grplist    Optional list of groups to include or exclude
-*   @param  string  $NOT        Set to "NOT" to exclude $grplist, blank to include it.
-*   @return array       Array of (grp_name=>grp_id)
-*/
+ * Gets all the groups in the glFusion groups table to prepare a selection list.
+ *
+ * @param   string  $grplist    Optional list of groups to include or exclude
+ * @param   string  $NOT        Set to "NOT" to exclude $grplist, blank to include it.
+ * @return  array       Array of (grp_name=>grp_id)
+ */
 function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 {
     global $_TABLES;
@@ -1297,18 +1304,20 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
 
 
 /**
-*   Loads the language array. If $requested is an array, the first valid
-*   language file is loaded. If not, the $requested language file is loaded.
-*   If $requested doesn't refer to a vailid language, then $_CONF['language']
-*   is assumed.
-*
-*   After loading the base language file, the same filename is loaded from
-*   language/custom, if available. The admin can override language strings
-*   by creating a language file in that directory.
-*
-*   @param  mixed   $deflang    A single or array of language strings
-*   @return array               $LANG_ADVT, the global language array for the plugin
-*/
+ * Loads the language array for a specified language.
+ * If $requested is an array, the first valid language file is loaded.
+ * If not, the $requested language file is loaded.
+ * If $requested doesn't refer to a vailid language, then $_CONF['language']
+ * is assumed.
+ *
+ * After loading the base language file, the same filename is loaded from
+ * language/custom, if available. The admin can override language strings
+ * by creating a language file in that directory.
+ *
+ * @deprecated
+ * @param   mixed   $requested  A single or array of language strings
+ * @return  array               $LANG_ADVT, the global language array for the plugin
+ */
 function Xplugin_loadlanguage_classifieds($requested='')
 {
     global $_CONF, $_CONF_ADVT;
@@ -1353,12 +1362,11 @@ function Xplugin_loadlanguage_classifieds($requested='')
 
 
 /**
-*   Provides a single function to check whether a user is authorized
-*   to submit ads.  Intended to be called before displaying forms or
-*   saving submissions.
-*
-*   @return boolean True if user can submit ads, False otherwise
-*/
+ * Check whether a user is authorized to submit ads.
+ * Intended to be called before displaying forms or saving submissions.
+ *
+ * @return  boolean True if user can submit ads, False otherwise
+ */
 function CLASSIFIEDS_canSubmit()
 {
     global $_CONF, $_CONF_ADVT, $_GROUPS;
@@ -1372,13 +1380,14 @@ function CLASSIFIEDS_canSubmit()
 
 
 /**
- *  Show the contest submission form in the centerblock.
- *  This shows the submission form in place of the home page for the
- *  designated user group.
- *  @param integer $where Where to show the block (only after featured story)
- *  @param integer $page Which page (Home page only)
- *  @param string $topic Which topics to show with (All)
- *  @return string HTML code for submission form
+ * Show the contest submission form in the centerblock.
+ * This shows the submission form in place of the home page for the
+ * designated user group.
+ *
+ * @param   integer $where Where to show the block (only after featured story)
+ * @param   integer $page Which page (Home page only)
+ * @param   string  $topic Which topics to show with (All)
+ * @return  string          HTML code for submission form
  */
 function plugin_centerblock_classifieds($where = 1, $page = 1, $topic = '')
 {
@@ -1405,14 +1414,14 @@ function plugin_centerblock_classifieds($where = 1, $page = 1, $topic = '')
 
 
 /**
-*   Create an edit form in the Account Settings section.
-*
-*   @since glFusion 1.1.5
-*   @param  integer $uid        User ID
-*   @param  string  $panel      Panel being populated
-*   @param  string  $fieldset   Name of fieldset being populated
-*   @return string              HTML for edit form.  Never NULL.
-*/
+ * Create an edit form in the Account Settings section.
+ *
+ * @since   glFusion 1.1.5
+ * @param   integer $uid        User ID
+ * @param   string  $panel      Panel being populated
+ * @param   string  $fieldset   Name of fieldset being populated
+ * @return  string              HTML for edit form.  Never NULL.
+ */
 function plugin_profileedit_classifieds($uid, $panel, $fieldset)
 {
     global $_CONF, $_USER;
@@ -1429,10 +1438,11 @@ function plugin_profileedit_classifieds($uid, $panel, $fieldset)
 
 
 /**
-*   Save the classifieds ad user information when edited via Account Settings.
-*
-*   @since glFusion 1.1.5
-*/
+ * Save the classifieds ad user information when edited via Account Settings.
+ *
+ * @since   glFusion 1.1.5
+ * @param   integer $uid    ID of user being saved
+ */
 function plugin_profilesave_classifieds($uid=0)
 {
     global $_USER;
@@ -1452,10 +1462,11 @@ function plugin_profilesave_classifieds($uid=0)
 
 
 /**
-*   Update classifieds info when a user account is modified.
-*
-*   @since version 1.1.0
-*/
+ * Update classifieds info when a user account is modified.
+ *
+ * @since   v1.1.0
+ * @param   integer $uid    ID of user being changed
+ */
 function plugin_userchanged_classifieds($uid=0)
 {
     if ($uid == 0) {
@@ -1473,10 +1484,10 @@ function plugin_userchanged_classifieds($uid=0)
 
 
 /**
-*   Remove Classifieds user profile info when an account is deleted
-*
-*   @param  int $uid    User ID that is being deleted
-*/
+ * Remove Classifieds user profile info when an account is deleted.
+ *
+ * @param   integer $uid    User ID that is being deleted
+ */
 function plugin_user_delete_classifieds($uid)
 {
     global $_TABLES;
@@ -1500,12 +1511,12 @@ function plugin_user_delete_classifieds($uid)
 
 
 /**
-*   Get the URL to the localized configuration help file.
-*
-*   @param  string  $option     Name of config option selected
-*   @param  string  $doclang    Document language desired.
-*   @return array   Array of (url, window_type)
-*/
+ * Get the URL to the localized configuration help file.
+ *
+ * @param   string  $option     Name of config option selected
+ * @param   string  $doclang    Document language desired.
+ * @return  array   Array of (url, window_type)
+ */
 function plugin_getconfigelementhelp_classifieds($option, $doclang='english')
 {
     $doc_url = CLASSIFIEDS_getDocURL('config', $doclang);
@@ -1520,10 +1531,10 @@ function plugin_getconfigelementhelp_classifieds($option, $doclang='english')
 
 
 /**
-*   Disable this plugin's blocks when the plugin is disabled.
-*
-*   @param  boolean $enabled    Plugin's "enabled" state
-*/
+ * Disable this plugin's blocks when the plugin is disabled.
+ *
+ * @param   boolean $enabled    Plugin's "enabled" state
+ */
 function plugin_enablestatechange_classifieds($enabled)
 {
     global $_TABLES, $_PLUGINS;
@@ -1548,11 +1559,11 @@ function plugin_enablestatechange_classifieds($enabled)
 
 
 /**
-*   Receives notification of another plugin's deletion
-*
-*   @param  mixed   $id     Item ID
-*   @param  string  $type   Plugin Name
-*/
+ * Receives notification of another plugin's deletion.
+ *
+ * @param   mixed   $id     Item ID
+ * @param   string  $type   Plugin Name
+ */
 function plugin_itemdeleted_classifieds($id, $type)
 {
     global $_TABLES;
@@ -1566,13 +1577,13 @@ function plugin_itemdeleted_classifieds($id, $type)
 
 
 /**
-*   Handle the plugin's autotags
-*
-*   @param  string  $op     Operation to perform
-*   @param  string  $content    Page content
-*   @param  array   $autotag    Autotag elements
-*   @return string      Updated page content
-*/
+ * Handle the plugin's autotags.
+ *
+ * @param   string  $op         Operation to perform
+ * @param   string  $content    Page content
+ * @param   array   $autotag    Autotag elements
+ * @return  string      Updated page content
+ */
 function plugin_autotags_classifieds($op, $content = '', $autotag = '')
 {
     global $_CONF_ADVT, $LANG_ADVT, $_TABLES;
@@ -1712,14 +1723,14 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
 
 
 /**
-*   Export user data when requested.
-*
-*   @param  integer $uid        User ID
-*   @param  string  $email      User Email Address (not used)
-*   @param  string  $username   User Name (not used)
-*   @param  string  $ip         IP address (not used)
-*   @return string              XML-formatted data
-*/
+ * Export user data when requested.
+ *
+ * @param   integer $uid        User ID
+ * @param   string  $email      User Email Address (not used)
+ * @param   string  $username   User Name (not used)
+ * @param   string  $ip         IP address (not used)
+ * @return  string              XML-formatted data
+ */
 function plugin_privacy_export_classifieds($uid,$email='',$username='',$ip='')
 {
     $U = new \Classifieds\UserInfo($uid);
@@ -1735,14 +1746,14 @@ function plugin_privacy_export_classifieds($uid,$email='',$username='',$ip='')
 
 
 /**
-*   Get the link to a documentation file.
-*   Returns the URL to the file, or to the directory if no file requested.
-*
-*   @see    plugin_getconfigelementhelp_classifieds()
-*   @param  string  $file       HTML file
-*   @param  string  $doclang    Documentation language
-*   @return string              URL to document directory or file
-*/
+ * Get the link to a documentation file.
+ * Returns the URL to the file, or to the directory if no file requested.
+ *
+ * @see     plugin_getconfigelementhelp_classifieds()
+ * @param   string  $file       HTML file
+ * @param   string  $doclang    Documentation language
+ * @return  string              URL to document directory or file
+ */
 function CLASSIFIEDS_getDocURL($file='', $doclang='english')
 {
     global $_CONF, $_CONF_ADVT;
@@ -1774,14 +1785,14 @@ function CLASSIFIEDS_getDocURL($file='', $doclang='english')
 
 
 /**
-*   Show the site header, with or without left blocks according to config.
-*
-*   @since  version 1.0.2
-*   @see    COM_siteHeader()
-*   @param  string  $subject    Text for page title (ad title, etc)
-*   @param  string  $meta       Other meta info
-*   @return string              HTML for site header
-*/
+ * Show the site header, with or without left blocks according to config.
+ *
+ * @since   v1.0.2
+ * @uses    COM_siteHeader()
+ * @param   string  $subject    Text for page title (ad title, etc)
+ * @param   string  $meta       Other meta info
+ * @return  string              HTML for site header
+ */
 function CLASSIFIEDS_siteHeader($subject='', $meta='')
 {
     global $_CONF_ADVT, $LANG_ADVT;
@@ -1810,12 +1821,12 @@ function CLASSIFIEDS_siteHeader($subject='', $meta='')
 
 
 /**
-*   Show the site footer, with or without right blocks according to config.
-*
-*   @since  version 1.0.2
-*   @see    COM_siteFooter()
-*   @return string              HTML for site header
-*/
+ * Show the site footer, with or without right blocks according to config.
+ *
+ * @since   v1.0.2
+ * @uses    COM_siteFooter()
+ * @return  string              HTML for site header
+ */
 function CLASSIFIEDS_siteFooter()
 {
     global $_CONF_ADVT;
@@ -1840,9 +1851,9 @@ function CLASSIFIEDS_siteFooter()
 
 
 /**
- *  Log activity to a plugin-specific log file
+ * Log activity to a plugin-specific log file.
  *
- *  @param string $logentry Text to log
+ * @param   string  $logentry   Text to log
  */
 function CLASSIFIEDS_auditLog($logentry = '')
 {
@@ -1881,11 +1892,11 @@ function CLASSIFIEDS_auditLog($logentry = '')
 
 
 /**
-*   Get the comment count for a single ad item
-*
-*   @param  string  $ad_id      ID of ad to check
-*   @return integer             Count of related comments
-*/
+ * Get the comment count for a single ad item/
+ *
+ * @param   string  $ad_id      ID of ad to check
+ * @return  integer             Count of related comments
+ */
 function CLASSIFIEDS_commentCount($ad_id)
 {
     global $_TABLES;
@@ -1898,14 +1909,14 @@ function CLASSIFIEDS_commentCount($ad_id)
 
 
 /**
-*   Get a form or URL parameter.
-*   Checks $_POST, then $_GET, and returns the raw value if found.
-*   Returns NULL if the parameter is not set
-*
-*   @param  string  $name   Name of parameter
-*   @param  string  $type   Type of parameter, default "string"
-*   @return mixed       Value of parameter, or NULL if not found
-*/
+ * Get a form or URL parameter.
+ * Checks $_POST, then $_GET, and returns the raw value if found.
+ * Returns NULL if the parameter is not set
+ *
+ * @param   string  $name   Name of parameter
+ * @param   string  $type   Type of parameter, default "string"
+ * @return  mixed       Value of parameter, or NULL if not found
+ */
 function CLASSIFIEDS_getParam($name, $type = 'string')
 {
     if (isset($_POST[$name])) {
@@ -1928,12 +1939,13 @@ function CLASSIFIEDS_getParam($name, $type = 'string')
 
 
 /**
-*   Returns an error message formatted for on-screen display.
-*   @param  string  $msg    Error message text
-*   @param  string  $type   Error type or severity
-*   @param  string  $hdr    Optional text to appear in the header.
-*   @return string          HTML code for the formatted message
-*/
+ * Returns an error message formatted for on-screen display.
+ *
+ * @param   string|array  $messages Error message(s)
+ * @param   string  $type           Error type or severity
+ * @param   string  $hdr            Optional text to appear in the header.
+ * @return  string          HTML code for the formatted message
+ */
 function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
 {
     global $_CONF_ADVT;
@@ -1976,13 +1988,13 @@ function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
 
 
 /**
-*   Gets the correct template depending on what type of display
-*   is being used.  Currently supports the new "blocks" display and the
-*   old zClassifieds-style display
-*
-*   @param  string  $str    Template base name
-*   @return string          Template full name
-*/
+ * Gets the correct template depending on the type of display.
+ * Currently supports the new "blocks" display and the old
+ * zClassifieds-style display
+ * 
+ * @param   string  $str    Template base name
+ * @return  string          Template full name
+ */
 function CLASSIFIEDS_getTemplate($str)
 {
     global $_CONF_ADVT;

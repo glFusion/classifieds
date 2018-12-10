@@ -1,24 +1,29 @@
 <?php
 /**
-*   Class to handle user account info for the Classifieds plugin
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle user account info for the Classifieds plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
- *  Class for user account info
- *  @package classifieds
+ * Class for user account info.
+ * @package classifieds
  */
 class UserInfo
 {
+    /** Internal properties accessed via `__set()` and `__get()`.
+     * @var array */
     private $properties;
+
+    /** Field names and types.
+     * @var array */
     private $fields = array(
         'uid' => 'int',
         'address' => 'string',
@@ -32,18 +37,18 @@ class UserInfo
         'days_balance' => 'int',
     );
 
-    /** Max days that user can run an ad
-     *  @var integer */
+    /** Max days that user can run an ad.
+     * @var integer */
     var $max_ad_days;
 
 
     /**
-    *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param  integer $uid    Optional User ID
-    */
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   integer $uid    Optional User ID
+     */
     public function __construct($uid=0)
     {
         global $_USER;
@@ -61,16 +66,23 @@ class UserInfo
     }
 
 
-    /** Returns the maximum number of days this user can add to an ad. */
-    public function getMaxDays() { return $this->max_ad_days; }
+    /**
+     * Returns the maximum number of days this user can add to an ad.
+     *
+     * @return  integer     Max days
+     */
+    public function getMaxDays()
+    {
+        return $this->max_ad_days;
+    }
 
 
     /**
-    *   Setter function
-    *
-    *   @param  string  $key    Variable name to set
-    *   @param  mixed   $value  Value for variable
-    */
+     * Set the value of a property.
+     *
+     * @param   string  $key    Variable name to set
+     * @param   mixed   $value  Value for variable
+     */
     public function __set($key, $value)
     {
         switch($key) {
@@ -97,11 +109,11 @@ class UserInfo
 
 
     /**
-    *   Getter function
-    *
-    *   @param  string  $key    Name of variable to retrieve
-    *   @return mixed           Value of variable, NULL if undefined
-    */
+     * Get the value of a property, or NULL if not defined.
+     *
+     * @param   string  $key    Name of variable to retrieve
+     * @return  mixed           Value of variable, NULL if undefined
+     */
     public function __get($key)
     {
         if (isset($this->properties[$key]))
@@ -112,10 +124,10 @@ class UserInfo
 
 
     /**
-    *   Sets all variables to the matching values from $rows
-    *
-    *   @param  array   $row    Array of values, from DB or $_POST
-    */
+     * Sets all variables to the matching values from $rows.
+     *
+     * @param   array   $A  Array of values, from DB or $_POST
+     */
     public function SetVars($A)
     {
         if (!is_array($A)) return;
@@ -132,18 +144,18 @@ class UserInfo
             $this->$fld = isset($A[$pfx.$fld]) ? $A[$pfx.$fld] : '';
         }
 
-        // Update the actual max number of days that this user ca
+        // Update the actual max number of days that this user can
         // run an ad
         $this->setMaxDays();
     }
 
 
     /**
-    *   Read one user from the database
-    *
-    *   @param  integer $uid    Optional User ID.  Current ID is used if zero.
-    *   @return boolean     True if record found, False if not
-    */
+     * Read one user from the database.
+     *
+     * @param   integer $uid    Optional User ID.  Current ID is used if zero.
+     * @return  boolean     True if record found, False if not
+     */
     public function ReadOne($uid = 0)
     {
         global $_TABLES;
@@ -167,8 +179,8 @@ class UserInfo
 
 
     /**
-    *   Save the current values to the database.
-    */
+     * Save the current values to the database.
+     */
     public function Save()
     {
         global $_TABLES;
@@ -203,8 +215,10 @@ class UserInfo
 
 
     /**
-    *   Delete the current user info record from the database
-    */
+     * Delete a specific user's info from the database.
+     *
+     * @param   integer $uid    ID of user being deleted
+     */
     public static function Delete($uid)
     {
         global $_TABLES;
@@ -215,11 +229,11 @@ class UserInfo
 
 
     /**
-    *   Creates the edit form
-    *
-    *   @param  string  $type   Type of form, plugin or glFusion acct settings
-    *   @return string          HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   string  $type   Type of form, plugin or glFusion acct settings
+     * @return  string          HTML for edit form
+     */
     public function showForm($type = 'advt')
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
@@ -252,12 +266,12 @@ class UserInfo
 
 
     /**
-    *   Update the max days balance by adding a given value
-    *   (positive or negative).
-    *
-    *   @param integer $value   Value to add to the current balance
-    *   @param integer $id      User ID to modify, empty to use the current one.
-    */
+     * Update the max days balance by adding a given value.
+     * Value may be positive or negative.
+     *
+     * @param   integer $value   Value to add to the current balance
+     * @param   integer $uid     User ID to modify, empty to use the current one.
+     */
     public function UpdateDaysBalance($value, $uid=0)
     {
         global $_TABLES;
@@ -287,8 +301,8 @@ class UserInfo
 
 
     /**
-     *  Sets the local variable for the maximum number of days for an ad.
-     *  This is used if ad purchasing or earning is enabled.
+     * Sets the local variable for the maximum number of days for an ad.
+     * This is used if ad purchasing or earning is enabled.
      */
     public function setMaxDays()
     {
@@ -315,12 +329,12 @@ class UserInfo
 
 
     /**
-    *   Perform privacy export of user fields.
-    *   Only exports fields containing data, and does not provide the
-    *   top-level wrapper tag.
-    *
-    *   @return string      XML-formatted user data
-    */
+     * Perform privacy export of user fields.
+     * Only exports fields containing data, and does not provide the
+     * top-level wrapper tag.
+     *
+     * @return  string      XML-formatted user data
+     */
     public function Export()
     {
         $retval = '';

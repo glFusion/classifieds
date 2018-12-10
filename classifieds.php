@@ -1,26 +1,26 @@
 <?php
 /**
-*   Table definitions and other static config variables.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.2.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Table definitions and other static config variables.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.2.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /**
-*   Global array of table names from glFusion
-*   @global array $_TABLES
-*/
+ * Global array of table names from glFusion.
+ * @global array $_TABLES
+ */
 global $_TABLES;
 
 /**
-*   Global table name prefix
-*   @global string $_DB_table_prefix
-*/
+ * Global table name prefix.
+ * @global string $_DB_table_prefix
+ */
 global $_DB_table_prefix;
 
 $_AD_table_prefix = $_DB_table_prefix;
@@ -55,9 +55,9 @@ $_CONF_ADVT['url'] = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
 $_CONF_ADVT['admin_url'] = $_CONF['site_admin_url'] . '/plugins/' . $_CONF_ADVT['pi_name'];
 
 /**
-*   Plugin-specific global array of category block colors
-*   @global array $CatListcolors
-*/
+ * Plugin-specific global array of category block colors.
+ * @global array $CatListcolors
+ */
 global $CatListcolors;
 $CatListcolors = array(
     // background, forground, header

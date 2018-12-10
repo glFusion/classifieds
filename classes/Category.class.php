@@ -1,31 +1,40 @@
 <?php
 /**
-*   Class for managing categories
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2012-2018 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.4.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class for managing ad categories
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2012-2018 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.4.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
-*   Class for category objects
-*/
+ * Class for category objects.
+ */
 class Category
 {
+    /** Internal properties accessed via `__set()` and `__get()`.
+     * @var array */
     private $properties;
+
+    /** Flag to indicate that this is a new record.
+     * @var boolean */
     public $isNew;
+
+    /** Path to category images.
+     * @var string */
     private $imgPath;
 
     /**
-    *   Constructor
-    *
-    *   @param  integer $catid  Optional category ID to load
-    */
+     * Constructor - Load default values and read a record.
+     *
+     * @param   integer $catid  Optional category ID to load
+     * @param   array|null  $data   Category record if already read
+     */
     public function __construct($catid = 0, $data = NULL)
     {
         global $_CONF_ADVT;
@@ -53,12 +62,11 @@ class Category
 
 
     /**
-    *   Magic setter function
-    *   Sets a property value
-    *
-    *   @param  string  $key    Property name
-    *   @param  mixed   $value  Property value
-    */
+     * Sets a property value.
+     *
+     * @param   string  $key    Property name
+     * @param   mixed   $value  Property value
+     */
     public function __set($key, $value)
     {
         switch ($key) {
@@ -90,12 +98,11 @@ class Category
 
 
     /**
-    *   Magic getter function
-    *   Returns the requested property's value, or NULL
-    *
-    *   @param  string  $key    Property Name
-    *   @return mixed       Property value, or NULL if not set
-    */
+     * Returns the requested property's value, or NULL.
+     *
+     * @param   string  $key    Property Name
+     * @return  mixed       Property value, or NULL if not set
+     */
     public function __get($key)
     {
         if (isset($this->properties[$key]))
@@ -106,10 +113,11 @@ class Category
 
 
     /**
-    *   Sets all variables to the matching values from the provided array
-    *
-    *   @param  array   $A      Array of values, from DB or $_POST
-    */
+     * Sets all variables to the matching values from the provided array.
+     *
+     * @param   array   $A      Array of values, from DB or $_POST
+     * @param   boolean $fromDB True if reading a DB record, False for $_POST
+     */
     public function SetVars($A, $fromDB = false)
     {
         if (!is_array($A)) return;
@@ -144,11 +152,11 @@ class Category
 
 
     /**
-    *   Read one record from the database
-    *
-    *   @param  integer $id     Optional ID.  Current ID is used if zero
-    *   @return boolean         True on success, False on failure
-    */
+     * Read one record from the database.
+     *
+     * @param   integer $id     Optional ID.  Current ID is used if zero
+     * @return  boolean         True on success, False on failure
+     */
     public function Read($id = 0)
     {
         global $_TABLES;
@@ -167,11 +175,11 @@ class Category
 
 
     /**
-    *   Save a new or updated category
-    *
-    *   @param  array   $A      Optional array of new values
-    *   @return string      Error message, empty string on success
-    */
+     * Save a new or updated category.
+     *
+     * @param   array   $A      Optional array of new values
+     * @return  string      Error message, empty string on success
+     */
     public function Save($A = array())
     {
         global $_TABLES, $_CONF_ADVT;
@@ -267,12 +275,12 @@ class Category
 
 
     /**
-    *   Deletes all checked categories.
-    *   Calls catDelete() to perform the actual deletion
-    *
-    *   @param  array   $var    Form variable containing array of IDs
-    *   @return string  Error message, if any
-    */
+     * Deletes all checked categories.
+     * Calls catDelete() to perform the actual deletion
+     *
+     * @param   array   $var    Form variable containing array of IDs
+     * @return  string  Error message, if any
+     */
     public static function DeleteMulti($var)
     {
         $display = '';
@@ -287,11 +295,11 @@ class Category
 
 
     /**
-    *  Delete a category, and all sub-categories, and all ads
-    *
-    *  @param  integer  $id     Category ID to delete
-    *  @return boolean          True on success, False on failure
-    */
+     * Delete a category, and all sub-categories, and all ads.
+     *
+     * @param   integer  $id     Category ID to delete
+     * @return  boolean          True on success, False on failure
+     */
     public static function Delete($id)
     {
         global $_TABLES, $_CONF_ADVT;
@@ -331,11 +339,11 @@ class Category
 
 
     /**
-    *   Delete a single category's icon
-    *   Deletes the icon from the filesystem, and updates the category table
-    *
-    *   @param  integer $cat_id     Category ID of image to delete
-    */
+     * Delete a single category's icon.
+     * Deletes the icon from the filesystem, and updates the category table.
+     *
+     * @param   integer $cat_id     Category ID of image to delete
+     */
     public static function DelImage($cat_id = 0)
     {
         global $_TABLES, $_CONF_ADVT;
@@ -356,12 +364,10 @@ class Category
 
 
     /**
-    *   Propagate a category's permissions to all sub-categories.
-    *   Called by catSave() if the admin selects "Propagate Permissions".
-    *   Recurses downward through the category table setting permissions of the
-    *   category specified by $id.  The actual category identified by $id is not
-    *   updated; that would be done in catSave().
-    */
+     * Propagate a category's permissions to all sub-categories.
+     * Called by Save() if the admin selects "Propagate Permissions".
+     * The current category is not updated; that would be done in Save().
+     */
     private function propagatePerms()
     {
         global $_TABLES;
@@ -387,13 +393,14 @@ class Category
 
 
     /**
-    *   Recursive function to propagate permissions from a category to all
-    *   sub-categories.
-    *
-    *   @deprecated
-    *   @param  integer $id     ID of top-level category
-    *   @param  array   $perms  Associative array of permissions to apply
-    */
+     * Recursive function to propagate permissions from a category to all
+     * sub-categories.
+     *
+     * @deprecated
+     * @param   integer $id     ID of top-level category
+     * @param   array   $perms  Permissions to set
+     * @param   array   $perms  Associative array of permissions to apply
+     */
     private static function X_propagatePerms($id, $perms)
     {
         global $_TABLES;
@@ -432,11 +439,11 @@ class Category
 
 
     /**
-    *   Create an edit form for a category
-    *
-    *   @param  int     $catid  Category ID, zero for a new entry
-    *   @return string      HTML for edit form
-    */
+     * Create an edit form for a category.
+     *
+     * @param   integer $cat_id Category ID, zero for a new entry
+     * @return  string      HTML for edit form
+     */
     public function Edit($cat_id = 0)
     {
         global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT, $LANG_ACCESS, $_USER;
@@ -496,16 +503,12 @@ class Category
 
 
     /**
-    *   Recurse through the category table building an option list
-    *   sorted by id.
-    *
-    *   @param integer  $sel        Category ID to be selected in list
-    *   @param integer  $root       Root category ID
-    *   @param string   $char       Indenting characters
-    *   @param string   $not        'NOT' to exclude $items, '' to include
-    *   @param string   $items      Optional comma-separated list of items to include or exclude
-    *   @return string              HTML option list, without <select> tags
-    */
+     * Recurse through the category table building an option list sorted by id.
+     *
+     * @param integer  $sel     Category ID to be selected in list
+     * @param integer  $self    Current category ID
+     * @return string           HTML option list, without <select> tags
+     */
     public static function buildSelection($sel=0, $self=0)
     {
         global $_TABLES;
@@ -583,14 +586,14 @@ class Category
 
 
     /**
-    *   Get the breadcrumbs for a catetory
-    *   Static function that can be passed a parent map or NULL
-    *   if a map hasn't been created yet.
-    *
-    *   @param  mixed   $map    Parent map array or NULL
-    *   @param  boolean $showlink   True to add links, False for text only
-    *   @return string          Breadcrumbs
-    */
+     * Get the breadcrumbs for a catetory.
+     * Static function that can be passed a parent map or NULL
+     * if a map hasn't been created yet.
+     *
+     * @param   integer $cat_id     Base category ID
+     * @param   boolean $showlink   True to add links, False for text only
+     * @return  string          Breadcrumbs
+     */
     public static function showBreadCrumbs($cat_id, $showlink=true)
     {
         global $_CONF_ADVT, $_TABLES;
@@ -632,14 +635,14 @@ class Category
 
 
     /**
-    *   Creates the breadcrumb string from the parent mapping.
-    *   Acts on the current category object
-    *
-    *   @uses   self::showBreadCrumbs()
-    *   @param  boolean $showlink   Link to the categories?
-    *   @param  boolean $raw        True to just get the json values
-    *   @return mixed       Parent array or HTML for breadcrumbs
-    */
+     * Creates the breadcrumb string from the parent mapping.
+     * Acts on the current category object
+     *
+     * @uses   self::showBreadCrumbs()
+     * @param  boolean $showlink   Link to the categories?
+     * @param  boolean $raw        True to just get the json values
+     * @return mixed       Parent array or HTML for breadcrumbs
+     */
     public function BreadCrumbs($showlink=true, $raw = false)
     {
         return self::showBreadCrumbs($this->cat_id, $showlink);
@@ -647,10 +650,10 @@ class Category
 
 
     /**
-    *   Creates the parent mapping for breadcrumbs when the category is saved
-    *
-    *   @return array       Array of parent category IDs and names
-    */
+     * Creates the parent mapping for breadcrumbs when the category is saved.
+     *
+     * @return  array   Array of parent category IDs and names
+     */
     public function MakeBreadcrumbs()
     {
         global $_TABLES, $LANG_ADVT;
@@ -683,12 +686,13 @@ class Category
 
 
     /**
-    *   Calls itself recursively to find all sub-categories.
-    *   Stores an array of category information in $subcats.
-    *
-    *   @param  integer $id     Top-level Category ID
-    *   @return array           Array of category objects
-    */
+     * Calls itself recursively to find all sub-categories.
+     * Stores an array of category information in $subcats.
+     *
+     * @param   integer $id     Top-level Category ID
+     * @param   integer $depth  Number of sub-category levels
+     * @return  array           Array of category objects
+     */
     public static function SubCats($id = 0, $depth = 1)
     {
         global $_TABLES, $LANG_ADVT;
@@ -737,13 +741,13 @@ class Category
 
 
     /**
-    *   Find the total number of ads for a category, including subcategories
-    *
-    *   @param  integer $cat_id     CategoryID
-    *   @param  boolean $current    True to count only non-expired ads
-    *   @param  boolean $sub        True to count ads in sub-categories
-    *   @return integer Total Ads
-    */
+     * Find the total number of ads for a category, including subcategories.
+     *
+     * @param   integer $cat_id     CategoryID
+     * @param   boolean $current    True to count only non-expired ads
+     * @param   boolean $sub        True to count ads in sub-categories
+     * @return  integer Total Ads
+     */
     public static function TotalAds($cat_id, $current = true, $sub = true)
     {
         global $_TABLES;
@@ -772,11 +776,11 @@ class Category
 
 
     /**
-    *   Determine if this category is associated with any ads.
-    *   Check both prod and submission tables
-    *
-    *   @return boolean     True if any ad uses this category, False if not
-    */
+     * Determine if this category is associated with any ads.
+     * Check both prod and submission tables
+     *
+     * @return  boolean     True if any ad uses this category, False if not
+     */
     public function isUsed()
     {
         global $_TABLES;
@@ -796,12 +800,12 @@ class Category
 
 
     /**
-    *   Check the current user's access to the current category
-    *
-    *   @uses   SEC_hasAccess()
-    *   @param  int     $required       Minimim required access level
-    *   @return boolean     True if the user meets the requirement, False if not.
-    */
+     * Check the current user's access to the current category.
+     *
+     * @uses    SEC_hasAccess()
+     * @param   integer $required       Minimim required access level
+     * @return  boolean     True if the user meets the requirement, False if not.
+     */
     public function checkAccess($required = 3)
     {
         global $_CONF_ADVT;
@@ -820,11 +824,11 @@ class Category
 
 
     /**
-    *   Check if the current user has read-write access to this category
-    *
-    *   @uses   self::checkAccess()
-    *   @return boolean     True if the user can edit, False if not
-    */
+     * Check if the current user has read-write access to this category.
+     *
+     * @uses    self::checkAccess()
+     * @return  boolean     True if the user can edit, False if not
+     */
     public function canEdit()
     {
         return $this->checkAccess(3);
@@ -832,11 +836,11 @@ class Category
 
 
     /**
-    *   Check if the current user has read access to this category
-    *
-    *   @uses   self::checkAccess()
-    *   @return boolean     True if the user can view, False if not
-    */
+     * Check if the current user has read access to this category.
+     *
+     * @uses    self::checkAccess()
+     * @return  boolean     True if the user can view, False if not
+     */
     public function canView()
     {
         return $this->checkAccess(2);
@@ -844,12 +848,13 @@ class Category
 
 
     /**
-    *   When no category is given, show a table of all categories
-    *   along with the count of ads for each.
-    *   Returns the results from the category
-    *   list function, chosen based on the display mode
-    *   @return string      HTML for category listing page
-    */
+     * When no category is given, show a table of all categories
+     * along with the count of ads for each.
+     * Returns the results from the category
+     * list function, chosen based on the display mode
+     *
+     * @return  string      HTML for category listing page
+     */
     public static function userList()
     {
         global $_CONF_ADVT;
@@ -868,11 +873,11 @@ class Category
 
 
     /**
-    *   Subscribe the current user to a specified category's notifications.
-    *
-    *   @param  integer $cat    Category ID to subscribe
-    *   @return boolean     True on success, False on failure
-    */
+     * Subscribe the current user to this category's notifications.
+     *
+     * @param   boolean $sub    True to subscribe to sub-categories also
+     * @return  boolean     True on success, False on failure
+     */
     public function Subscribe($sub = true)
     {
         global $_CONF_ADVT, $LANG_ADVT;
@@ -906,15 +911,15 @@ class Category
 
 
     /**
-    *   Returns the string corresponding to the $id parameter.
-    *   Designed to be used standalone; if this is an object,
-    *   we already have the description in a variable.
-    *   Uses a static variable to hold the descriptions since this can be
-    *   called many times for a list.
-    *
-    *   @param  integer $id     Database ID of the ad type
-    *   @return string          Ad Type Description
-    */
+     * Returns the string corresponding to the $id parameter.
+     * Designed to be used standalone; if this is an object,
+     * we already have the description in a variable.
+     * Uses a static variable to hold the descriptions since this can be
+     * called many times for a list.
+     *
+     * @param   integer $id     Database ID of the ad type
+     * @return  string          Ad Type Description
+     */
     public static function XX_GetDescription($id)
     {
         global $_TABLES;
@@ -929,11 +934,11 @@ class Category
 
 
     /**
-    *   Shortcut functions to get resized thumbnail URLs.
-    *
-    *   @param  string  $filename   Filename to view
-    *   @return string      URL to the resized image
-    */
+     * Shortcut functions to get resized thumbnail URLs.
+     *
+     * @param   string  $filename   Filename to view
+     * @return  string      URL to the resized image
+     */
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
@@ -943,11 +948,11 @@ class Category
 
 
     /**
-    *   Reset all category permissions to a single group/perm setting
-    *
-    *   @param  integer $gid    Group ID to set
-    *   @param  array   $perms  Permissions to set
-    */
+     * Reset all category permissions to a single group/perm setting.
+     *
+     * @param   integer $gid    Group ID to set
+     * @param   array   $perms  Permissions to set
+     */
     public static function ResetPerms($gid, $perms)
     {
         global $_TABLES;
@@ -966,11 +971,12 @@ class Category
 
 
     /**
-    *   Read all the categories into a static array.
-    *
-    *   @param  integer $root   Root category ID
-    *   @return array           Array of category objects
-    */
+     * Read all the categories into a static array.
+     *
+     * @param   integer $root   Root category ID
+     * @param   string  $prefix Prefix to prepend to sub-category display names
+     * @return  array           Array of category objects
+     */
     public static function getTree($root=0, $prefix='&nbsp;')
     {
         global $_TABLES;
@@ -1002,12 +1008,12 @@ class Category
 
 
     /**
-    *   Get a category and all its children
-    *
-    *   @param  integer $root   Root category ID, empty to start with Root
-    *   @param  string  $prefix String to prepend to child category display names
-    *   @return array           Array of categrory objects
-    */
+     * Get a category and all its children.
+     *
+     * @param   integer $root   Root category ID, empty to start with Root
+     * @param   string  $prefix String to prepend to child category display names
+     * @return  array           Array of categrory objects
+     */
     public static function XgetTree($root = NULL, $prefix = '-')
     {
         if (empty($root)) $root = 1;
@@ -1024,11 +1030,11 @@ class Category
 
 
     /**
-    *   Given a child category ID, get the complete path back to the Root
-    *
-    *   @param  integer $child  Child category ID
-    *   @return array           Array of category objects starting at the root
-    */
+     * Given a child category ID, get the complete path back to the Root.
+     *
+     * @param   integer $child  Child category ID
+     * @return  array           Array of category objects starting at the root
+     */
     public static function getPath($child)
     {
         global $_TABLES;
@@ -1049,12 +1055,12 @@ class Category
 
 
     /**
-    *   Rebuild the MPT tree starting at a given parent and "left" value
-    *
-    *   @param  integer $parent     Starting category ID
-    *   @param  integer $left       Left value of the given category
-    *   @return integer         New Right value (only when called recursively)
-    */
+     * Rebuild the MPT tree starting at a given parent and "left" value.
+     *
+     * @param  integer $parent     Starting category ID
+     * @param  integer $left       Left value of the given category
+     * @return integer         New Right value (only when called recursively)
+     */
     public static function rebuildTree($parent, $left)
     {
         global $_TABLES;
@@ -1087,11 +1093,11 @@ class Category
 
 
     /**
-    *   Get the ID of the immediate parent for a given category.
-    *
-    *   @param  integer $cat_id     Current category ID
-    *   @return integer     ID of parent category.
-    */
+     * Get the ID of the immediate parent for a given category.
+     *
+     * @param   integer $cat_id     Current category ID
+     * @return  integer     ID of parent category.
+     */
     public static function getParent($cat_id)
     {
         global $_TABLES;

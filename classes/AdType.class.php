@@ -1,39 +1,39 @@
 <?php
 /**
-*   Class to manage ad types
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage ad types.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
-*   Class for ad type
-*   @package classifieds
-*/
+ * Class for ad type.
+ * @package classifieds
+ */
 class AdType
 {
-    /** Properties array
-     *  @var array */
+    /** Properties array.
+     * @var array */
     var $properties;
 
     /** Error string or value, to be accessible by the calling routines.
-     *  @var mixed */
+     * @var mixed */
     public  $Error;
 
 
     /**
-    *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param integer $id Optional type ID
-    */
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   integer $id Optional type ID
+     */
     public function __construct($id=0)
     {
         $id = (int)$id;
@@ -47,6 +47,13 @@ class AdType
         }
     }
 
+
+    /**
+     * Set the value of an internal property.
+     *
+     * @param   string  $key    Property name
+     * @param   mixed   $value  Value to set
+     */
     public function __set($key, $value)
     {
         switch ($key) {
@@ -62,6 +69,13 @@ class AdType
         }
     }
 
+
+    /**
+     * Get the value of a property, or NULL if not set.
+     *
+     * @param   string  $key    Name of property
+     * @return  mixed   $value  Value of property, NULL if not set
+     */
     public function __get($key)
     {
         if (isset($this->properties[$key]))
@@ -72,10 +86,10 @@ class AdType
 
 
     /**
-    *   Sets all variables to the matching values from $rows
-    *
-    *   @param array $row Array of values, from DB or $_POST
-    */
+     * Sets all variables to the matching values from $rows.
+     *
+     * @param   array   $row    Array of values, from DB or $_POST
+     */
     public function SetVars($row)
     {
         if (!is_array($row)) return;
@@ -87,10 +101,10 @@ class AdType
 
 
     /**
-    *   Read one as type from the database and populate the local values.
-    *
-    *   @param integer $id Optional ID.  Current ID is used if zero
-    */
+     * Read one as type from the database and populate the local values.
+     *
+     * @param   integer $id     Optional ID.  Current ID is used if zero
+     */
     public function ReadOne($id = 0)
     {
         global $_TABLES;
@@ -110,8 +124,8 @@ class AdType
 
 
     /**
-    *   Delete the curret cls/div record from the database
-    */
+     * Delete the curret cls/div record from the database.
+     */
     public function Delete()
     {
         global $_TABLES;
@@ -124,11 +138,11 @@ class AdType
 
 
     /**
-    *   Adds the current values to the databae as a new record
-    *
-    *   @param  array   $vals   Optional array of values to set
-    *   @return boolean     True on success, False on error
-    */
+     * Adds the current values to the databae as a new record.
+     *
+     * @param   array   $vals   Optional array of values to set
+     * @return  boolean     True on success, False on error
+     */
     public function Save($vals = NULL)
     {
         global $_TABLES;
@@ -157,10 +171,10 @@ class AdType
 
 
     /**
-    *   Determines if the current values are valid.
-    *
-    *   @return boolean True if ok, False otherwise.
-    */
+     * Determines if the current values are valid.
+     *
+     * @return  boolean     True if ok, False otherwise.
+     */
     public function isValidRecord()
     {
         if ($this->description == '') {
@@ -172,11 +186,11 @@ class AdType
 
 
     /**
-    *   Creates the edit form
-    *
-    *   @param  integer $id Optional ID, current record used if zero
-    *   @return string      HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   integer $id Optional ID, current record used if zero
+     * @return  string      HTML for edit form
+     */
     public function showForm($id = 0)
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $LANG_ADMIN;
@@ -212,12 +226,12 @@ class AdType
 
 
     /**
-    *   Creates a dropdown selection for the specified list, with the
-    *   record corresponding to $sel selected.
-    *
-    *   @param  integer $sel    Optional item ID to select
-    *   @return string      HTML for selection dropdown
-    */
+     * Creates a dropdown selection for the specified list.
+     * Pre-selects the specified record.
+     *
+     * @param   integer $sel    Optional item ID to select
+     * @return  string      HTML for selection dropdown
+     */
     public static function makeSelection($sel=0)
     {
         global $_TABLES;
@@ -228,12 +242,12 @@ class AdType
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @param  integer     $oldval Original value to change
-    *   @param  integer     $id     ID number of element to modify
-    *   @return integer     New value (old value if failed)
-    */
+     * Sets the "enabled" field to the specified value.
+     *
+     * @param   integer $oldval Original value to change
+     * @param   integer $id     ID number of element to modify
+     * @return  integer     New value (old value if failed)
+     */
     public static function toggleEnabled($oldval, $id=0)
     {
         global $_TABLES;
@@ -256,10 +270,10 @@ class AdType
 
 
     /**
-    *   Determine if this ad type is used by any ads in the database.
-    *
-    *   @return boolean True if used, False if not
-    */
+     * Determine if this ad type is used by any ads in the database.
+     *
+     * @return  boolean     True if used, False if not
+     */
     public function isUsed()
     {
         global $_TABLES;
@@ -273,15 +287,15 @@ class AdType
 
 
     /**
-    *   Returns the string corresponding to the $id parameter.
-    *   Designed to be used standalone; if this is an object,
-    *   we already have the description in a variable.
-    *   Uses a static variable to hold the descriptions since this can
-    *   be called many times for an ad listing.
-    *
-    *   @param  integer $id     Database ID of the ad type
-    *   @return string          Ad Type Description
-    */
+     * Returns the string corresponding to the $id parameter.
+     * Designed to be used standalone; if this is an object,
+     * we already have the description in a variable.
+     * Uses a static variable to hold the descriptions since this can
+     * be called many times for an ad listing.
+     *
+     * @param  integer $id     Database ID of the ad type
+     * @return string          Ad Type Description
+     */
     public static function getDescription($id)
     {
         global $_TABLES;

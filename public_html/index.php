@@ -1,15 +1,15 @@
 <?php
 /**
-*   Public entry point for the Classifieds plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.2.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Public entry point for the Classifieds plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.2.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';
@@ -243,14 +243,14 @@ exit;
 
 
 /**
-*   Get the fields for the ad listing.
-*
-*   @param  string   $fieldname     Name of the field
-*   @param  string   $fieldvalue    Value to be displayed
-*   @param  array    $A             Associative array of all values available
-*   @param  array    $icon_arr      Array of icons available for display
-*   @return string                  Complete HTML to display the field
-*/
+ * Get the fields for the ad listing.
+ *
+ * @param   string   $fieldname     Name of the field
+ * @param   string   $fieldvalue    Value to be displayed
+ * @param   array    $A             Associative array of all values available
+ * @param   array    $icon_arr      Array of icons available for display
+ * @return  string                  Complete HTML to display the field
+ */
 function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT;
@@ -327,9 +327,10 @@ function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Create admin list of Ad Types
-*   @return string  HTML for admin list
-*/
+ * Create admin list of Ad Types.
+ *
+ * @return  string  HTML for admin list
+ */
 function CLASSIFIEDS_ManageAds()
 {
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, $_CONF_ADVT,

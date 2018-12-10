@@ -1,18 +1,19 @@
 <?php
 /**
-*   Admin index file.  Dispatch requests to other files
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Entry point for Classifieds administrative functions.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
-/** Import core glFusion libraries */
+/** Import core glFusion libraries. */
 require_once '../../../lib-common.php';
+/** Import core authentication functions. */
 require_once '../../auth.inc.php';
 
 // If plugin is installed but not enabled, display an error and exit gracefully
@@ -33,10 +34,12 @@ if (!SEC_hasRights('classifieds.admin')) {
 $admin_mode = '';
 
 /**
-*   Create the admin menu at the top of the list and form pages.
-*
-*   @return string      HTML for admin menu section
-*/
+ * Create the admin menu at the top of the list and form pages.
+ *
+ * @param   string  $mode       View mode
+ * @param   string  $help_text  Additional help text to show
+ * @return  string      HTML for admin menu section
+ */
 function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
 {
     global $_CONF, $_CONF_ADVT, $LANG_ADVT, $LANG01;

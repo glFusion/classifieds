@@ -1,36 +1,57 @@
 <?php
 /**
-*   Class to manage ad types
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage classified ads.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
-*   Class for ad type
-*   @package classifieds
-*/
+ * Class for ad objects
+ * @package classifieds
+ */
 class Ad
 {
     /** Error string or value, to be accessible by the calling routines.
-     *  @var mixed */
+     * @var mixed */
     public $Error;
-    public $isNew;
-    public $Cat;    // Category object
-    public $Type;   // Type object
 
+    /** Flag to indicate that this is a new record.
+     * @var boolean */
+    public $isNew;
+
+    /** Related category object.
+     * @var object */
+    public $Cat;
+
+    /** Ad Type object.
+     * @var object */
+    public $Type;
+
+    /** Internal properties accessed via `__set()` and `__get()`.
+     * @var array */
     private $properties;
+
+    /** Database table name, either production or submissions.
+     * @var string */
     private $table;
+
+    /** Flag to indicate administrative access.
+     * @var boolean */
     private $isAdmin;
+
+    /** Tag to be part of all cache key names.
+     * @var string */
     private static $tag = 'ad_';
 
-    // Database fields
+    /** Database field to type mappings.
+     * @var array */
     private $fields = array(
         'ad_id' => 'string',
         'cat_id' => 'int',
@@ -51,13 +72,13 @@ class Ad
 
 
     /**
-    *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param  mixed   $id     Optional Ad ID or array of values
-    *   @param  string  $table  Table Name, default to production
-    */
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   mixed   $id     Optional Ad ID or array of values
+     * @param   string  $table  Table Name, default to production
+     */
     public function __construct($id='', $table='ad_ads')
     {
         $this->properties = array();
@@ -81,11 +102,11 @@ class Ad
 
 
     /**
-    *   Setter function
-    *
-    *   @param  string  $key    Name of variable to set
-    *   @param  mixed   $value  Value to set for variable
-    */
+     * Set the value of a property.
+     *
+     * @param   string  $key    Name of variable to set
+     * @param   mixed   $value  Value to set for variable
+     */
     public function __set($key, $value)
     {
         switch($key) {
@@ -128,11 +149,11 @@ class Ad
 
 
     /**
-    *   Getter function
-    *
-    *   @param  string  $key    Name of value to retrieve
-    *   @return mixed           Value for variable or NULL if undefined
-    */
+     * Get the value of a property, NULL if not set.
+     *
+     * @param   string  $key    Name of value to retrieve
+     * @return  mixed           Value for variable or NULL if undefined
+     */
     public function __get($key)
     {
         if (isset($this->properties[$key]))
@@ -143,9 +164,10 @@ class Ad
 
 
     /**
-    *   Sets all variables to the matching values from $rows
-    *   @param array $row Array of values, from DB or $_POST
-    */
+     * Sets all variables to the matching values from $rows.
+     *
+     * @param   array   $row    Array of values, from DB or $_POST
+     */
     public function setVars($row)
     {
         if (!is_array($row)) return;
@@ -160,10 +182,10 @@ class Ad
 
 
     /**
-    *  Read one ad from the database and populate the local values.
-    *
-    *  @param integer $id Optional ID.  Current ID is used if empty
-    */
+     * Read one ad from the database and populate the local values.
+     *
+     * @param   integer $id     Optional Ad ID. Current ID is used if empty.
+     */
     public function Read($id = '')
     {
         if ($id != '') {
@@ -183,12 +205,12 @@ class Ad
 
 
     /**
-    *   Get an instance of an ad.
-    *   Retrieves and caches ads.
-    *
-    *   @param  mixed   $id     Ad ID, or array of ad values
-    *   @return object      Ad object
-    */
+     * Get an instance of an ad.
+     * Retrieves and caches ad records.
+     *
+     * @param   mixed   $id     Ad ID, or array of ad values
+     * @return  object      Ad object
+     */
     public static function getInstance($id)
     {
         static $ads = array();
@@ -205,11 +227,11 @@ class Ad
 
 
     /**
-    *   Save the current values to the database.
-    *
-    *   @param  array   $A      Optional array of values, e.g. from $_POST
-    *   @return boolean         True on success, False on failure
-    */
+     * Save the current ad record to the database.
+     *
+     * @param   array   $A  Optional array of values, e.g. from $_POST
+     * @return  boolean     True on success, False on failure
+     */
     public function Save($A = array())
     {
         global $_CONF, $_CONF_ADVT;
@@ -291,12 +313,10 @@ class Ad
 
 
     /**
-    *   Duplicate an ad
-    *   Creates a new ad and image records based on the current ad.
-    *   image records.
-    *
-    *   @return string  ID of new ad
-    */
+     * Creates new ad and image records based on the current ad.
+     *
+     * @return string  ID of new ad
+     */
     public function Duplicate()
     {
         global $_TABLES;
@@ -330,12 +350,12 @@ class Ad
 
 
     /**
-    *   Delete the current ad record from the database
-    *
-    *   @param  string  $ad_id  ID of ad to delete
-    *   @param  string  $table  Table, either submission or prod
-    *   @return boolean         True on success, False on failure
-    */
+     * Delete the current ad record from the database.
+     *
+     * @param   string  $ad_id  ID of ad to delete
+     * @param   string  $table  Table, either submission or prod
+     * @return  boolean         True on success, False on failure
+     */
     public static function Delete($ad_id, $table = 'ad_ads')
     {
         global $_TABLES, $_CONF_ADVT;
@@ -366,10 +386,10 @@ class Ad
 
 
     /**
-    *   Determines if the current values are valid.
-    *
-    *   @return boolean True if ok, False otherwise.
-    */
+     * Determines if the current values are valid.
+     *
+     * @return  boolean     True if ok, False otherwise.
+     */
     public function isValidRecord()
     {
         if ($this->subject == '' ||
@@ -382,11 +402,11 @@ class Ad
 
 
     /**
-    *   Creates the edit form
-    *
-    *   @param  string  $id Optional Ad ID, current record used if zero
-    *   @return string      HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   string  $id Optional Ad ID, current record used if zero
+     * @return  string      HTML for edit form
+     */
     public function Edit($id = '')
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
@@ -501,10 +521,10 @@ class Ad
 
 
     /**
-    *   Display the ad
-    *
-    *   @return string  HTML for the ad display
-    */
+     * Display the ad.
+     *
+     * @return  string  HTML for the ad display
+     */
     public function Detail()
     {
         global $_USER, $_TABLES, $_CONF, $LANG_ADVT, $_CONF_ADVT;
@@ -701,12 +721,12 @@ class Ad
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @param  integer $newval New value to set (1 or 0)
-    *   @param  integer $id     ID number of element to modify
-    *   @return integer New value (old value if failed)
-    */
+     * Sets the "enabled" field to the specified value.
+     *
+     * @param   integer $newval New value to set (1 or 0)
+     * @param   integer $id     ID number of element to modify
+     * @return  integer     New value (old value if failed)
+     */
     public function toggleEnabled($newval, $id=0)
     {
         global $_TABLES;
@@ -736,9 +756,11 @@ class Ad
 
 
     /**
-    *   Public access to set the table used for saving/reading
-    *   Called from savesubmission in functions.inc
-    */
+     * Public access to set the table used for saving/reading.
+     * Called from savesubmission in functions.inc.
+     *
+     * @param   string  $table  Table name
+     */
     public function setTable($table)
     {
         global $_TABLES;
@@ -747,10 +769,10 @@ class Ad
 
 
     /**
-    *   Helper function to check if the current object is a submission.
-    *
-    *   @return boolean     True if this is a submission, False if it is prod
-    */
+     * Helper function to check if the current object is a submission.
+     *
+     * @return  boolean     True if this is a submission, False if it is prod
+     */
     public function isSubmission()
     {
         global $_TABLES;
@@ -759,10 +781,13 @@ class Ad
 
 
     /**
-    *   Calculate the new number of days. For an existing ad start from the
-    *   date added, if new then start from now.  If the ad has already expired,
-    *   then $moredays will be added to now() rather than exp_date.
-    */
+     * Calculate the expiration date when a number of days is added.
+     * If the ad has already expired, then $moredays will be added
+     * to now() rather than exp_date.
+     *
+     * @param   integer $moredays   Number of days to add
+     * @return  void    No return, the exp_date property is updated
+     */
     private function _calcExpDate($moredays = 0)
     {
         global $_CONF_ADVT;
@@ -795,12 +820,12 @@ class Ad
 
 
     /**
-    *   Return the max number of days that may be added to an ad.
-    *   Considers the configured maximum runtime and the time the ad
-    *   has already run.
-    *
-    *   @return integer     Max number of days that can be added
-    */
+     * Return the max number of days that may be added to an ad.
+     * Considers the configured maximum runtime and the time the ad
+     * has already run.
+     *
+     * @return  integer     Max number of days that can be added
+     */
     public function calcMaxAddDays()
     {
         global $_CONF_ADVT;
@@ -818,11 +843,11 @@ class Ad
 
 
     /**
-    *  Returns the <option></option> portion to be used
-    *  within a <select></select> block to choose users from a dropdown list
-    *  @param  string  $sel    ID of selected value
-    *  @return string          HTML output containing options
-    */
+     * Returns the options for a selection list of users.
+     *
+     * @param   string  $selId  ID of selected value
+     * @return  string          HTML output containing options
+     */
     public static function userDropdown($selId = '')
     {
         global $_TABLES;
@@ -843,8 +868,8 @@ class Ad
 
 
     /**
-    *   Update the comment counter
-    */
+     * Update the comment counter when a comment is added.
+     */
     public function updateComments()
     {
         $sql = "UPDATE {$this->table}
@@ -855,8 +880,8 @@ class Ad
 
 
     /**
-    *   Update the ad hit counter
-    */
+     * Update the ad hit counter when the ad is viewed.
+     */
     public function updateHits()
     {
         // Increment the views counter
@@ -868,12 +893,12 @@ class Ad
 
 
     /**
-    *   Updates the ad with a new expiration date.  $days (in seconds)
-    *   is added to the original expiration date.
-    *
-    *   @param  integer  $days   Number of days to add
-    *   @return integer     New maximum
-    */
+     * Updates the ad with a new expiration date.
+     * $days (in seconds) is added to the original expiration date.
+     *
+     * @param   integer  $days   Number of days to add
+     * @return  integer     New maximum
+     */
     public function addDays($days = 0)
     {
         global $_USER, $_CONF, $_CONF_ADVT, $_TABLES;
@@ -900,10 +925,10 @@ class Ad
 
 
     /**
-    *   Check if the current user can edit this ad.
-    *
-    *   @return boolean     True if access allows edit, False if not
-    */
+     * Check if the current user can edit this ad.
+     *
+     * @return  boolean     True if access allows edit, False if not
+     */
     public function canEdit()
     {
         global $_CONF_ADVT, $_USER;
@@ -917,13 +942,13 @@ class Ad
 
 
     /**
-    *   Check if the current user can view this ad.
-    *   Users can always view their own ads, and those under categories
-    *   to which they have read access
-    *
-    *   @uses   Category::canView()
-    *   @return boolean     True if access allows viewing, False if not
-    */
+     * Check if the current user can view this ad.
+     * Users can always view their own ads, and those under categories
+     * to which they have read access
+     *
+     * @uses    Category::canView()
+     * @return  boolean     True if access allows viewing, False if not
+     */
     public function canView()
     {
         global $_USER;
@@ -939,13 +964,13 @@ class Ad
 
 
     /**
-    *   Get an array of popular ads.
-    *   Returns up to the top X ads (default 4)
-    *   Requires at least 2 views to be considered.
-    *
-    *   @param  int     $num    Max number of ads to get
-    *   @return array       Array of ad details
-    */
+     * Get an array of popular ads.
+     * Returns up to the top X ads (default 4).
+     * Requires at least 2 views to be considered.
+     *
+     * @param   integer $num    Max number of ads to get
+     * @return  array       Array of ad details
+     */
     public static function GetHotAds($num = 4)
     {
         global $_TABLES, $_USER;
@@ -976,11 +1001,11 @@ class Ad
 
 
     /**
-    *   Get the ad immediately next to this ad within the same category.
-    *
-    *   @param  string  $dir    Either 'prev' or 'next'
-    *   @return string      ID of neighboring ad
-    */
+     * Get the ad immediately next to this ad within the same category.
+     *
+     * @param   string  $dir    Either 'prev' or 'next'
+     * @return  string      ID of neighboring ad
+     */
     public function GetNeighbor($dir = 'prev')
     {
         global $_TABLES, $_USER;
@@ -1017,13 +1042,13 @@ class Ad
 
 
     /**
-    *   Update the date that the ad was added.
-    *   Used to change the date upon approval, so the add will run the
-    *   entire allowed number of days.
-    *
-    *   @param  integer $id     ID of ad to update
-    *   @param  integer $ts     Unix timestamp to set, default is time()
-    */
+     * Update the date that the ad was added.
+     * Used to change the date upon approval, so the add will run the
+     * entire allowed number of days.
+     *
+     * @param   integer $id     ID of ad to update
+     * @param   integer $ts     Unix timestamp to set, default is time()
+     */
     public static function setAddDate($id, $ts = NULL)
     {
         global $_TABLES;

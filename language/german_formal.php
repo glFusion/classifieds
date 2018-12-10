@@ -1,16 +1,21 @@
 <?php
 /**
-*   English language strings for the Classifieds plugin for glFusion
-*   @author     Lee Garner <lee@leegarner.com>
-*   @modified   Siegfried Gutschi <sigi AT modellbaukalender DOT info> (Jän 2018)
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.0.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Language strings for the Classifieds plugin for glFusion.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @modified    Siegfried Gutschi <sigi AT modellbaukalender DOT info> (Jan 2018)
+ * @copyright   Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.0.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
+/**
+ * Language string array.
+ * @global array
+ * */
 $LANG_ADVT = array (
 'plugin'                => 'Plugin',
 'access_denied'         => 'Zugriff verweigert',
@@ -220,9 +225,9 @@ $LANG_ADVT = array (
 'here'                  => 'hier',
 'to_change_it'          => 'zu ändern.',
 'ad_types' => array(
-    // Don't remove number zero, it's used as a fallback in case any 
+    // Don't remove number zero, it's used as a fallback in case any
     // others have been removed.  'enabled'=>0 keeps it out of the possible
-    // selections.  Generally you should disable or modify these types, not 
+    // selections.  Generally you should disable or modify these types, not
     // remove them.
       0 => array('name' => 'Verschiedenes', 'enabled'  => 0),
       1 => array('name' => 'Zum Verkauf', 'enabled'       => 1),

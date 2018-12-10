@@ -1,15 +1,16 @@
 <?php
 /**
-*   English language strings for the Classifieds plugin for glFusion
-*   @author     Lee Garner <lee@leegarner.com>
-*   @modified   Siegfried Gutschi <sigi AT modellbaukalender DOT info> (Jän 2018)
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.0.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * English language strings for the Classifieds plugin for glFusion.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @modified    Siegfried Gutschi <sigi AT modellbaukalender DOT info> (Jan 2018)
+ * @copyright   Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.0.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 $LANG_ADVT = array (
 'plugin'                => 'Plugin',

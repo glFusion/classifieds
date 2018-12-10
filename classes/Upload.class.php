@@ -1,46 +1,46 @@
 <?php
 /**
-*   Class to handle uploads
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    0.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle uploads.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     0.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
-*   Image-handling class
-*   @package classifieds
-*/
+ * Image-handling class/
+ * @package classifieds
+ */
 class Upload extends \upload
 {
-    /** Path to actual image (without filename)
-     *  @var string */
+    /** Path to actual image (without filename).
+     * @var string */
     var $pathImage;
 
-    /** ID of the current ad
-     *  @var string */
+    /** ID of the current ad.
+     * @var string */
     var $ad_id;
 
-    /** Mime-type of image.  Just to save the image library a little work
-    *   @var string */
+    /** Mime-type of image. Just to save the image library a little work.
+    * @var string */
     var $mime_type;
 
-    /** Indicate that we actually have one or more files to upload
-     *  @var boolean */
+    /** Indicate that we actually have one or more files to upload.
+     * @var boolean */
     public $havefiles;
 
 
     /**
-    *   Constructor
-    *
-    *   @param  string  $ad_id      ID of ad associated with this image
-    *   @param  string  $varname    Form variable name, default 'photo'
-    */
+     * Constructor.
+     *
+     * @param   string  $ad_id      ID of ad associated with this image
+     * @param   string  $varname    Form variable name, default 'photo'
+     */
     public function __construct($ad_id, $varname='photo')
     {
         global $_CONF_ADVT, $_CONF;
@@ -83,10 +83,10 @@ class Upload extends \upload
 
 
     /**
-    *   Perform the upload.
-    *   Make sure we can upload the files and create thumbnails before
-    *   adding the image to the database.
-    */
+     * Perform the upload.
+     * Make sure we can upload the files and create thumbnails before
+     * adding the image to the database.
+     */
     public function uploadFiles()
     {
         global $_TABLES;
@@ -113,11 +113,11 @@ class Upload extends \upload
 
 
     /**
-    *   Handles the physical file upload and storage.
-    *   If the image isn't validated, the upload doesn't happen.
-    *
-    *   @param array $file $_FILES array
-    */
+     * Handles the physical file upload and storage.
+     * If the image isn't validated, the upload doesn't happen.
+     *
+     * @param   array   $file   $_FILES array
+     */
     public function Upload($file)
     {
         global $LANG_PHOTO, $_CONF_ADVT;
@@ -139,11 +139,11 @@ class Upload extends \upload
 
 
     /**
-    *   Validate the uploaded image, checking for size constraints and other errors
-    *
-    *   @param array $file $_FILES array
-    *   @return boolean True if valid, False otherwise
-    */
+     * Validate the uploaded image, checking for size constraints and other errors.
+     *
+     * @param   array   $file   $_FILES array
+     * @return  boolean     True if valid, False otherwise
+     */
     public function Validate($file)
     {
         global $LANG_PHOTO, $_CONF_ADVT;
@@ -181,7 +181,7 @@ class Upload extends \upload
             break;
         case UPLOAD_ERR_INI_SIZE:
         case UPLOAD_ERR_FORM_SIZE:
-            $msg = "<li>upload_too_big</li>\n"; 
+            $msg = "<li>upload_too_big</li>\n";
             break;
         case UPLOAD_ERR_NO_FILE:
             $msg = "<li>upload_missing_msg</li>\n";

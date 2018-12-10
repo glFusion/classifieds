@@ -1,14 +1,16 @@
 <?php
 /**
-*   @author     Mark R. Evans <mark@glfusion.org>
-*   @copyright  Copyright (c) 2008 Mark R. Evans <mark@glfusion.org>
-*   @copyright  Copyright (c) 2007-2008 Mystral-kk <geeklog@mystral-kk.net>
-*   @package    classifieds
-*   @version    0.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Sitemap driver for the Classifieds plugin.
+ *
+ * @author      Mark R. Evans <mark@glfusion.org>
+ * @copyright   Copyright (c) 2008 Mark R. Evans <mark@glfusion.org>
+ * @copyright   Copyright (c) 2007-2008 Mystral-kk <geeklog@mystral-kk.net>
+ * @package     classifieds
+ * @version     v0.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 // this file can't be used on its own
 if (!defined ('GVERSION')) {
@@ -16,18 +18,20 @@ if (!defined ('GVERSION')) {
 }
 
 /**
-*   Implementation of class DataproxyDriver for the Classifieds plugin
-*   @package classifieds
-*/
+ * Implementation of class DataproxyDriver for the Classifieds plugin.
+ * @package classifieds
+ */
 class sitemap_classifieds extends sitemap_base
 {
+    /** Driver Name.
+     * @var string */
     protected $name = 'classifieds';
 
     /**
-    *   Get the friendly display name
-    *
-    *   @return string      Friendly name
-    */
+     * Get the friendly display name.
+     *
+     * @return  string      Friendly name
+     */
     public function getDisplayName()
     {
         global $LANG_ADVT;
@@ -36,17 +40,19 @@ class sitemap_classifieds extends sitemap_base
 
 
     /**
-    * @param $pid int/string/boolean id of the parent category.  False means
-    *        the top category (with no parent)
-    * @return array(
-    *   'id'        => $id (string),
-    *   'pid'       => $pid (string: id of its parent)
-    *   'title'     => $title (string),
-    *   'uri'       => $uri (string),
-    *   'date'      => $date (int: Unix timestamp),
-    *   'image_uri' => $image_uri (string)
-    *  )
-    */
+     * Get the child categories under the given parent category ID
+     *
+     * @param $pid int/string/boolean id of the parent category.  False means
+     *        the top category (with no parent)
+     * @return array(
+     *   'id'        => $id (string),
+     *   'pid'       => $pid (string: id of its parent)
+     *   'title'     => $title (string),
+     *   'uri'       => $uri (string),
+     *   'date'      => $date (int: Unix timestamp),
+     *   'image_uri' => $image_uri (string)
+     *  )
+     */
     function getChildCategories($pid = false)
     {
         global $_CONF, $_TABLES, $_CONF_ADVT;
@@ -87,14 +93,11 @@ class sitemap_classifieds extends sitemap_base
 
 
     /**
-    * Returns an array of (
-    *   'id'        => $id (string),
-    *   'title'     => $title (string),
-    *   'uri'       => $uri (string),
-    *   'date'      => $date (int: Unix timestamp),
-    *   'image_uri' => $image_uri (string)
-    * )
-    */
+     * Get the items under a specified category ID.
+     *
+     * @param   $category   Category ID
+     * @return  array   Array(id, title, uri, timestamp, image_url)
+     */
     function getItems($category = false)
     {
         global $_CONF, $_TABLES, $_CONF_ADVT;

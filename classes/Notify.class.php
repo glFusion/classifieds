@@ -1,34 +1,34 @@
 <?php
 /**
-*   Class for managing notifications
-*   A collection of static functions to notify admins and users of
-*   ad submissions, approvals, expirations, etc.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class for managing notifications.
+ *
+ * @author     Lee Garner <lee@leegarner.com>
+ * @copyright  Copyright (c) 2016 Lee Garner <lee@leegarner.com>
+ * @package    classifieds
+ * @version    1.1.0
+ * @license    http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
-*   Class for notification functions
-*/
+ * Class for notification functions.
+ * A collection of static functions to notify admins and users of
+ * ad submissions, approvals, expirations, etc.
+ */
 class Notify
 {
     /**
-    *   Send an email to all subscribers of a category or its parent
-    *   when an ad is approved.
-    *
-    *   Email is only sent if the ad is approved and a notification
-    *   hasn't already been sent.
-    *
-    *   @param  object  $Ad     Ad object
-    *   @return boolean         True on notification, False on error
-    */
+     * Send an email to all subscribers of a category or its parent
+     * when an ad is approved.
+     *
+     * Email is only sent if the ad is approved and a notification
+     * hasn't already been sent.
+     *
+     * @param   object  $Ad     Ad object
+     * @return  boolean         True on notification, False on error
+     */
     public static function Subscribers($Ad)
     {
         global $_CONF_ADVT;
@@ -42,14 +42,14 @@ class Notify
 
 
     /**
-    *   Sends an email to the owner of an ad indicating acceptance or rejection.
-    *   Note: Rejection notification is not currently supported.
-    *   The language file is determined based on the owner's configured
-    *   language, defaulting to English.
-    *
-    *   @param  object  $Ad         Approved or rejected Ad object.
-    *   @param  boolean $approved   True if ad is approved, False if rejected
-    */
+     * Sends an email to the owner of an ad indicating acceptance or rejection.
+     * @todo: Rejection notification is not currently supported.
+     * The language file is determined based on the owner's configured
+     * language, defaulting to English.
+     *
+     * @param   object  $Ad         Approved or rejected Ad object.
+     * @param   boolean $approved   True if ad is approved, False if rejected
+     */
     public static function Approval($Ad, $approved=true)
     {
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT;
@@ -131,9 +131,9 @@ class Notify
 
 
     /**
-    *   Generates a notification email to all uses who have ads that
-    *   will expire within the set expiration period.
-    */
+     * Generates a notification email to all uses who have ads that
+     * will expire within the set expiration period.
+     */
     public static function Expiration()
     {
         global $_TABLES, $_CONF, $_CONF_ADVT;
@@ -214,10 +214,10 @@ class Notify
 
 
     /**
-    *   Notify the site adminstrator that an ad has been submitted.
-    *
-    *   @param  object  $Ad     Ad object
-    */
+     * Notify the site adminstrator that an ad has been submitted.
+     *
+     * @param   object  $Ad     Ad object
+     */
     public static function Submission($Ad)
     {
         global $_TABLES, $LANG_ADVT, $_CONF, $_CONF_ADVT;
@@ -291,10 +291,10 @@ class Notify
 
 
     /**
-    *   Notify the ad owner when a new comment is posted
-    *
-    *   @param  object  $Ad     Ad object
-    */
+     * Notify the ad owner when a new comment is posted.
+     *
+     * @param   object  $Ad     Ad object
+     */
     public static function Comment($Ad)
     {
         global $_TABLES, $LANG_ADVT, $_USER;
@@ -326,11 +326,11 @@ class Notify
 
 
     /**
-    *   Get all groups that are under the requested group
-    *
-    *   @param  integer $basegroup  Group ID where search starts
-    *   @return array   Array of group IDs
-    */
+     * Get all groups that are under the requested group.
+     *
+     * @param   integer $basegroup  Group ID where search starts
+     * @return  array   Array of group IDs
+     */
     private static function _getGroupList($basegroup)
     {
         global $_TABLES;
@@ -365,18 +365,19 @@ class Notify
 
 
     /**
-    *   Loads the language array. If $requested is an array, the first valid
-    *   language file is loaded. If not, the $requested language file is loaded.
-    *   If $requested doesn't refer to a vailid language, then $_CONF['language']
-    *   is assumed.
-    *
-    *   After loading the base language file, the same filename is loaded from
-    *   language/custom, if available. The admin can override language strings
-    *   by creating a language file in that directory.
-    *
-    *   @param  mixed   $requested  A single or array of language strings
-    *   @return array       $LANG_ADVT, the global language array for the plugin
-    */
+     * Loads the requested language array to send email in the recipient's language.
+     * If $requested is an array, the first valid language file is loaded.
+     * If not, the $requested language file is loaded.
+     * If $requested doesn't refer to a vailid language, then $_CONF['language']
+     * is assumed.
+     *
+     * After loading the base language file, the same filename is loaded from
+     * language/custom, if available. The admin can override language strings
+     * by creating a language file in that directory.
+     *
+     * @param   mixed   $requested  A single or array of language strings
+     * @return  array       $LANG_ADVT, the global language array for the plugin
+     */
     public static function loadLanguage($requested='')
     {
         global $_CONF, $_CONF_ADVT;

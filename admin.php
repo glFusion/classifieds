@@ -1,28 +1,29 @@
 <?php
 /**
-*   Create administration lists for ad elements
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.3.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Create administration lists for ad elements.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.3.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 // Include required admin functions
 USES_lib_admin();
 
 
 /**
-*   Ad type management - return the display version for a single field
-*   @param string   $fieldname  Name of the field
-*   @param string   $fieldvalue Value to be displayed
-*   @param array    $A          Associative array of all values available
-*   @param array    $icon_arr   Array of icons available for display
-*   @return string              Complete HTML to display the field
-*/
+ * Ad type management - return the display version for a single field.
+ *
+ * @param   string  $fieldname  Name of the field
+ * @param   string  $fieldvalue Value to be displayed
+ * @param   array   $A          Associative array of all values available
+ * @param   array   $icon_arr   Array of icons available for display
+ * @return  string              Complete HTML to display the field
+ */
 function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
@@ -104,10 +105,10 @@ function plugin_getListField_AdTypes($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Create admin list of Ad Types
-*
-*   @return string  HTML for admin list
-*/
+ * Create admin list of Ad Types.
+ *
+ * @return  string  HTML for admin list
+ */
 function CLASSIFIEDS_adminAdTypes()
 {
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, $_CONF_ADVT, $LANG_ADVT;
@@ -144,6 +145,15 @@ function CLASSIFIEDS_adminAdTypes()
 }
 
 
+/**
+ * Display field contents for the Category admin list.
+ *
+ * @param   string  $fieldname  Name of the field
+ * @param   string  $fieldvalue Value to be displayed
+ * @param   array   $A          Associative array of all values available
+ * @param   array   $icon_arr   Array of icons available for display
+ * @return  string              Complete HTML to display the field
+ */
 function plugin_getListField_AdCategories($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
@@ -207,10 +217,11 @@ function plugin_getListField_AdCategories($fieldname, $fieldvalue, $A, $icon_arr
 
 
 /**
-*   Create an admin list of categories.  Currently Unused
-*   @return string  HTML for admin list of categories
-*/
-function CLASSIFIEDS_adminCategories()
+ * Create an admin list of categories.  Currently Unused.
+ *
+ * @return  string  HTML for admin list of categories
+ */
+function XCLASSIFIEDS_adminCategories()
 {
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS,
             $_CONF_ADVT, $LANG_ADVT;
@@ -239,10 +250,10 @@ function CLASSIFIEDS_adminCategories()
 
 
 /**
-*   Uses lib-admin to list the forms definitions and allow updating.
-*
-*   @return string HTML for the list
-*/
+ * Uses lib-admin to list the forms definitions and allow updating.
+ *
+ * @return  string  HTML for the list
+ */
 function CLASSIFIEDS_adminAds()
 {
     global $_CONF, $_CONF_ADVT, $_TABLES, $LANG_ADMIN, $LANG_ADVT;
@@ -286,14 +297,14 @@ function CLASSIFIEDS_adminAds()
 
 
 /**
-*   Determine what to display in the admin list for each form.
-*
-*   @param  string  $fieldname  Name of the field, from database
-*   @param  mixed   $fieldvalue Value of the current field
-*   @param  array   $A          Array of all name/field pairs
-*   @param  array   $icon_arr   Array of system icons
-*   @return string              HTML for the field cell
-*/
+ * Determine what to display in the admin list for each form.
+ *
+ * @param   string  $fieldname  Name of the field, from database
+ * @param   mixed   $fieldvalue Value of the current field
+ * @param   array   $A          Array of all name/field pairs
+ * @param   array   $icon_arr   Array of system icons
+ * @return  string              HTML for the field cell
+ */
 function CLASSIFIEDS_getField_ad($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_CONF_ADVT, $LANG_ACCESS, $LANG_ADVT;

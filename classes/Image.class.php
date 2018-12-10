@@ -1,34 +1,36 @@
 <?php
 /**
-*   Class to handle images
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle images.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Classifieds;
 
 /**
- *  Image-handling class
- *  @package classifieds
+ * Image-handling class.
+ * @see Uploads for image file uploading functions.
+ * @package classifieds
  */
 class Image
 {
-    /** Path to actual image (without filename)
-     *  @var string */
+    /** Path to actual image (without filename).
+     * @var string */
     var $pathImage;
 
-    /** ID of the current ad
-     *  @var string */
+    /** ID of the current ad.
+     * @var string */
     var $ad_id;
 
     /**
-     *  Constructor
-     *  @param string $name Optional image filename
+     * Constructor.
+     *
+     * @param   integer $photo_id   ID of image record to read
      */
     public function __construct($photo_id)
     {
@@ -51,8 +53,8 @@ class Image
 
 
     /**
-    *   Delete an image from disk.
-    */
+     * Delete this image from disk.
+     */
     public function Delete()
     {
         global $_TABLES;
@@ -73,13 +75,13 @@ class Image
 
 
     /**
-    *   Function to retrieve ID and filename of all images.
-    *   Optional limit value can be used to get only one.
-    *
-    *   @param  string  $ad_id      Ad ID
-    *   @param  intger  $limit      Optional limit modifier
-    *   @return array       Array of id=>filename for images.
-    */
+     * Retrieve ID and filename of all images.
+     * Optional limit value can be used to get only one.
+     *
+     * @param   string  $ad_id      Ad ID
+     * @param   intger  $limit      Optional limit modifier
+     * @return  array       Array of id=>filename for images.
+     */
     public static function getAll($ad_id, $limit=0)
     {
         global $_TABLES;
@@ -100,11 +102,11 @@ class Image
 
 
     /**
-    *   Get the first image in the database for a given ad
-    *
-    *   @param  string  $ad_id      Ad ID
-    *   @return string              Filename of first image
-    */
+     * Get the first image in the database for a given ad.
+     *
+     * @param   string  $ad_id      Ad ID
+     * @return  string              Filename of first image
+     */
     public static function getFirst($ad_id)
     {
         $images = self::getAll($ad_id, 1);
@@ -118,11 +120,10 @@ class Image
 
 
     /**
-    *   Delets all photos related to the given ad from the disk
-    *   and the database.
-    *
-    *   @param  int     $ad_id  ID of ad for which photos are to be deleted
-    */
+     * Delets all photos related to the given ad from the disk and the database.
+     *
+     * @param   integer $ad_id  ID of ad for which photos are to be deleted
+     */
     public static function DeleteAll($ad_id)
     {
         global $_TABLES, $_CONF_ADVT;
@@ -137,18 +138,17 @@ class Image
         }
         // Delete all image records for this ad_id
         DB_delete($_TABLES['ad_photo'], 'ad_id', $ad_id);
-
         return 0;
     }
 
 
     /**
-    *   Get the number of records for this image.
-    *   Used to determine if an image file can be removed from disk.
-    *
-    *   @param  string  $filename   Image filename
-    *   @return integer     Number of records in database
-    */
+     * Get the number of records for this image.
+     * Used to determine if an image file can be removed from disk.
+     *
+     * @param   string  $filename   Image filename
+     * @return  integer     Number of records in database
+     */
     public static function UsedCount($filename)
     {
         global $_TABLES;
@@ -157,12 +157,12 @@ class Image
 
 
     /**
-    *   Shortcut function to get the URL to the display version of the image.
-    *   Used for the lightbox popup display.
-    *
-    *   @param  string  $filename   Image filename
-    *   @return string              URL to image sized for display
-    */
+     * Shortcut function to get the URL to the display version of the image.
+     * Used for the lightbox popup display.
+     *
+     * @param   string  $filename   Image filename
+     * @return  string              URL to image sized for display
+     */
     public static function dispUrl($filename)
     {
         global $_CONF_ADVT;
@@ -175,12 +175,12 @@ class Image
 
 
     /**
-    *   Shortcut function to get the URL to the vmall display image.
-    *   Used for the larger thumbnails on the ad detail page
-    *
-    *   @param  string  $filename   Image filename
-    *   @return string              URL to image sized for display
-    */
+     * Shortcut function to get the URL to the vmall display image.
+     * Used for the larger thumbnails on the ad detail page
+     *
+     * @param   string  $filename   Image filename
+     * @return  string              URL to image sized for display
+     */
     public static function smallUrl($filename)
     {
         global $_CONF_ADVT;
@@ -193,12 +193,12 @@ class Image
 
 
     /**
-    *   Shortcut functions to get resized thumbnail URLs.
-    *   Used for the small thumbnails on ad listings.
-    *
-    *   @param  string  $filename   Filename to view
-    *   @return string      URL to the resized image
-    */
+     * Shortcut functions to get resized thumbnail URLs.
+     * Used for the small thumbnails on ad listings.
+     *
+     * @param   string  $filename   Filename to view
+     * @return  string      URL to the resized image
+     */
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;

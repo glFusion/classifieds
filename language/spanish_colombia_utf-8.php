@@ -1,14 +1,15 @@
 <?php
 /**
-*   Sapnish (Colombia) language strings for the Classifieds plugin for glFusion
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.0.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Sapnish (Colombia) language strings for the Classifieds plugin for glFusion.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     1.0.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 $LANG_ADVT = array (
 'plugin'            => 'Extensión',
