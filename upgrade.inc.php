@@ -1,33 +1,32 @@
 <?php
 /**
-*   Upgrade routines for the Classifieds plugin
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Upgrade routines for the Classifieds plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined('GVERSION')) {
     die('This file can not be used on its own.');
 }
 
-// Required to get the ADVT_DEFAULTS config values
-global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT, $_DB_dbms;
+global $_CONF, $_CONF_ADVT;
 
-/** Include the default configuration values */
-require_once __DIR__ . '/install_defaults.php';
 /** Include the table creation strings */
-require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
+require_once __DIR__ . "/sql/mysql_install.php";
 
 /**
-*   Perform the upgrade starting at the current version
-*
-*   @return boolean     True on success, False on failure
-*/
-function classifieds_do_upgrade()
+ * Perform the upgrade starting at the current version.
+ *
+ * @param   boolean $dvlp   True to ignore errors for development update
+ * @return  boolean     True on success, False on failure
+ */
+function classifieds_do_upgrade($dvlp = false)
 {
     global $_CONF_ADVT, $_PLUGIN_INFO;
 
@@ -46,62 +45,62 @@ function classifieds_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.2')) {
         $current_ver = '0.2';
-        if (!classifieds_upgrade_0_2()) return false;
+        if (!classifieds_upgrade_0_2($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.2.2')) {
         $current_ver = '0.2.2';
-        if (!classifieds_upgrade_0_2_2()) return false;
+        if (!classifieds_upgrade_0_2_2(dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.2.3')) {
         $current_ver = '0.2.3';
-        if (!classifieds_upgrade_0_2_3()) return false;
+        if (!classifieds_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.3')) {
         $current_ver = '0.3';
-        if (!classifieds_upgrade_0_3()) return false;
+        if (!classifieds_upgrade_0_3($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.4')) {
         $current_ver = '0.4';
-        if (!classifieds_upgrade_0_4()) return false;
+        if (!classifieds_upgrade_0_4($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.1')) {
         $current_ver = '1.0.1';
-        if (!classifieds_upgrade_1_0_1()) return false;
+        if (!classifieds_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.2')) {
         $current_ver = '1.0.2';
-        if (!classifieds_upgrade_1_0_2()) return false;
+        if (!classifieds_do_set_version($current_ver)) return false;;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.4')) {
         $current_ver = '1.0.4';
-        if (!classifieds_upgrade_1_0_4()) return false;
+        if (!classifieds_upgrade_1_0_4($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.1.0')) {
         $current_ver = '1.1.0';
-        if (!classifieds_upgrade_1_1_0()) return false;
+        if (!classifieds_upgrade_1_1_0($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.1.2')) {
         $current_ver = '1.1.2';
-        if (!classifieds_upgrade_1_1_2()) return false;
+        if (!classifieds_upgrade_1_1_2($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.1.3')) {
         $current_ver = '1.1.3';
-        if (!classifieds_upgrade_1_1_3()) return false;
+        if (!classifieds_upgrade_1_1_3($dvlp)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.3.0')) {
         $current_ver = '1.3.0';
-        if (!classifieds_upgrade_1_3_0()) return false;
+        if (!classifieds_upgrade_1_3_0($dvlp)) return false;
     }
 
     // Final version update to catch updates that don't go through
@@ -113,6 +112,13 @@ function classifieds_do_upgrade()
             return false;
         }
     }
+
+    // Update the plugin configuration
+    USES_lib_install();
+    global $classifiedsConfigData;
+    require_once __DIR__ . '/install_defaults.php';
+    _update_config('ckassufueds', $classifiedsConfigData);
+
     classifieds_remove_old_files();
     \Classifieds\Cache::clear();
     COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
@@ -122,13 +128,14 @@ function classifieds_do_upgrade()
 
 
 /**
-*   Actually perform any sql updates
-*
-*   @param  string  $version    Version being upgraded TO
-*   @param  array   $sql        Array of SQL statement(s) to execute
-*   @return boolean         True on success, False on failure
-*/
-function classifieds_do_upgrade_sql($version='Undefined', $sql='')
+ * Actually perform any sql updates.
+ *
+ * @param   string  $version    Version being upgraded TO
+ * @param   array   $sql        Array of SQL statement(s) to execute
+ * @param   boolean $dvlp       True to ignore SQL errors and continue
+ * @return  boolean         True on success, False on failure
+ */
+function classifieds_do_upgrade_sql($version='Undefined', $sql='', $dvlp = false)
 {
     global $_TABLES, $_CONF_ADVT;
 
@@ -149,7 +156,7 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='')
         DB_query($s,'1');
         if (DB_error()) {
             COM_errorLog("SQL Error during Classifieds plugin update",1);
-            return false;
+            if (!$dvlp) return false;
         }
     }
     return true;
@@ -159,7 +166,7 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='')
 /** Upgrade to version 0.2 */
 function classifieds_upgrade_0_2()
 {
-    global $_TABLES, $_ADVT_DEFAULT, $_CONF_ADVT, $NEWTABLE;
+    global $_TABLES, $_CONF_ADVT, $NEWTABLE;
 
     if (empty($_TABLES['ad_submission'])) {
         COM_errorLog("The ad_submission table is undefined.  Check your config.php");
@@ -222,27 +229,6 @@ function classifieds_upgrade_0_2()
                 $feat_id, $group_id
             )");
 
-    // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        $c->add('maxads_pg_exp', $_ADVT_DEFAULT['maxads_pg_exp'],
-                'text', 0, 0, 2, 120, true, $_CONF_ADVT['pi_name']);
-        $c->add('maxads_pg_list', $_ADVT_DEFAULT['maxads_pg_list'],
-                'text', 0, 0, 2, 130, true, $_CONF_ADVT['pi_name']);
-        $c->add('max_total_duration', $_ADVT_DEFAULT['max_total_duration'],
-                'text', 0, 0, 2, 140, true, $_CONF_ADVT['pi_name']);
-        $c->add('purge_days', $_ADVT_DEFAULT['purge_days'],
-                'text', 0, 0, 2, 150, true, $_CONF_ADVT['pi_name']);
-        $c->add('exp_notify_days', $_ADVT_DEFAULT['exp_notify_days'],
-                'text', 0, 0, 2, 160, true, $_CONF_ADVT['pi_name']);
-        $c->add('loginrequired', $_ADVT_DEFAULT['loginrequired'],
-                'select', 0, 0, 3, 170, true, $_CONF_ADVT['pi_name']);
-        $c->add('usercanedit', $_ADVT_DEFAULT['usercanedit'],
-                'select', 0, 0, 3, 180, true, $_CONF_ADVT['pi_name']);
-        $c->add('use_gl_cron', $_ADVT_DEFAULT['use_gl_cron'],
-                'select', 0, 0, 3, 190, true, $_CONF_ADVT['pi_name']);
-    }
-
     if (!classifieds_do_upgrade_sql('0.2', $sql)) return false;
     return classifieds_do_set_version('0.2');
 }
@@ -266,46 +252,10 @@ function classifieds_upgrade_0_2_2()
 }
 
 
-/** Upgrade to version 0.2.3 */
-function classifieds_upgrade_0_2_3()
-{
-    global $_TABLES, $_ADVT_DEFAULT, $_CONF_ADVT;
-
-    // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-
-        // The default ad group should be "Classifieds Admin", so
-        // find it's id in gl_vars
-        $gid = DB_getItem($_TABLES['vars'], 'value', "name='classifieds_gid'");
-        if ($gid == '')
-            $gid = $_ADVT_DEFAULT['defgrpad'];
-
-        COM_errorLog("Adding new configuration items");
-        // Add default ad group
-        $c->add('defgrpad', $gid,
-                'select', 0, 4, 0, 90, true, $_CONF_ADVT['pi_name']);
-
-        // Add option to email users upon acceptance/rejection
-        $c->add('emailusers', $_ADVT_DEFAULT['emailusers'],
-                'select', 0, 0, 10, 95, true, $_CONF_ADVT['pi_name']);
-
-        // Add new fieldset for category defaults
-        $c->add('fs_perm_cat', NULL, 'fieldset', 0, 5, NULL, 0, true, $_CONF_ADVT['pi_name']);
-        $c->add('defgrpcat', $_ADVT_DEFAULT['defgrpcat'],
-                'select', 0, 5, 0, 90, true, $_CONF_ADVT['pi_name']);
-        $c->add('default_perm_cat', $_ADVT_DEFAULT['default_perm_cat'],
-                '@select', 0, 5, 12, 100, true, $_CONF_ADVT['pi_name']);
-    }
-
-    return classifieds_do_set_version('0.2.3');
-}
-
-
 /** Upgrade to version 0.3 */
 function classifieds_upgrade_0_3()
 {
-    global $_TABLES, $_ADVT_DEFAULT, $_CONF_ADVT, $_CONF;
+    global $_TABLES, $_CONF_ADVT, $_CONF;
 
     // This version moves config vars to classifieds.php and adds other items
     // to config.php.
@@ -319,18 +269,6 @@ function classifieds_upgrade_0_3()
     }
 
     // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-
-        COM_errorLog("Adding new configuration items");
-        // Add default ad group
-        $c->add('random_blk_width', $_ADVT_DEFAULT['random_blk_width'],
-                'text', 0, 0, 2, 32, true, $_CONF_ADVT['pi_name']);
-        $c->add('catlist_dispmode', $_ADVT_DEFAULT['catlist_dispmode'],
-                'select', 0, 0, 6, 200, true, $_CONF_ADVT['pi_name']);
-
-    }
-
     $sql[] = "ALTER TABLE {$_TABLES['ad_category']}
         CHANGE cat_name cat_name varchar(40)";
 
@@ -344,25 +282,16 @@ function classifieds_upgrade_0_3()
 }
 
 
-/** Upgrade to version 0.4 */
+/**
+ * Upgrade to version 0.4.
+ *
+ * @return   Boolean True on success, False on failure
+ */
 function classifieds_upgrade_0_4()
 {
     global $_TABLES, $NEWTABLE;
 
     $sql = array();
-
-    // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        COM_errorLog("Adding new configuration items");
-
-        // Add centerblock option
-        $c->add('centerblock', $_ADVT_DEFAULT['centerblock'],
-                'select', 0, 0, 3, 210, true, $_CONF_ADVT['pi_name']);
-        // Configuration for comment support
-        $c->add('commentsupport', $_ADVT_DEFAULT['commentsupport'],
-                'select', 0, 0, 3, 220, true, $_CONF_ADVT['pi_name']);
-    }
 
     // Create the Ad Type table ad modify the ad & submission tables
     $sql[] = "DROP TABLE IF EXISTS {$_TABLES['ad_types']}";
@@ -396,64 +325,14 @@ function classifieds_upgrade_0_4()
 }
 
 
-/** Upgrade to version 1.0.1 */
-function classifieds_upgrade_1_0_1()
-{
-    global $_ADVT_DEFAULT, $_CONF_ADVT;
-
-    // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        COM_errorLog("Adding new configuration items");
-
-        // Add left & right block options
-        $c->add('leftblocks', $_ADVT_DEFAULT['leftblocks'],
-                'select', 0, 0, 3, 230, true, $_CONF_ADVT['pi_name']);
-        $c->add('rightblocks', $_ADVT_DEFAULT['rightblocks'],
-                'select', 0, 0, 3, 240, true, $_CONF_ADVT['pi_name']);
-    }
-
-    return classifieds_set_version('1.0.1');
-}
-
-
-/** Upgrade to version 1.0.2 */
-function classifieds_upgrade_1_0_2()
-{
-    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
-
-    $sql = array();
-
-    // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        COM_errorLog("Adding new configuration items");
-
-        // Remove individual block selections and combine into one
-        $displayblocks = 0;
-        if ($_CONF_ADVT['leftblocks'] == 1) $displayblocks += 1;
-        if ($_CONF_ADVT['rightblocks'] == 1) $displayblocks += 2;
-
-        $c->del('leftblocks', $_CONF_ADVT['pi_name']);
-        $c->del('rightblocks', $_CONF_ADVT['pi_name']);
-        $c->add('displayblocks', $displayblocks,
-                'select', 0, 0, 13, 230, true, $_CONF_ADVT['pi_name']);
-    }
-
-    // Alter What's New config to not show an empty section, if desired
-    $sql[] = "UPDATE {$_TABLES['conf_values']}
-            SET selectionArray=14
-            WHERE name='hidenewads' AND group_name='{$_CONF_ADVT['pi_name']}'";
-
-    if (!classifieds_do_upgrade_sql('1.0.2', $sql)) return false;
-    return classifieds_do_set_version('1.0.2');
-}
-
-
-/** Upgrade to version 1.0.4 */
+/**
+ * Upgrade to version 1.0.4.
+ *
+ * @return   Boolean True on success, False on failure
+ */
 function classifieds_upgrade_1_0_4()
 {
-    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
+    global $_CONF_ADVT, $_TABLES;
 
     $sql = array("ALTER TABLE {$_TABLES['ad_uinfo']} ADD notify_comment
             tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER notify_exp,
@@ -464,33 +343,21 @@ function classifieds_upgrade_1_0_4()
             CHANGE subject subject varchar(255) NOT NULL default ''",
     );
 
-    // Add new configuration items
-    $c = config::get_instance();
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        COM_errorLog("Adding new configuration items");
-
-        $c->add('helpurl', $_ADVT_DEFAULT['helpurl'],
-                'text', 0, 0, 0, 240, true, $_CONF_ADVT['pi_name']);
-        $c->del('ebaylink', $_CONF_ADVT['pi_name']);
-        $c->add('disp_fullname', $_ADVT_DEFAULT['disp_fullname'],
-                'select', 0, 0, 3, 175, true, $_CONF_ADVT['pi_name']);
-    }
-
     if (!classifieds_do_upgrade_sql('1.0.4', $sql)) return false;
     return classifieds_do_set_version('1.0.4');
 }
 
 /**
-*   Upgrade to version 1.1.0
-*   Adds config item for max image width on ad detail page
-*   Removes image path config options
-*/
+ * Upgrade to version 1.1.0.
+ * Adds config item for max image width on ad detail page
+ * Removes image path config options
+ *
+ * @return   Boolean True on success, False on failure
+ */
 function classifieds_upgrade_1_1_0()
 {
-    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
+    global $_CONF_ADVT, $_TABLES;
 
-    // Add new configuration items
-    $c = config::get_instance();
     $old_imgpath = pathinfo($_CONF_ADVT['image_dir']);
     $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
     $new_imgpath = $_CONF_ADVT['imgpath']  . '/user';
@@ -537,24 +404,6 @@ function classifieds_upgrade_1_1_0()
                 }
             }
         }
-    }
-
-    // Now update configuration options.
-    // - Remove path configs for images (always using /private/data now)
-    // - Remove permissions matrix for ads
-    // - Remove help URL config item (never used)
-    if ($c->group_exists($_CONF_ADVT['pi_name'])) {
-        COM_errorLog("Adding and removing configuration items");
-        $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
-                'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
-        $c->del('catimgpath', $_CONF_ADVT['pi_name']);
-        $c->del('catimgurl', $_CONF_ADVT['pi_name']);
-        $c->del('image_dir', $_CONF_ADVT['pi_name']);
-        $c->del('image_url', $_CONF_ADVT['pi_name']);
-        $c->del('fs_paths', $_CONF_ADVT['pi_name']);
-        $c->del('helpurl', $_CONF_ADVT['pi_name']);
-        $c->del('fs_permissions', $_CONF_ADVT['pi_name']);
-        $c->del('default_permissions', $_CONF_ADVT['pi_name']);
     }
 
     // Make sure there's a user information record created for each user
@@ -610,12 +459,14 @@ function classifieds_upgrade_1_1_0()
 
 
 /**
-*   Upgrade to version 1.1.2
-*   Adds comments field to submissions to match ad table
-*/
+ * Upgrade to version 1.1.2.
+ * Adds comments field to submissions to match ad table.
+ *
+ * @return   Boolean True on success, False on failure
+ */
 function classifieds_upgrade_1_1_2()
 {
-    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
+    global $_CONF_ADVT, $_TABLES;
 
     $sql = array(
         "ALTER TABLE {$_TABLES['ad_submission']}
@@ -627,19 +478,16 @@ function classifieds_upgrade_1_1_2()
 
 
 /**
-*   Upgrade to version 1.1.3
-*   Migrates notification subscriptions to glFusion subscription system.
-*/
+ * Upgrade to version 1.1.3
+ * Migrates notification subscriptions to glFusion subscription system.
+ *
+ * @return   Boolean True on success, False on failure
+ */
 function classifieds_upgrade_1_1_3()
 {
-    global $_ADVT_DEFAULT, $_CONF_ADVT, $_TABLES;
+    global $_CONF_ADVT, $_TABLES;
 
     COM_errorLog("Updating {$_CONF_ADVT['pi_display_name']} to 1.1.3");
-    $c = config::get_instance();
-    $c->add('detail_tpl_ver', 'v1',
-            'select', 0, 0, 6, 205, true, $_CONF_ADVT['pi_name']);
-    $c->add('auto_subcats', 0,
-            'select', 0, 0, 3, 240, true, $_CONF_ADVT['pi_name']);
     $sql = "SELECT n.cat_id, n.uid, c.description
             FROM {$_TABLES['ad_notice']} n
             LEFT JOIN {$_TABLES['ad_category']} c
@@ -660,22 +508,23 @@ function classifieds_upgrade_1_1_3()
 
 
 /**
-*   Update to version 1.3.0
-*   Adds modified preorder tree traversal to category table
-*/
+ * Update to version 1.3.0.
+ * Adds modified preorder tree traversal to category table
+ *
+ * @return   Boolean True on success, False on failure
+ */
 function classifieds_upgrade_1_3_0()
 {
     global $_TABLES;
 
     $sql = array(
         // Add tree fields, drop auto_increment key for renumbering
-        "ALTER TABLE {$_TABLES['ad_category']}
-            ADD lft int(5) unsigned NOT NULL default 0,
-            ADD rgt int(5) unsigned NOT NULL default 0,
-            DROP parent_map,
-            DROP add_date,
-            ADD KEY (lft),
-            ADD KEY (rgt)",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD lft int(5) unsigned NOT NULL default 0",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD rgt int(5) unsigned NOT NULL default 0",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP parent_map",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP add_date",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
     );
     if (!classifieds_do_upgrade_sql('1.3.0', $sql)) return false;
     // Populate the tree values
@@ -685,13 +534,13 @@ function classifieds_upgrade_1_3_0()
 
 
 /**
-*   Update the plugin version number in the database.
-*   Called at each version upgrade to keep up to date with
-*   successful upgrades.
-*
-*   @param  string  $ver    New version to set
-*   @return boolean         True on success, False on failure
-*/
+ * Update the plugin version number in the database.
+ * Called at each version upgrade to keep up to date with
+ * successful upgrades.
+ *
+ * @param   string  $ver    New version to set
+ * @return  boolean         True on success, False on failure
+ */
 function classifieds_do_set_version($ver)
 {
     global $_TABLES, $_CONF_ADVT;
@@ -714,9 +563,9 @@ function classifieds_do_set_version($ver)
 
 
 /**
-*   Remove deprecated files.
-*   No return, and errors here don't really matter
-*/
+ * Remove deprecated files.
+ * No return, and errors here don't really matter
+ */
 function classifieds_remove_old_files()
 {
     global $_CONF;
@@ -730,7 +579,7 @@ function classifieds_remove_old_files()
 
     foreach ($old_files as $path=>$files) {
         foreach ($files as $file) {
-            @unlink "$path/$file";
+            @unlink("$path/$file");
         }
     }
 }

@@ -1,206 +1,427 @@
 <?php
 /**
-*   Installation defaults for the Classifieds plugin
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Installation defaults for the Classifieds plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.1.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined('GVERSION')) {
     die('This file can not be used on its own!');
 }
 
 /**
- *  Classifieds default settings
+ * Classifieds default configuration settings.
  *
- *  Initial Installation Defaults used when loading the online configuration
- *  records. These settings are only used during the initial installation
- *  and not referenced any more once the plugin is installed
- *  @global array $_ADVT_DEFAULT
- *
+ * Initial Installation Defaults used when loading the online configuration
+ * records. These settings are only used during the initial installation
+ * and not referenced any more once the plugin is installed.
+ * @var array
  */
-global $_ADVT_DEFAULT, $_CONF_ADVT;
-$_ADVT_DEFAULT = array();
+$classifiedsConfigItems = array(
+    array(
+        'name' => 'sg_main',
+        'default_value' => NULL,
+        'type' => 'subgroup',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => NULL,
+        'sort' => 0,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'fs_main',
+        'default_value' => NULL,
+        'type' => 'fieldset',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => NULL,
+        'sort' => 0,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'img_max_height',
+        'default_value' => '600',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 10,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'img_max_width',
+        'default_value' => '800',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 20,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'detail_img_width',
+        'default_value' => '150',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 30,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'thumb_max_size',
+        'default_value' => '100',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 40,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'random_blk_width',
+        'default_value' => '100',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 50,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'imagecount',
+        'default_value' => '3',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 60,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'submission',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 70,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'default_duration',
+        'default_value' => '30',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 80,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'newcatdays',
+        'default_value' => '100w3',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 90,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'newadsinterval',
+        'default_value' => '14',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 100,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'hidenewads',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 14,
+        'sort' => 110,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'emailadmin',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 9,
+        'sort' => 120,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'emailusers',
+        'default_value' => 0,
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 10,
+        'sort' => 130,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'hideuserfunction',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 140,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'maxads_pg_exp',
+        'default_value' => '20',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 150,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'maxads_pg_list',
+        'default_value' => '20',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 160,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'max_total_duration',
+        'default_value' => '120',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 170,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'purge_days',
+        'default_value' => '15',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 170,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'exp_notify_days',
+        'default_value' => -1,
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 180,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'loginrequired',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 190,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'disp_fullname',
+        'default_value' => 1,
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 200,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'usercanedit',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 210,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'use_gl_cron',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 220,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'catlist_dispmode',
+        'default_value' => 'normal',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 6,
+        'sort' => 230,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'detail_tpl_ver',
+        'default_value' => 'v1',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,     // helper function used
+        'sort' => 240,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'centerblock',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 250,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'commentsupport',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 260,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'displayblocks',
+        'default_value' => 3,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 13,
+        'sort' => 270,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'auto_subcats',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 270,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
 
-// Max image dimensions for display popups (slimbox)
-$_ADVT_DEFAULT['img_max_height'] = 600;
-$_ADVT_DEFAULT['img_max_width'] = 800;
-// Max image width for ad detail page, typically larger than thumbnail
-$_ADVT_DEFAULT['detail_img_width'] = 150;
-$_ADVT_DEFAULT['random_blk_width'] = 100;   // Max width for random ad block
-$_ADVT_DEFAULT['thumb_max_size'] = 100; // Max dimension for thumbnails
-$_ADVT_DEFAULT['imagecount']    = 3;    // max number of user images
-$_ADVT_DEFAULT['submission'] = 1;       // Submission queue. 0= disabled  1= enabled
-$_ADVT_DEFAULT['default_duration'] = 30;   // default ad duration, in days
-$_ADVT_DEFAULT['max_cust_fields'] = 4;     // maximum custom fields to allow
-$_ADVT_DEFAULT['newcatdays'] = 3;      // days to consider a category as new
-$_ADVT_DEFAULT['newadsinterval']    = 14; // days to consider an ad as new
-$_ADVT_DEFAULT['hidenewads']    = 0;    // 1 = hide from the What's New block
+    // Permissions
+    array(
+        'name' => 'fs_perm_cat',
+        'default_value' => NULL,
+        'type' => 'fieldset',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => NULL,
+        'sort' => 0,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'defgrpcat',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => 0,     // helper function used
+        'sort' => 10,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+    array(
+        'name' => 'default_perm_cat',
+        'default_value' => 0,
+        'type' => '@select',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => 12,
+        'sort' => 20,
+        'set' => true,
+        'group' => 'classifieds',
+    ),
+);
 
 /**
- *  Notify admins of new submissions
- *      0 - never notify admins
- *      1 - only if $_ADVT_DEFAULT['submission'] is enabled
- *      2 - always
- */
-$_ADVT_DEFAULT['emailadmin']   = 2;
-
-// Email users upon acceptance?  1=Yes, 0=No, Default No
-$_ADVT_DEFAULLT['emailusers'] = 0;
-
-$_ADVT_DEFAULT['hideuserfunction'] = 1;     // 1 = hide from User Functions menu
-
-// Set the default permissions
-$_ADVT_DEFAULT['default_perm_cat'] =  array (3, 3, 2, 2);
-
-// Default values for max ads shown per page (expanded & list views)
-$_ADVT_DEFAULT['maxads_pg_list'] = 20;
-$_ADVT_DEFAULT['maxads_pg_exp'] = 20;
-
-// Default max duration for a single ad run, and total including renewals
-$_ADVT_DEFAULT['max_ad_duration'] = 30;
-$_ADVT_DEFAULT['max_total_duration'] = 120;
-
-// Set the number of days after ad expiration when it will be purged
-$_ADVT_DEFAULT['purge_days'] = 15;
-
-// Number of days before an ad expiration for users to be notified.
-$_ADVT_DEFAULT['exp_notify_days'] = -1;
-
-// Login required for all access?
-$_ADVT_DEFAULT['loginrequired'] = 0;
-
-// True if regular users can edit their own ads
-$_ADVT_DEFAULT['usercanedit'] = 1;
-
-// Use glFusion's built-in cron facility?
-$_ADVT_DEFAULT['use_gl_cron'] = 1;
-
-// Default groups for ad and category: Logged-In Users.
-// For Ads this is the group that is allowed to view ads.
-// For Categories this is the group that may submit adds to a category
-$_ADVT_DEFAULT['defgrpad'] = 1;
-$_ADVT_DEFAULT['defgrpcat'] = 13;
-
-// Category display type.  This will be a value like 'normal', 'blocks', etc.
-$_ADVT_DEFAULT['catlist_dispmode'] = 'normal';
-
-// Template version of the ad detail
-$_ADVT_DEFAULT['detail_tpl_ver'] = 'v1';
-
-// Replace home page? 1=yes, 0=no
-$_ADVT_DEFAULT['centerblock'] = 0;
-
-// Control which blocks to display- both by default
-$_ADVT_DEFAULT['displayblocks'] = 3;
-
-// Support comments? 1=yes, 0=false
-$_ADVT_DEFAULT['commentsupport'] = 1;
-
-$_ADVT_DEFAULT['helpurl'] = '';
-$_ADVT_DEFAULT['disp_fullname'] = 1;
-
-// Automatically subscribe sub-categories?
-$_ADVT_DEFAULT['auto_subcats'] = 0;
-
-/**
- *  Initialize Classifieds plugin configuration
+ * Initialize Classifieds plugin configuration.
  *
- *  Creates the database entries for the configuation if they don't already
- *  exist. Initial values will be taken from $_CONF_ADVT if available (e.g. from
- *  an old config.php), uses $_ADVT_DEFAULT otherwise.
+ * Creates the database entries for the configuation if they don't already
+ * exist.
  *
- *  @param  integer $group_id   Group ID to use as the plugin's admin group
- *  @return boolean             true: success; false: an error occurred
+ * @param   integer $group_id   Group ID to use as the plugin's admin group
+ * @return  boolean             true: success; false: an error occurred
  */
 function plugin_initconfig_classifieds($group_id = 0)
 {
-    global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT;
-
-    if (is_array($_CONF_ADVT) && (count($_CONF_ADVT) > 1)) {
-        $_ADVT_DEFAULT = array_merge($_ADVT_DEFAULT, $_CONF_ADVT);
-    }
-
-    // Use configured default if a valid group ID wasn't presented
-    if ($group_id == 0)
-        $group_id = $_ADVT_DEFAULT['defgrpad'];
+    global $classifiedsConfigData;
 
     $c = config::get_instance();
-
-    if (!$c->group_exists($_CONF_ADVT['pi_name'])) {
-
-        $c->add('sg_main', NULL, 'subgroup', 0, 0, NULL, 0, true, $_CONF_ADVT['pi_name']);
-        $c->add('fs_main', NULL, 'fieldset', 0, 0, NULL, 0, true, $_CONF_ADVT['pi_name']);
-        $c->add('img_max_height', $_ADVT_DEFAULT['img_max_height'],
-                'text', 0, 0, 0, 10, true, $_CONF_ADVT['pi_name']);
-        $c->add('img_max_width', $_ADVT_DEFAULT['img_max_width'], 
-                'text', 0, 0, 0, 20, true, $_CONF_ADVT['pi_name']);
-        $c->add('detail_img_width', $_ADVT_DEFAULT['detail_img_width'],
-                'text', 0, 0, 0, 25, true, $_CONF_ADVT['pi_name']);
-        $c->add('thumb_max_size', $_ADVT_DEFAULT['thumb_max_size'], 
-                'text', 0, 0, 0, 30, true, $_CONF_ADVT['pi_name']);
-        $c->add('random_blk_width', $_ADVT_DEFAULT['random_blk_width'], 
-                'text', 0, 0, 0, 32, true, $_CONF_ADVT['pi_name']);
-        $c->add('imagecount', $_ADVT_DEFAULT['imagecount'], 
-                'text', 0, 0, 0, 35, true, $_CONF_ADVT['pi_name']);
-        $c->add('submission', $_ADVT_DEFAULT['submission'], 'select',
-                0, 0, 0, 40, true, $_CONF_ADVT['pi_name']);
-        $c->add('default_duration', $_ADVT_DEFAULT['default_duration'], 
-                'text', 0, 0, 0, 50, true, $_CONF_ADVT['pi_name']);
-        $c->add('newcatdays', $_ADVT_DEFAULT['newcatdays'], 
-                'text', 0, 0, 0, 60, true, $_CONF_ADVT['pi_name']);
-        $c->add('newadsinterval', $_ADVT_DEFAULT['newadsinterval'], 
-                'text', 0, 0, 0, 70, true, $_CONF_ADVT['pi_name']);
-        $c->add('hidenewads', $_ADVT_DEFAULT['hidenewads'], 
-                'select', 0, 0, 14, 80, true, $_CONF_ADVT['pi_name']);
-        $c->add('emailadmin', $_ADVT_DEFAULT['emailadmin'], 
-                'select', 0, 0, 9, 90, true, $_CONF_ADVT['pi_name']);
-        $c->add('emailusers', $_ADVT_DEFAULT['emailusers'], 
-                'select', 0, 0, 10, 95, true, $_CONF_ADVT['pi_name']);
-        $c->add('hideuserfunction', $_ADVT_DEFAULT['hideuserfunction'], 
-                'select', 0, 0, 3, 100, true, $_CONF_ADVT['pi_name']);
-        $c->add('maxads_pg_exp', $_ADVT_DEFAULT['maxads_pg_exp'], 
-                'text', 0, 0, 2, 120, true, $_CONF_ADVT['pi_name']);
-        $c->add('maxads_pg_list', $_ADVT_DEFAULT['maxads_pg_list'],
-                'text', 0, 0, 2, 130, true, $_CONF_ADVT['pi_name']);
-        $c->add('max_total_duration', $_ADVT_DEFAULT['max_total_duration'],
-                'text', 0, 0, 2, 140, true, $_CONF_ADVT['pi_name']);
-        $c->add('purge_days', $_ADVT_DEFAULT['purge_days'],
-                'text', 0, 0, 2, 150, true, $_CONF_ADVT['pi_name']);
-        $c->add('exp_notify_days', $_ADVT_DEFAULT['exp_notify_days'],
-                'text', 0, 0, 2, 160, true, $_CONF_ADVT['pi_name']);
-        $c->add('loginrequired', $_ADVT_DEFAULT['loginrequired'], 
-                'select', 0, 0, 3, 170, true, $_CONF_ADVT['pi_name']);
-        $c->add('disp_fullname', $_ADVT_DEFAULT['disp_fullname'], 
-                'select', 0, 0, 3, 175, true, $_CONF_ADVT['pi_name']);
-        $c->add('usercanedit', $_ADVT_DEFAULT['usercanedit'], 
-                'select', 0, 0, 3, 180, true, $_CONF_ADVT['pi_name']);
-        $c->add('use_gl_cron', $_ADVT_DEFAULT['use_gl_cron'], 
-                'select', 0, 0, 3, 190, true, $_CONF_ADVT['pi_name']);
-        $c->add('catlist_dispmode', $_ADVT_DEFAULT['catlist_dispmode'],
-                'select', 0, 0, 6, 200, true, $_CONF_ADVT['pi_name']);
-        $c->add('detail_tpl_ver', $_ADVT_DEFAULT['detail_tpl_ver'],
-                'select', 0, 0, 6, 205, true, $_CONF_ADVT['pi_name']);
-        $c->add('centerblock', $_ADVT_DEFAULT['centerblock'],
-                'select', 0, 0, 3, 210, true, $_CONF_ADVT['pi_name']);
-        $c->add('commentsupport', $_ADVT_DEFAULT['commentsupport'],
-                'select', 0, 0, 3, 220, true, $_CONF_ADVT['pi_name']);
-        $c->add('displayblocks', $_ADVT_DEFAULT['displayblocks'],
-                'select', 0, 0, 13, 230, true, $_CONF_ADVT['pi_name']);
-        $c->add('auto_subcats', $_ADVT_DEFAULT['auto_subcats'],
-                'select', 0, 0, 3, 240, true, $_CONF_ADVT['pi_name']);
-
-        $c->add('fs_perm_cat', NULL, 'fieldset', 0, 5, NULL, 0, true, $_CONF_ADVT['pi_name']);
-        $c->add('defgrpcat', $_ADVT_DEFAULT['defgrpcat'],
-                'select', 0, 5, 0, 90, true, $_CONF_ADVT['pi_name']);
-        $c->add('default_perm_cat', $_ADVT_DEFAULT['default_perm_cat'],
-                '@select', 0, 5, 12, 100, true, $_CONF_ADVT['pi_name']);
+    if (!$c->group_exists('classifieds')) {
+        USES_lib_install();
+        foreach ($classifiedsConfigData AS $cfgItem) {
+            _addConfigItem($cfgItem);
+        }
     }
-
     return true;
 }
 
