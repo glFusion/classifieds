@@ -81,7 +81,6 @@ $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
 $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
     uid SMALLINT UNSIGNED NOT NULL auto_increment,
     tel VARCHAR(20) NOT NULL,
-    fax VARCHAR(20) NOT NULL,
     city VARCHAR(20) NOT NULL,
     state VARCHAR(20) NOT NULL,
     lastup_date INT NOT NULL,
