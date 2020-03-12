@@ -2,81 +2,80 @@
 {!if profileedit}
 <div id="pe_advtinfo" class="jsenabled_hide">
 {!else}
-<form class="adForm" method="post" action="?page=account&mode=update_account">
+<form class="uk-form uk-form-horizontal" method="post" action="">
 {!endif}
-  <fieldset style="margin-top:10px;"><legend>{$LANG_ADVT['fieldset1']}</legend>
+  <fieldset data-uk-margin><legend>{$LANG_ADVT['fieldset1']}</legend>
   <p>{$LANG_ADVT['public_contact_info']}
-  <span class="alert">{$LANG_ADVT['public_contact_info_warn']}</span>
+  <div class="uk-alert uk-alert-danger">{$LANG_ADVT['public_contact_info_warn']}</div>
   </p>
   <input type="hidden" name="advt_uid" value="{uid}" />
+  <div class="uk-form-row">
+    <label for="advt_address" class="uk-form-label">{$LANG_ADVT['address']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_address" name="advt_address" size="40"
+            maxlength="40" value="{uinfo_address}" />
+    </div>
+  </div>
 
-  <table class="adForm">
-    <tr>
-      <td class="label">{$LANG_ADVT['address']}</td>
-      <td class="input">
-        <input type="text" name="advt_address" size="25" maxlength="20" 
-            value="{uinfo_address}" />
-      </td>
-    </tr>
-    <tr>
-      <td class="label">{$LANG_ADVT['city']}</td>
-      <td class="input">
-        <input type="text" name="advt_city" size="20" maxlength="20" 
-            value="{uinfo_city}" />
-      </td>
-    </tr>
-    <tr>
-      <td class="label">{$LANG_ADVT['state']}</td>
-      <td class="input">
-        <input type="text" name="advt_state" size="2" maxlength="20" 
-            value="{uinfo_state}" />
-      </td>
-    </tr>
-    <tr>
-      <td class="label">{$LANG_ADVT['telephone']}</td>
-      <td class="input">
-        <input type="text" name="advt_tel" size="12" maxlength="20" 
-            value="{uinfo_tel}" />
-      </td>
-    </tr>
-    <tr>
-      <td class="label">{$LANG_ADVT['fax']}</td>
-      <td class="input">
-        <input type="text" name="advt_fax" size="12" maxlength="20" 
-            value="{uinfo_fax}" />
-      </td>
-    </tr>
-    <tr>
-      <td class="label">{$LANG_ADVT['postal']}</td>
-      <td class="input">
-        <input type="text" name="advt_postcode" size="20" maxlength="20" 
-            value="{uinfo_postcode}" />
-      </td>
-    </tr>
-  </table>
+  <div class="uk-form-row">
+    <label for="advt_city" class="uk-form-label">{$LANG_ADVT['city']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_city" name="advt_city" size="40"
+            maxlength="40" value="{uinfo_city}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_state" class="uk-form-label">{$LANG_ADVT['state']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_state" name="advt_state" size="5"
+            maxlength="5" value="{uinfo_state}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_tel" class="uk-form-label">{$LANG_ADVT['telephone']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_tel" name="advt_tel" size="12"
+            maxlength="20" value="{uinfo_tel}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label for="advt_postcode" class="uk-form-label">{$LANG_ADVT['postal']}</label>
+    <div class="uk-form-controls">
+      <input type="text" id="advt_postcode" name="advt_postcode" size="20"
+            maxlength="20" value="{uinfo_postcode}" />
+    </div>
+  </div>
+
   </fieldset>
 
-  <fieldset style="margin-top:10px;"><legend>{$LANG_ADVT['fieldset2']}</legend>
-  <table class="adForm">
-    <tr>
-      <td class="label">{$LANG_ADVT['notify_exp']}</td>
-      <td class="input">
-        <input type=checkbox name="advt_notify_exp" value="1" 
-            {exp_notify_checked} />
-      </td>
-    </tr> 
-    <tr>
-      <td class="label">{$LANG_ADVT['notify_cmt']}</td>
-      <td class="input">
-        <input type=checkbox name="advt_notify_comment" value="1"
-            {cmt_notify_checked} />
-      </td>
-    </tr>
-  </table>
+  <fieldset data-uk-margin><legend>{$LANG_ADVT['fieldset2']}</legend>
+  <div class="uk-form-row">
+    <label for="advt_notify_exp" class="uk-form-label">{$LANG_ADVT['notify_exp']}</label>
+    <div class="uk-form-controls">
+      <input type="checkbox" id="advt_notify_exp" name="advt_notify_exp"
+            value="1" {exp_notify_checked} />
+    </div>
+  </div> 
+
+  <div class="uk-form-row">
+    <label for="advt_notify_cmt" class="uk-form-label">{$LANG_ADVT['notify_cmt']}</label>
+    <div class="uk-form-controls">
+      <input type="checkbox" id="advt_notify_cmt" name="advt_notify_comment"
+            value="1" {cmt_notify_checked} />
+    </div>
+  </div>
+
 </fieldset>
 {!if profileedit}
 </div>
 {!else}
+  <div class="uk-form-controls">
+    <button type="submit" class="uk-button uk-button-success" name="mode" value="update_account">{$LANG_ADVT['update_account']}</button>
+    <button type="reset" class="uk-button uk-button-primary" name="ads">{$LANG_ADVT['reset']}</button>
+  </div>
 </form>
 {!endif}
 {# end {templatelocation} #}
