@@ -94,7 +94,6 @@ $LANG_ADVT = array (
 'ebay_expl'             => 'Wenn Sie ein ebay-Konto besitzen, können Sie hier auch Ihre ebay-ID eingeben. Somit können Besucher Ihre Angebote in Ihrer Profil-Seite sehen.',
 'ebay_id'               => 'ebay-ID',
 'enabled'               => 'Aktiviert',
-'fax'                   => 'Fax',
 'forsale'               => 'Zum Verkauf',
 'found'                 => 'Gefunden ',
 'listings'              => ' Auflistung, jetzt anzeigen ',
@@ -250,6 +249,8 @@ $LANG_ADVT = array (
 'msg_error'             => 'Leider gab es einen Fehler bei Ihrer Anfrage',
 'no_ads_listed_cat' => 'There are no ads listed under this category',
 'sample' => 'Sample',
+'msg_account_updated' => 'Your account has been updated.',
+'msg_save_error' => 'There was an error performing the update.',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Ihre Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';

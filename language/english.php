@@ -92,7 +92,6 @@ $LANG_ADVT = array (
 'expiration'   => 'Expiration',
 'expired'           => 'Expired',
 'enabled'                => 'Enabled',
-'fax'               => 'Fax',
 'forsale'       => 'For Sale',
 'found'             => 'Found ',
 'listings'            => ' listings, now displaying ',
@@ -248,6 +247,8 @@ $LANG_ADVT = array (
 'msg_error' => 'There has been an error processing your request',
 'no_ads_listed_cat' => 'There are no ads listed under this category',
 'sample' => 'Sample',
+'msg_account_updated' => 'Your account has been updated.',
+'msg_save_error' => 'There was an error performing the update.',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Your ad has been queued for administrator approval.';
