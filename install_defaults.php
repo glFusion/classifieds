@@ -413,12 +413,12 @@ $classifiedsConfigItems = array(
  */
 function plugin_initconfig_classifieds($group_id = 0)
 {
-    global $classifiedsConfigData;
+    global $classifiedsConfigItems;
 
     $c = config::get_instance();
     if (!$c->group_exists('classifieds')) {
         USES_lib_install();
-        foreach ($classifiedsConfigData AS $cfgItem) {
+        foreach ($classifiedsConfigItems as $cfgItem) {
             _addConfigItem($cfgItem);
         }
     }

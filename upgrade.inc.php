@@ -115,12 +115,12 @@ function classifieds_do_upgrade($dvlp = false)
 
     // Update the plugin configuration
     USES_lib_install();
-    global $classifiedsConfigData;
+    global $classifiedsConfigItems;
     require_once __DIR__ . '/install_defaults.php';
-    _update_config('ckassufueds', $classifiedsConfigData);
+    _update_config('classifieds', $classifiedsConfigItems);
 
     classifieds_remove_old_files();
-    \Classifieds\Cache::clear();
+    Classifieds\Cache::clear();
     COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
     CTL_clearCache($_CONF_ADVT['pi_name']);
     return true;
@@ -146,8 +146,9 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='', $dvlp = false
     }
 
     // If no sql statements passed in, return success
-    if (!is_array($sql))
+    if (!is_array($sql)) {
         return true;
+    }
 
     // Execute SQL now to perform the upgrade
     COM_errorLOG("--Updating Classified Ads to version $version");
@@ -511,9 +512,10 @@ function classifieds_upgrade_1_1_3()
  * Update to version 1.3.0.
  * Adds modified preorder tree traversal to category table
  *
- * @return   Boolean True on success, False on failure
+ * @param   boolean $dvlp   True to ignore sql errors
+ * @return  boolean     True on success, False on failure
  */
-function classifieds_upgrade_1_3_0()
+function classifieds_upgrade_1_3_0($dvlp = false)
 {
     global $_TABLES;
 
@@ -525,8 +527,9 @@ function classifieds_upgrade_1_3_0()
         "ALTER TABLE {$_TABLES['ad_category']} DROP add_date",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
+        "ALTER TABLE {$_TABLES['ad_uinfo']} DROP fax",
     );
-    if (!classifieds_do_upgrade_sql('1.3.0', $sql)) return false;
+    if (!classifieds_do_upgrade_sql('1.3.0', $sql, $dvlp)) return false;
     // Populate the tree values
     \Classifieds\Category::rebuildTree(0, 0);
     return classifieds_do_set_version('1.3.0');
@@ -545,6 +548,7 @@ function classifieds_do_set_version($ver)
 {
     global $_TABLES, $_CONF_ADVT;
 
+    COM_errorLog("Setting the classifieds plugin version to $ver");
     // now update the current version number.
     $sql = "UPDATE {$_TABLES['plugins']} SET
             pi_version = '" . DB_escapeString($ver) . "',
@@ -572,16 +576,64 @@ function classifieds_remove_old_files()
 
     $old_files = array(
         __DIR__ => array(
-            'js/picker.js',     // 1.2.2
-            'js/catfldxml.js',  // 1.4.0
+            // 1.2.2
+            'js/picker.js',
+            // 1.3.0
+            'admin.php',
+            'js/catfldxml.js',
+            'templates/account_settings.uikit.thtml',
+	    'templates/admin/adminedit.uikit.thtml',
+	    'templates/admin/catEditForm.uikit.thtml',
+            'templates/adtypeform.uikit.thtml',
+	    'templates/breadcrumbs.uikit.thtml',
+	    'templates/detail.uikit.thtml'.
+	    'templates/detail/v1/detail.uikit.thtml',
+	    'templates/detail/v2/detail.uikit.thtml',
+            'templates/edit.uikit.thtml',
+            'templates/adList.thtml',
+        ),
+        // public_html/classifieds
+        $_CONF['path_html'] . 'classifieds' => array(
+            // 1.3.0
+            'js',
+        ),
+        // admin/plugins/classifieds
+        $_CONF['path_html'] . 'admin/plugins/classifieds' => array(
         ),
     );
 
-    foreach ($old_files as $path=>$files) {
+    foreach ($paths as $path=>$files) {
         foreach ($files as $file) {
-            @unlink("$path/$file");
+            // Remove the file or directory
+            CLASSIFIEDS_rmdir("$path/$file");
         }
     }
 }
+
+
+/**
+ * Remove a file, or recursively remove a directory.
+ *
+ * @param   string  $dir    Directory name
+ */
+function CLASSIFIEDS_rmdir($dir)
+{
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+                if (is_dir($dir . '/' . $object)) {
+                    PHC_rmdir($dir . '/' . $object);
+                } else {
+                    @unlink($dir . '/' . $object);
+                }
+            }
+        }
+        @rmdir($dir);
+    } elseif (is_file($dir)) {
+        @unlink($dir);
+    }
+}
+
 
 ?>
