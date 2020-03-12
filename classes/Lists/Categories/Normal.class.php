@@ -64,7 +64,7 @@ class Normal extends \Classifieds\Lists\Categories
                 'cat_url'   => CLASSIFIEDS_makeUrl('home', $Cat->getID()),
                 'cat_name'  => $Cat->getName(),
                 'cat_ad_count' => Category::TotalAds($Cat->getID()),
-                'image' => Category::thumbUrl($Cat->getImage()) : '',
+                'image' => Category::thumbUrl($Cat->getImage()),
             ) );
 
             $SubCats = Category::SubCats($Cat->getID());
