@@ -41,11 +41,6 @@ class Menu
                 'text' => $LANG_ADVT['mnu_home'],
                 'active' => $view == 'home' ? true : false,
             ),
-            array(
-                'url' => CLASSIFIEDS_makeURL('recent'),
-                'text' => $LANG_ADVT['mnu_recent'],
-                'active' => $view == 'recent' ? true : false,
-            ),
         );
 
         if (!COM_isAnonUser()) {

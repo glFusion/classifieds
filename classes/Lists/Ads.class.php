@@ -22,18 +22,6 @@ use Classifieds\Image;
  */
 class Ads
 {
-    /** List name used in URL references.
-     * @var string */
-    protected $pagename = '';
-
-    /** SQL where clause to select ads.
-     * @vqr string */
-    protected $where_clause = '';
-
-    /** SQL limit clause to limit results.
-     * @var string */
-    protected $limit_clause = '';
-
     /** Category IDs to limit search.
      * @var array */
     protected $cat_ids = array();
@@ -44,7 +32,7 @@ class Ads
 
     /** User ID to filter by poster.
      * @var integer */
-    private $uid = 0;
+    protected $uid = 0;
 
 
     /**
@@ -86,9 +74,6 @@ class Ads
                 ON cat.cat_id = ad.cat_id
             WHERE ad.exp_date > $time " .
             COM_getPermSQL('AND', 0, 2, 'cat');
-        if ($this->where_clause != '') {
-            $sql .= " AND $this->where_clause ";
-        }
         if ($this->uid > 0) {
             $sql .= " AND ad.uid = {$this->uid}";
         }
@@ -101,10 +86,7 @@ class Ads
         $sql .= " ORDER BY ad.add_date DESC";
         //echo $sql;die;
 
-        // first execute the query with the supplied limit clause to get
-        // the total number of ads eligible for viewing
-        $sql1 = $sql . ' ' . $this->limit_clause;
-        $result = DB_query($sql1);
+        $result = DB_query($sql);
         if (!$result) return "Database Error";
         $totalAds = DB_numRows($result);
 
@@ -128,12 +110,15 @@ class Ads
 
         // Create the page menu string for display if there is more
         // than one page
-        $pageMenu = '';
         if ($totalPages > 1) {
-            $baseURL = $_CONF_ADVT['url'] . "/index.php?page=$pagename";
-            $pageMenu = COM_printPageNavigation($baseURL, $page, $totalPages, "start=");
+            $pageMenu = COM_printPageNavigation(
+                $_CONF_ADVT['url'] . '/index.php',
+                $page,
+                $totalPages,
+                'start='
+            );
+            $T->set_var('pagemenu', $pageMenu);
         }
-        $T->set_var('pagemenu', $pageMenu);
 
         $sql .= " LIMIT $initAds, $maxAds";
         //echo $sql;die;

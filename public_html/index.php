@@ -164,14 +164,6 @@ case 'moredays':
     $view = 'manage';
     break;
 
-case 'recent':
-    //  Display recent ads
-    $L = new \Classifieds\Lists\Ads\Recent();
-    $content .= $L->Render();
-    $T->set_var('header', $LANG_ADVT['recent_listed']);
-    $menu_opt = $LANG_ADVT['mnu_recent'];
-    break;
-
 case 'manage':
     // Manage ads.  Restricted to the user's own ads
     if ($isAnon) COM_404();
