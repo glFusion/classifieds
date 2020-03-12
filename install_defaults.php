@@ -300,17 +300,6 @@ $classifiedsConfigItems = array(
         'group' => 'classifieds',
     ),
     array(
-        'name' => 'catlist_dispmode',
-        'default_value' => 'normal',
-        'type' => 'select',
-        'subgroup' => 0,
-        'fieldset' => 0,
-        'selection_array' => 6,
-        'sort' => 230,
-        'set' => true,
-        'group' => 'classifieds',
-    ),
-    array(
         'name' => 'detail_tpl_ver',
         'default_value' => 'v1',
         'type' => 'select',
