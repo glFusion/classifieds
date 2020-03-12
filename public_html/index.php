@@ -27,9 +27,9 @@ if ($_CONF['loginrequired'] == 1) {
     $_CONF_ADVT['loginrequired'] = 1;
 }
 if ($isAnon && $_CONF_ADVT['loginrequired'] == 1) {
-    $display = CLASSIFIEDS_siteHeader();
+    $display = Classifieds\Menu::siteHeader();
     $display .= SEC_loginForm();
-    $display .= CLASSIFIEDS_siteFooter(true);
+    $display .= Classifieds\Menu::siteFooter(true);
     echo $display;
     exit;
 }
@@ -214,7 +214,8 @@ default:
     // Display the ad listing, possibly filtered by category and type
     $L = new \Classifieds\Lists\Ads($id);
     $L->addCats(CLASSIFIEDS_getParam('cats', 'array'))
-        ->addTypes(CLASSIFIEDS_getParam('types', 'array'));
+        ->addTypes(CLASSIFIEDS_getParam('types', 'array'))
+        ->setUid(CLASSIFIEDS_getParam('uid', 'int'));
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['blocktitle']);
     $menu_opt = $LANG_ADVT['mnu_home'];

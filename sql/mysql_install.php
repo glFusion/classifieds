@@ -30,8 +30,6 @@ $NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
   `perm_members` tinyint(1) unsigned NOT NULL DEFAULT '2',
   `perm_anon` tinyint(1) unsigned NOT NULL DEFAULT '2',
   `image` varchar(100) DEFAULT NULL,
-  `fgcolor` varchar(10) DEFAULT NULL,
-  `bgcolor` varchar(10) DEFAULT NULL,
   `lft` int(5) unsigned NOT NULL DEFAULT '0',
   `rgt` int(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`cat_id`),
@@ -117,11 +115,11 @@ $DEFVALUES['ad_types'] = "INSERT INTO {$_TABLES['ad_types']}
 $DEFVALUES['category'] = "INSERT INTO {$_TABLES['ad_category']} (
         papa_id, cat_name, description,
         group_id, owner_id, perm_owner, perm_group, perm_members, perm_anon,
-        image, fgcolor, bgcolor
+        image
     ) VALUES (
         1, 'Root', 'Root Category',
         13, 2, 3, 3, 2, 2,
-        '', '#000066', '#6699ff'
+        ''
     )";
 
 ?>

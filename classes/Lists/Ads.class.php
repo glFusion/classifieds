@@ -42,6 +42,10 @@ class Ads
      * @var array */
     protected $type_ids = array();
 
+    /** User ID to filter by poster.
+     * @var integer */
+    private $uid = 0;
+
 
     /**
      * Set the category if one is specified.
@@ -76,7 +80,7 @@ class Ads
         $T->set_file('catlist', 'ads.thtml');
 
         // Get the ads for this category, starting at the requested page
-        $sql = "SELECT ad.*, ad.add_date as ad_add_date, cat.*
+        $sql = "SELECT ad.*, ad.add_date as ad_add_date, cat.cat_id, cat.cat_name
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON cat.cat_id = ad.cat_id
@@ -84,6 +88,9 @@ class Ads
             COM_getPermSQL('AND', 0, 2, 'cat');
         if ($this->where_clause != '') {
             $sql .= " AND $this->where_clause ";
+        }
+        if ($this->uid > 0) {
+            $sql .= " AND ad.uid = {$this->uid}";
         }
         if (!empty($this->type_ids)) {
             $sql .= ' AND ad.ad_type in (' . implode(',', $this->type_ids) . ')';
@@ -143,8 +150,6 @@ class Ads
         $counter = 0;
         while ($row = DB_fetchArray($result, false)) {
             $T->set_var(array(
-                'fgColor'   => $row['fgcolor'],
-                'bgColor'   => $row['bgcolor'],
                 'cat_id'    => $row['cat_id'],
                 'subject'   => strip_tags($row['subject']),
                 'ad_id'     => $row['ad_id'],
@@ -154,10 +159,10 @@ class Ads
                 'cat_name'  => $row['cat_name'],
                 'cat_url'   => CLASSIFIEDS_makeURL('home', $row['cat_id']),
                 'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
-                'descript' => substr(strip_tags($row['description']), 0, 300),
-                'ellipses'  => strlen($row['description']) > 300 ? '...' : '',
+                //'descript' => substr(strip_tags($row['description']), 0, 300),
+                //'ellipses'  => strlen($row['description']) > 300 ? '...' : '',
                 'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
-                'tn_cellwidth' => $_CONF_ADVT['thumb_max_size'] - 20,
+                //'tn_cellwidth' => $_CONF_ADVT['thumb_max_size'] - 20,
                 //'adblock'   => PLG_displayAdBlock('classifieds_list', ++$counter),
             ) );
             $filename = Image::getFirst($row['ad_id']);
@@ -168,7 +173,8 @@ class Ads
             $T->parse('QRow', 'QueueRow', true);
         }   // while
 
-
+        // Create the category filter checkboxes.
+        // Only show categories that are in use.
         $T->set_block('catlist', 'CatChecks', 'CC');
         foreach (Category::getTree() as $Cat) {
             if (Category::TotalAds($Cat->getID()) == 0) {
@@ -181,8 +187,14 @@ class Ads
             ) );
             $T->parse('CC', 'CatChecks', true);
         }
+
+        // Create the ad type filter checkboxes.
+        // Only show types that are in use.
         $T->set_block('catlist', 'TypeChecks', 'TC');
         foreach (AdType::getAll() as $AT) {
+            if (!$AT->isUsed()) {
+                continue;
+            }
             $T->set_var(array(
                 'type_id'   => $AT->getID(),
                 'type_name' => $AT->getDscp(),
@@ -191,12 +203,41 @@ class Ads
             $T->parse('TC', 'TypeChecks', true);
         }
 
+        // Create the user filter checkboxes.
+        // Only show users who have posted ads.
+        $T->set_block('catlist', 'UserChecks', 'UC');
+        $sql = "SELECT DISTINCT(ad.uid), u.username, u.fullname
+            FROM {$_TABLES['ad_ads']} ad
+            LEFT JOIN {$_TABLES['users']} u
+            ON ad.uid = u.uid";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $T->set_var(array(
+                'uid'   => $A['uid'],
+                'user_name' => COM_getDisplayName($A['uid'], $A['username'], $A['fullname']),
+                'uid_sel' => $A['uid'] == $this->uid ? 'selected="selected"' : '',
+            ) );
+            $T->parse('UC', 'UserChecks', true);
+        }
+
         $T->set_var('totalAds', $totalAds);
         $T->set_var('adsStart', $startEntry);
         $T->set_var('adsEnd', $endEntry);
         $T->parse('output', 'catlist');
         return $T->finish($T->get_var('output'));
     }   // function Render()
+
+
+    /**
+     * Set the user ID to filter ads by poster.
+     *
+     * @param   integer $uid        User ID
+     * @return  object  $this
+     */
+    public function setUid($uid)
+    {
+        $this->uid = (int)$uid;
+    }
 
 
     /**
@@ -233,6 +274,26 @@ class Ads
             }
         } elseif ((int)$cats > 0) {
             $this->cat_ids[] = (int)$cats;
+        }
+        return $this;
+    }
+
+
+    /**
+     * Add user IDs to the filter.
+     * May be called multiple times.
+     *
+     * @param   array   $ids    Array of user IDs
+     * @return  object  $this
+     */
+    public function addUsers($ids=array())
+    {
+        if (is_array($ids)) {
+            foreach ($ids as $id) {
+                $this->uids[] = (int)$id;
+            }
+        } elseif ((int)$ids > 0) {
+            $this->uids[] = (int)$ids;
         }
         return $this;
     }

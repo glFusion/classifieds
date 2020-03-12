@@ -73,14 +73,6 @@ class Category
      * @var string */
     private $image = '';
 
-    /** Foreground color.
-     * @var string */
-    private $fgcolor = '#000000';
-
-    /** Background color.
-     * @var string */
-    private $bgcolor = '#FFFFFF';
-
     /** Path to category images.
      * @var string */
     private $imgPath = '';
@@ -124,8 +116,6 @@ class Category
         $this->group_id = (int)$A['group_id'];
         $this->owner_id = (int)$A['owner_id'];
         $this->image    = (int)$A['image'];
-        $this->fgcolor  = $A['fgcolor'];
-        $this->bgcolor  = $A['bgcolor'];
         if ($fromDB) {      // perm values are already int
             $this->perm_owner = (int)$A['perm_owner'];
             $this->perm_group = (int)$A['perm_group'];
@@ -248,10 +238,7 @@ class Category
             perm_owner = {$this->perm_owner},
             perm_group = {$this->perm_group},
             perm_members = {$this->perm_members},
-            perm_anon = {$this->perm_anon},
-            fgcolor = '{$this->fgcolor}',
-            bgcolor = '{$this->bgcolor}'";
-            //parent_map = '$parent_map'";
+            perm_anon = {$this->perm_anon}";
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         $result = DB_query($sql);
@@ -476,8 +463,6 @@ class Category
         $T->set_var(array(
             'catname'   => $this->cat_name,
             'description' => $this->dscp,
-            'fgcolor'   => $this->fgcolor,
-            'bgcolor'   => $this->bgcolor,
             'cat_id'    => $this->cat_id,
             'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?categories',
             'img_url'   => self::thumbUrl($this->image),
@@ -492,13 +477,6 @@ class Category
             'sel_parent_cat' => self::buildSelection(self::getParent($this->cat_id), $this->cat_id),
             'have_propagate' => $this->isNew() ? '' : 'true',
             'orig_pcat' => $this->papa_id,
-            'colorpicker' => LGLIB_colorpicker(array(
-                    'fg_id'     => 'fgcolor',
-                    'fg_color'  => $this->fgcolor,
-                    'bg_id'     => 'bgcolor',
-                    'bg_color'  => $this->bgcolor,
-                    'sample_id' => 'sample',
-                )),
         ) );
         $T->parse('output','modify');
         return $T->finish($T->get_var('output'));
@@ -1168,28 +1146,6 @@ class Category
     public function getDscp()
     {
         return $this->dscp;
-    }
-
-
-    /**
-     * Get the foreground color string.
-     *
-     * @return  string      Foreground color
-     */
-    public function getFGColor()
-    {
-        return $this->fgcolor;
-    }
-
-
-    /**
-     * Get the background color string.
-     *
-     * @return  string      Background color
-     */
-    public function getBGColor()
-    {
-        return $this->bgcolor;
     }
 
 
