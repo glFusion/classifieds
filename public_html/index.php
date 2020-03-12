@@ -211,30 +211,14 @@ case 'byposter':
 
 case 'home':
 default:
-    // Display either the categories, or the ads under a requested
-    // category
-    //$T->set_var('header', $LANG_ADVT['blocktitle']);
+    // Display the ad listing, possibly filtered by category and type
     $L = new \Classifieds\Lists\Ads($id);
     $L->addCats(CLASSIFIEDS_getParam('cats', 'array'))
         ->addTypes(CLASSIFIEDS_getParam('types', 'array'));
     $content .= $L->Render();
-    break;
-
-    $C = new \Classifieds\Category($id);
-    if ($C->getParentID() > 0) {
-        // A sub-category, display the ads
-        //$L = new \Classifieds\AdList_Cat($id);
-        $L = new \Classifieds\Lists\Ads\byCat($id);
-        $content .= $L->Render();
-        $pageTitle = $L->getCat()->getName();
-    } else {
-        // The root category, display the sub-categories
-        $content .= \Classifieds\Lists\Categories::Render();
-    }
     $T->set_var('header', $LANG_ADVT['blocktitle']);
     $menu_opt = $LANG_ADVT['mnu_home'];
     break;
-
 }   // switch ($mode)
 
 if (!empty($view)) COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
