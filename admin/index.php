@@ -323,7 +323,7 @@ default:
 }
 
 // Generate the common header for all admin pages
-echo CLASSIFIEDS_siteHeader();
+echo Classifieds\Menu::siteHeader();
 $T = new Template($_CONF_ADVT['path'] . '/templates/admin/');
 $T->set_file('admin', 'index.thtml');
 $T->set_var(array(
@@ -333,6 +333,6 @@ $T->set_var(array(
 ) );
 $T->parse('output','admin');
 echo $T->finish($T->get_var('output'));
-echo CLASSIFIEDS_siteFooter();
+echo Classifieds\Menu::siteFooter();
 
 ?>

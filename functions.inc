@@ -169,10 +169,10 @@ function plugin_savecomment_classifieds($title,$comment,$id,$pid,$postmode)
             'classifieds', $postmode);
 
     if ($ret > 0) {         // failure, return to comment form
-        return CLASSIFIEDS_siteHeader()
+        return Classifieds\Menu::siteHeader()
             . CMT_commentform($title, $comment, $id, $pid,
                     'classifieds', $LANG03[14], $postmode)
-            . CLASSIFIEDS_siteFooter();
+            . Classifieds\Menu::siteFooter();
     }
 
     // success - update the comment counter for this ad
