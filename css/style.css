@@ -342,6 +342,10 @@ img.advtImageThumb.v2 {
 form#adlistopts h4 {
     margin-bottom: 2px;
 }
-form#adlistopts div.uk-form-controls label{
+
+form#adlistopts div.uk-form-controls input[type="checkbox"] {
+    margin-top: 0px;
+}
+form#adlistopts div.uk-form-controls label {
     font-weight:inherit;
 }
