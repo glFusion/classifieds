@@ -655,58 +655,6 @@ function plugin_dopluginsearch_classifieds(
 
 
 /**
- * Returns additional code to be placed in the HTML header.
- *
- * @return  string  Additional Header Code
- */
-function Xplugin_getheadercode_classifieds()
-{
-    global $_CONF, $_CONF_ADVT, $_TABLES;
-
-    $retval = '';       // Return value
-    $type = '';         // Type of item being displayed (detail only for now)
-
-    // Check the current URL for content that we should modify
-    $uri = strtolower(COM_getCurrentURL());
-
-    if ($_CONF['url_rewrite']) {
-        if (preg_match("/classifieds\/index\.php\/detail\/(.*)/", $uri, $match)) {
-            $type = 'detail';
-        }
-    } else {
-        if (preg_match("/classifieds\/index\.php\?mode=detail&id=(.*)/", $uri, $match)) {
-            $type = 'detail';
-        }
-    }
-
-    if (isset($match[1])) {
-        $id = COM_applyFilter($match[1]);
-        if ($id == '') {
-            $type= '';
-        }
-    } else {
-        return;
-    }
-
-    // Retrieve the relevant content from DB
-    $target = '';
-
-    switch ($type) {
-    case 'detail':
-        $exp_date = DB_getItem($_TABLES['ad_ads'], 'exp_date',
-                "ad_id = '" . DB_escapeString($id) . "'");
-        if (!empty($exp_date)) {
-            $retval .= '<meta http-equiv="expires" content="' .
-                    gmdate('D, d M Y H:i:s T', $exp_date) . '">' . LB;
-        }
-        break;
-    }
-
-    return $retval;
-}
-
-
-/**
  * Returns additional CSS files to be imported.
  * Checks first for a layout-specific version, then loads the default if none.
  *
@@ -1811,23 +1759,6 @@ function CLASSIFIEDS_auditLog($logentry = '')
 
     // Write the log entry to the file
     fputs($file, "$timestamp ($byuser) - $logentry\n");
-}
-
-
-/**
- * Get the comment count for a single ad item/
- *
- * @param   string  $ad_id      ID of ad to check
- * @return  integer             Count of related comments
- */
-function XCLASSIFIEDS_commentCount($ad_id)
-{
-    global $_TABLES;
-
-    $count = (int)DB_count($_TABLES['comments'],
-                    array('sid', 'type'),
-                    array($ad_id, 'classifieds') );
-    return $count;
 }
 
 
