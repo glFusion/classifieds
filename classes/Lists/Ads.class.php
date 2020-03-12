@@ -207,7 +207,7 @@ class Ads
      */
     public function addTypes($types=array())
     {
-        if (is_array($typs)) {
+        if (is_array($types)) {
             foreach ($types as $id) {
                 $this->type_ids[] = (int)$id;
             }
