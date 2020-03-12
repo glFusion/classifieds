@@ -3,14 +3,15 @@
  * Class to manage ad types.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.0
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Classifieds;
+
 
 /**
  * Class for ad type.
@@ -18,9 +19,17 @@ namespace Classifieds;
  */
 class AdType
 {
-    /** Properties array.
-     * @var array */
-    var $properties;
+    /** Type record ID.
+     * @var integer */
+    private $id = 0;
+
+    /** Description.
+     * @var string */
+    private $dscp = '';
+
+    /** Enabled flag.
+     * @var boolean */
+    private $enabled = 1;
 
     /** Error string or value, to be accessible by the calling routines.
      * @var mixed */
@@ -32,56 +41,53 @@ class AdType
      * Reads in the specified class, if $id is set.  If $id is zero,
      * then a new entry is being created.
      *
-     * @param   integer $id Optional type ID
+     * @param   array|integer $id Optional type ID or data record
      */
     public function __construct($id=0)
     {
-        $id = (int)$id;
-        if ($id < 1) {
-            $this->id = 0;
-            $this->description = '';
-            $this->enabled = 1;
+        if (is_array($id)) {
+            $this->setVars($id);
         } else {
-            $this->id = $id;
-            $this->ReadOne();
+            $this->id = (int)$id;
+            if ($id > 0) {
+                $this->ReadOne();
+            }
         }
     }
 
 
     /**
-     * Set the value of an internal property.
+     * Get an instance of an ad type..
+     * First checks the static array in case the object has already been read,
+     * and finally reads from the DB.
      *
-     * @param   string  $key    Property name
-     * @param   mixed   $value  Value to set
+     * @param   integer|array   $type   Ad type record or integer ID
+     * @return  object              Ad type object
      */
-    public function __set($key, $value)
+    public static function getInstance($type)
     {
-        switch ($key) {
-        case 'id':
-            $this->properties[$key] = (int)$value;
-            break;
-        case 'description':
-            $this->properties[$key] = trim($value);
-            break;
-        case 'enabled':
-            $this->properties[$key] = $value == 1 ? 1 : 0;
-            break;
+        static $Types = array();
+
+        if (is_array($type) && isset($Types['id'])) {
+            $type_id = $type['id'];
+        } else {
+            $type_id = $type;
         }
+        if (!array_key_exists($type_id, $Types)) {
+            $Types[$type_id] = new self($type);
+        }
+        return $Types[$type_id];
     }
 
 
     /**
-     * Get the value of a property, or NULL if not set.
+     * Set the isAdmin flag.
      *
-     * @param   string  $key    Name of property
-     * @return  mixed   $value  Value of property, NULL if not set
+     * @param   boolean $admin True for admin access, False otherwise.
      */
-    public function __get($key)
+    public function setAdmin($admin)
     {
-        if (isset($this->properties[$key]))
-            return $this->properties[$key];
-        else
-            return NULL;
+        $this->isAdmin = $admin ? true : false;
     }
 
 
@@ -94,8 +100,8 @@ class AdType
     {
         if (!is_array($row)) return;
 
-        $this->id = $row['id'];
-        $this->description = $row['description'];
+        $this->id = (int)$row['id'];
+        $this->dscp = $row['description'];
         $this->enabled = isset($row['enabled']) && $row['enabled'] ? 1 : 0;
     }
 
@@ -120,6 +126,26 @@ class AdType
                             WHERE id=$id");
         $row = DB_fetchArray($result, false);
         $this->SetVars($row);
+    }
+
+
+    /**
+     * Get all the ad types, ordered by name.
+     *
+     * @return  array   Array of AdType objects
+     */
+    public static function getAll()
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $sql = "SELECT * FROM {$_TABLES['ad_types']}
+            ORDER BY description ASC";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $retval[] = new self($A);
+        }
+        return $retval;
     }
 
 
@@ -162,7 +188,7 @@ class AdType
             $sql1 = "UPDATE {$_TABLES['ad_types']} SET ";
             $sql3 = " WHERE id=" . $this->id;
         }
-        $sql2 = "description = '" . DB_escapeString($this->description) . "',
+        $sql2 = "description = '" . DB_escapeString($this->dscp) . "',
                 enabled = {$this->enabled}";
         $sql = $sql1 . $sql2 . $sql3;
         $res = DB_query($sql);
@@ -177,7 +203,7 @@ class AdType
      */
     public function isValidRecord()
     {
-        if ($this->description == '') {
+        if ($this->dscp == '') {
             return false;
         } else {
             return true;
@@ -199,18 +225,14 @@ class AdType
         if ($id > 0) $this->Read($id);
 
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
-        if ($_CONF_ADVT['_is_uikit']) {
-            $T->set_file('admin','adtypeform.uikit.thtml');
-        } else {
-            $T->set_file('admin','adtypeform.thtml');
-        }
+        $T->set_file('admin','adtypeform.thtml');
         $T->set_var(array(
             'pi_admin_url'  => $_CONF_ADVT['admin_url'],
             'lang_header'   => $id == 0 ? $LANG_ADVT['newadtypehdr'] : $LANG_ADVT['editadtypehdr'],
-            'cancel_url'    => $_CONF_ADVT['admin_url'] . '/index.php?admin=type',
+            'cancel_url'    => $_CONF_ADVT['admin_url'] . '/index.php?types',
             'show_name'     => $this->showName,
             'type_id'       => $this->id,
-            'description'   => htmlspecialchars($this->description),
+            'description'   => htmlspecialchars($this->dscp),
             'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
         ) );
 
@@ -222,7 +244,7 @@ class AdType
         }
         $T->parse('output','admin');
         return $T->finish($T->get_var('output'));
-    }   // function showForm()
+    }
 
 
     /**
@@ -236,9 +258,14 @@ class AdType
     {
         global $_TABLES;
 
-        return COM_optionList($_TABLES['ad_types'],
-                'id,description', $sel, 1, 'enabled=1');
-    }   // function makeSelection()
+        return COM_optionList(
+            $_TABLES['ad_types'],
+            'id,description',
+            $sel,
+            1,
+            'enabled=1'
+        );
+    }
 
 
     /**
@@ -298,6 +325,8 @@ class AdType
      */
     public static function getDescription($id)
     {
+        return self::getInstance($id)->getDscp();
+
         global $_TABLES;
         static $desc = array();
 
@@ -306,6 +335,155 @@ class AdType
             $desc[$id] = DB_getItem($_TABLES['ad_types'], 'description', "id='$id'");
         }
         return $desc[$id];
+    }
+
+
+    public function getID()
+    {
+        return (int)$this->id;
+    }
+
+    /**
+     * Get the description for this ad type.
+     *
+     * @return  string      Description string
+     */
+    public function getDscp()
+    {
+        return $this->dscp;
+    }
+
+
+    /**
+     * Create admin list of Ad Types.
+     *
+     * @return  string  HTML for admin list
+     */
+    public static function adminList()
+    {
+        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, $_CONF_ADVT, $LANG_ADVT;
+
+        USES_lib_admin();
+        $retval = '';
+
+        $header_arr = array(
+            array(
+                'text' => $LANG_ADVT['edit'],
+                'field' => 'edit',
+                'sort' => false,
+                'align' => 'center',
+            ),
+            array(
+                'text' => $LANG_ADVT['description'],
+                'field' => 'description',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['enabled'],
+                'field' => 'enabled',
+                'sort' => false,
+                'align' => 'center',
+            ),
+            array(
+                'text' => $LANG_ADVT['delete'],
+                'field' => 'delete',
+                'sort' => false,
+                'align' => 'center',
+            ),
+        );
+        $defsort_arr = array('field' => 'description', 'direction' => 'asc');
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => $_CONF_ADVT['admin_url'] . '/index.php',
+        );
+        $query_arr = array(
+            'table' => 'ad_types',
+            'sql' => "SELECT * FROM {$_TABLES['ad_types']} ",
+            'query_fields' => array(),
+            'default_filter' => ''
+        );
+        $form_arr = '';
+
+        $retval .= COM_createLink(
+            $LANG_ADVT['new_type'],
+            $_CONF_ADVT['admin_url'] . '/index.php?editadtype=x',
+            array(
+                'class' => 'uk-button uk-button-success',
+                'style' => 'float:left',
+            )
+        );
+        $retval .= ADMIN_list(
+            'classifieds',
+            array(__CLASS__, 'getListField'),
+            $header_arr,
+            $text_arr, $query_arr, $defsort_arr, '', '', '', $form_arr
+        );
+        return $retval;
+    }
+
+
+    /**
+     * Ad type management - return the display version for a single field.
+     *
+     * @param   string  $fieldname  Name of the field
+     * @param   string  $fieldvalue Value to be displayed
+     * @param   array   $A          Associative array of all values available
+     * @param   array   $icon_arr   Array of icons available for display
+     * @return  string              Complete HTML to display the field
+     */
+    public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
+    {
+        global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
+
+        $retval = '';
+
+        switch($fieldname) {
+        case 'edit':
+            $retval = COM_createLink(
+                '',
+                $_CONF_ADVT['admin_url'] . "/index.php?editadtype={$A['id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit'
+                )
+            );
+            break;
+
+        case 'enabled':
+            if ($fieldvalue == 1) {
+                $chk = ' checked="checked" ';
+                $enabled = 1;
+            } else {
+                $chk = '';
+                $enabled = 0;
+            }
+            $fld_id = $fieldname . '_' . $A['id'];
+            $retval =
+                "<input name=\"{$fld_id}\" id=\"{$fld_id}\" " .
+                "type=\"checkbox\" $chk " .
+                "onclick='ADVTtoggleEnabled(this, \"{$A['id']}\", \"adtype\", \"{$_CONF['site_url']}\");' ".
+                ">\n";
+            break;
+
+        case 'delete':
+            if (DB_count($_TABLES['ad_ads'], 'ad_type', $A['id']) == 0) {
+                $retval .= COM_createLink(
+                    '',
+                    $_CONF_ADVT['admin_url'] .
+                        "/index.php?deleteadtype=x&amp;type_id={$A['id']}",
+                    array(
+                        'title' => 'Delete this item',
+                        'class' => 'uk-icon uk-icon-trash advt_icon_danger',
+                        'onclick' => "return confirm('Do you really want to delete this item?');",
+                    )
+                );
+            }
+            break;
+
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+        return $retval;
     }
 
 }   // class AdType

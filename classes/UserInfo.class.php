@@ -3,14 +3,15 @@
  * Class to handle user account info for the Classifieds plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Classifieds;
+
 
 /**
  * Class for user account info.
@@ -18,9 +19,41 @@ namespace Classifieds;
  */
 class UserInfo
 {
-    /** Internal properties accessed via `__set()` and `__get()`.
-     * @var array */
-    private $properties;
+    /** glFusion user ID.
+     * @var integer */
+    private $uid = 0;
+
+    /** Street address.
+     * @var string */
+    private $address = '';
+
+    /** City name.
+     * @var string */
+    private $city = '';
+
+    /** State.
+     * @var string */
+    private $state = '';
+
+    /** Zip code.
+     * @var string */
+    private $postcode = '';
+
+    /** Telephone number.
+     * @var string */
+    private $tel = '';
+
+    /** Notify prior to expiration?
+     * @var integer */
+    private $notify_exp = 0;
+
+    /** Notify when a comment is left?
+     * @var integer */
+    private $notify_comment = 0;
+
+    /** Balance available to run ads, in days.
+     * @var integer */
+    private $days_balance = 0;
 
     /** Field names and types.
      * @var array */
@@ -31,7 +64,6 @@ class UserInfo
         'state' => 'string',
         'postcode' => 'string',
         'tel' => 'string',
-        'fax' => 'string',
         'notify_exp' => 'bool',
         'notify_comment' => 'bool',
         'days_balance' => 'int',
@@ -78,52 +110,6 @@ class UserInfo
 
 
     /**
-     * Set the value of a property.
-     *
-     * @param   string  $key    Variable name to set
-     * @param   mixed   $value  Value for variable
-     */
-    public function __set($key, $value)
-    {
-        switch($key) {
-        case 'uid':
-        case 'days_balance':
-            $this->properties[$key] = (int)$value;
-            break;
-
-        case 'notify_exp':
-        case 'notify_comment':
-            $this->properties[$key] = $value == 1 ? 1 : 0;
-            break;
-
-        case 'address':
-        case 'city':
-        case 'state':
-        case 'postcode':
-        case 'tel':
-        case 'fax':
-            $this->properties[$key] = trim($value);
-            break;
-        }
-    }
-
-
-    /**
-     * Get the value of a property, or NULL if not defined.
-     *
-     * @param   string  $key    Name of variable to retrieve
-     * @return  mixed           Value of variable, NULL if undefined
-     */
-    public function __get($key)
-    {
-        if (isset($this->properties[$key]))
-            return $this->properties[$key];
-        else
-            return NULL;
-    }
-
-
-    /**
      * Sets all variables to the matching values from $rows.
      *
      * @param   array   $A  Array of values, from DB or $_POST
@@ -141,7 +127,16 @@ class UserInfo
         }
 
         foreach ($this->fields as $fld=>$type) {
-            $this->$fld = isset($A[$pfx.$fld]) ? $A[$pfx.$fld] : '';
+            switch ($type) {
+            case 'int':
+                $this->$fld = (int)$A[$pfx.$fld];
+                break;
+            case 'bool':
+                $this->$fld = isset($A[$pfx.$fld]) && $A[$pfx.$fld] ? 1 : 0;
+                break;
+            default:
+                $this->$fld = isset($A[$pfx.$fld]) ? $A[$pfx.$fld] : '';
+            }
         }
 
         // Update the actual max number of days that this user can
@@ -190,11 +185,11 @@ class UserInfo
      */
     public function Save()
     {
-        global $_TABLES;
+        global $_TABLES, $LANG_ADVT;
 
         $sql = "INSERT INTO {$_TABLES['ad_uinfo']}
                 (uid, address, city, state, postcode,
-                tel, fax, notify_exp, notify_comment)
+                tel, notify_exp, notify_comment)
             VALUES (
                 '{$this->uid}',
                 '" . DB_escapeString($this->address) . "',
@@ -202,7 +197,6 @@ class UserInfo
                 '" . DB_escapeString($this->state) . "',
                 '" . DB_escapeString($this->postcode) . "',
                 '" . DB_escapeString($this->tel) . "',
-                '" . DB_escapeString($this->fax) . "',
                 '{$this->notify_exp}',
                 '{$this->notify_comment}'
             )
@@ -212,13 +206,17 @@ class UserInfo
                 state = '" . DB_escapeString($this->state) . "',
                 postcode = '" . DB_escapeString($this->postcode) . "',
                 tel = '" . DB_escapeString($this->tel) . "',
-                fax = '" . DB_escapeString($this->fax) . "',
                 notify_exp = '{$this->notify_exp}',
                 notify_comment = '{$this->notify_comment}'
             ";
         //echo $sql;die;
         DB_query($sql);
-        Cache::delete('uid_' . $this->uid);
+        if (!DB_error()) {
+            COM_setMsg($LANG_ADVT['msg_account_updated']);
+            Cache::delete('uid_' . $this->uid);
+        } else {
+            COM_setMsg($LANG_ADVT['msg_save_error'], 'error');
+        }
     }
 
 
@@ -248,8 +246,7 @@ class UserInfo
         global $_TABLES, $_CONF, $_CONF_ADVT, $LANG_ADVT, $_USER;
 
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
-        $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
-        $T->set_file('accountinfo', "account_settings$tpltype.thtml");
+        $T->set_file('accountinfo', "account_settings.thtml");
         if ($type != 'advt') {
             // Called from the use settings page
             $T->set_var('profileedit', 'true');
@@ -261,7 +258,6 @@ class UserInfo
             'uinfo_city'        => $this->city,
             'uinfo_state'       => $this->state,
             'uinfo_tel'         => $this->tel,
-            'uinfo_fax'         => $this->fax,
             'uinfo_postcode'    => $this->postcode,
             'exp_notify_checked' => $this->notify_exp == 1 ?
                         'checked="checked"' : '',
@@ -358,6 +354,62 @@ class UserInfo
         }
         return $retval;
     }
+
+
+    /**
+     * Get the telephone number.
+     *
+     * @return  string      Phone number
+     */
+    public function getTelephone()
+    {
+        return $this->tel;
+    }
+
+
+    /**
+     * Get the street address.
+     *
+     * @return  string      Street address
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+
+    /**
+     * Get the City name.
+     *
+     * @return  string      City name
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+
+    /**
+     * Get the State name.
+     *
+     * @return  string      State
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+
+    /**
+     * Get the postal code.
+     *
+     * @return  string      Postal code
+     */
+    public function getPostal()
+    {
+        return $this->postcode;
+    }
+
 
 }   // class UserInfo
 

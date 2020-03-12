@@ -3,14 +3,16 @@
  * List ads by Cagetory.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Classifieds\Lists\Ads;
+use Classifieds\Category;
+
 
 /**
  * Display the ads under the given category ID.
@@ -31,7 +33,7 @@ class byCat extends \Classifieds\Lists\Ads
     public function __construct($cat_id = 0)
     {
         $this->cat_id = (int)$cat_id;
-        $this->Cat = new \Classifieds\Category($this->cat_id);
+        $this->Cat = new Category($this->cat_id);
     }
 
     /**
@@ -56,7 +58,7 @@ class byCat extends \Classifieds\Lists\Ads
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
         $T->set_file('header', 'adlisthdrCat.thtml');
         $T->set_var('pi_url', $_CONF_ADVT['url']);
-        $T->set_var('catimg_url', \Classifieds\Image::thumbUrl($this->Cat->image));
+        $T->set_var('catimg_url', \Classifieds\Image::thumbUrl($this->Cat->getImage()));
 
         // Set the breadcrumb navigation
         $T->set_var('breadcrumbs', $this->Cat->BreadCrumbs(true));
@@ -83,7 +85,7 @@ class byCat extends \Classifieds\Lists\Ads
                     '/index.php?mode=edit&cat_id=' . $this->cat_id;
             }
             $T->set_var(array(
-                'cat_id'        => $this->Cat->cat_id,
+                'cat_id'        => $this->cat_id,
                 'sub_vis'       => $sub_vis,
                 'unsub_vis'     => $unsub_vis,
                 'can_subscribe' => 'true',
@@ -104,36 +106,38 @@ class byCat extends \Classifieds\Lists\Ads
         $cat_for_adlist = $this->cat_id;
 
         // Get the sub-categories which have this category as their parent
-        if ($this->Cat->papa_id == 0) {
+        if ($this->Cat->getParentID() == 0) {
             // For top category, show only immediate subordinates to avoid a
             // huge list
-            $subcats = \Classifieds\Category::SubCats($this->cat_id, 1);
+            $subcats = Category::SubCats($this->cat_id, 1);
         } else {
             // Use a large depth to get counts and ads from sub-sub-categories
-            $subcats = \Classifieds\Category::SubCats($this->cat_id, 99);
+            $subcats = Category::SubCats($this->cat_id, 99);
         }
         $listvals = '';
         $max = count($CatListcolors);
         $i = 0;
-        foreach ($subcats as $row) {
+        foreach ($subcats as $Cat) {
             // for each sub-category, add it to the list for getting ads
-            $cat_for_adlist .= ",{$row->cat_id}";
+            $cat_for_adlist .= ",{$Cat->getID()}";
 
             $T->set_block('header', 'SubCat', 'sCat');
-            if ($row->fgcolor == '' || $row->bgcolor == '') {
+            if ($Cat->getFGColor() == '' || $Cat->getBGColor() == '') {
                 if ($i >= $max) $i = 0;
                 $T->set_var('bgcolor', $CatListcolors[$i][0]);
                 $T->set_var('fgcolor', $CatListcolors[$i][1]);
                 $i++;
             } else {
-                $T->set_var('bgcolor', $row->bgcolor);
-                $T->set_var('fgcolor', $row->fgcolor);
+                $T->set_var('bgcolor', $Cat->getBGColor());
+                $T->set_var('fgcolor', $Cat->getFGColor());
             }
 
-            $T->set_var('subcat_url',
-                CLASSIFIEDS_makeURL('list', $row->cat_id));
-            $T->set_var('subcat_name', $row->cat_name);
-            $T->set_var('subcat_count', \Classifieds\Category::TotalAds($row->cat_id));
+            $T->set_var(
+                'subcat_url',
+                CLASSIFIEDS_makeURL('list', $Cat->getID())
+            );
+            $T->set_var('subcat_name', $Cat->getName());
+            $T->set_var('subcat_count', Category::TotalAds($Cat->getID()));
             $T->parse('sCat', 'SubCat', true);
         }
 
@@ -143,8 +147,9 @@ class byCat extends \Classifieds\Lists\Ads
                 WHERE cat_id IN ($cat_for_adlist)
                 AND exp_date > $time";
         $result = DB_query($sql);
-        if (!$result)
+        if (!$result) {
             return CLASSIFIEDS_errorMsg($LANG_ADVT['database_error'], 'alert');
+        }
         $totalAds = DB_numRows($result);
 
         $this->where_clause = " ad.cat_id IN ($cat_for_adlist)

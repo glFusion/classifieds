@@ -17,98 +17,96 @@ namespace Classifieds;
  */
 class Category
 {
-    /** Internal properties accessed via `__set()` and `__get()`.
-     * @var array */
-    private $properties;
+    /** Category record ID.
+     * @var integer */
+    private $cat_id = 0;
 
-    /** Flag to indicate that this is a new record.
-     * @var boolean */
-    public $isNew;
+    /** Parent Category record ID.
+     * @var integer */
+    private $papa_id = 0;
+
+    /** Group ID for permissions.
+     * @var integer */
+    private $group_id = 13;
+
+    /** Owner ID.
+     * @var integer */
+    private $owner_id = 2;
+
+    /** Owner permission.
+     * @var integer */
+    private $perm_owner = 3;
+
+    /** Group permission.
+     * @var integer */
+    private $perm_group = 2;
+
+    /** Members permission.
+     * @var integer */
+    private $perm_members = 2;
+
+    /** Anonymous permission.
+     * @var integer */
+    private $perm_anon = 2;
+
+    /** Left category record ID, for MPTT.
+     * @var integer */
+    private $lft = 0;
+
+    /** Right category record ID, for MPTT.
+     * @var integer */
+    private $rgt = 0;
+
+    /** Category short name.
+     * @var string */
+    private $cat_name = '';
+
+    /** Display name.
+     * @var string */
+    private $disp_name;
+
+    /** Full text description
+     * @var string */
+    private $dscp = '';
+
+    /** Image filename.
+     * @var string */
+    private $image = '';
+
+    /** Search keywords.
+     * @var string */
+    private $keywords = '';
+
+    /** Foreground color.
+     * @var string */
+    private $fgcolor = '#000000';
+
+    /** Background color.
+     * @var string */
+    private $bgcolor = '#FFFFFF';
 
     /** Path to category images.
      * @var string */
-    private $imgPath;
+    private $imgPath = '';
+
 
     /**
      * Constructor - Load default values and read a record.
      *
-     * @param   integer $catid  Optional category ID to load
-     * @param   array|null  $data   Category record if already read
+     * @param   array|integer   $data   Category record or ID
      */
-    public function __construct($catid = 0, $data = NULL)
+    public function __construct($data = 0)
     {
         global $_CONF_ADVT;
 
-        // Set default colors. Other fields can be empty
-        $this->fgcolor = '#000000';
-        $this->bgcolor = '#FFFFFF';
         $catid = (int)$catid;
         $this->imgPath = $_CONF_ADVT['imgpath'] . '/cat/';
-        if ($catid > 0) {
-            $this->cat_id = $catid;
-            if ($data !== NULL) {
-                $this->SetVars($data, true);
-                $this->isNew = false;
-            } elseif ($this->Read()) {
-                $this->isNew = false;
-            } else {
-                $this->cat_id = 0;
-                $this->isNew = true;
-            }
+        if (is_array($data)) {
+            $this->setVars($data, true);
         } else {
-            $this->isNew = true;
+            $this->cat_id = (int)$data;
+            $this->Read();
         }
-    }
-
-
-    /**
-     * Sets a property value.
-     *
-     * @param   string  $key    Property name
-     * @param   mixed   $value  Property value
-     */
-    public function __set($key, $value)
-    {
-        switch ($key) {
-        case 'cat_id':
-        case 'papa_id':
-        case 'group_id':
-        case 'owner_id':
-        case 'perm_owner':
-        case 'perm_group':
-        case 'perm_members':
-        case 'perm_anon':
-        case 'lft':
-        case 'rgt':
-            $this->properties[$key] = (int)$value;
-            break;
-
-        case 'cat_name':
-        case 'disp_name':
-        case 'description':
-        case 'image':
-        case 'keywords':
-        case 'fgcolor':
-        case 'bgcolor':
-        //case 'parent_map':
-            $this->properties[$key] = $value;
-            break;
-        }
-    }
-
-
-    /**
-     * Returns the requested property's value, or NULL.
-     *
-     * @param   string  $key    Property Name
-     * @return  mixed       Property value, or NULL if not set
-     */
-    public function __get($key)
-    {
-        if (isset($this->properties[$key]))
-            return $this->properties[$key];
-        else
-            return NULL;
     }
 
 
@@ -118,27 +116,27 @@ class Category
      * @param   array   $A      Array of values, from DB or $_POST
      * @param   boolean $fromDB True if reading a DB record, False for $_POST
      */
-    public function SetVars($A, $fromDB = false)
+    public function setVars($A, $fromDB = false)
     {
         if (!is_array($A)) return;
 
-        $this->cat_id   = $A['cat_id'];
-        $this->papa_id  = $A['papa_id'];
+        $this->cat_id   = (int)$A['cat_id'];
+        $this->papa_id  = (int)$A['papa_id'];
         $this->cat_name     = $A['cat_name'];
         $this->disp_name = isset($A['disp_name']) ? $A['disp_name'] : $A['cat_name'];
-        $this->description = $A['description'];
-        $this->group_id = $A['group_id'];
-        $this->owner_id = $A['owner_id'];
-        $this->image    = $A['image'];
+        $this->dscp     = $A['description'];
+        $this->group_id = (int)$A['group_id'];
+        $this->owner_id = (int)$A['owner_id'];
+        $this->image    = (int)$A['image'];
         $this->fgcolor  = $A['fgcolor'];
         $this->bgcolor  = $A['bgcolor'];
         if ($fromDB) {      // perm values are already int
-            $this->perm_owner = $A['perm_owner'];
-            $this->perm_group = $A['perm_group'];
-            $this->perm_members = $A['perm_members'];
-            $this->perm_anon = $A['perm_anon'];
-            $this->lft = $A['lft'];
-            $this->rgt = $A['rgt'];
+            $this->perm_owner = (int)$A['perm_owner'];
+            $this->perm_group = (int)$A['perm_group'];
+            $this->perm_members = (int)$A['perm_members'];
+            $this->perm_anon = (int)$A['perm_anon'];
+            $this->lft = (int)$A['lft'];
+            $this->rgt = (int)$A['rgt'];
         } else {        // perm values are in arrays from form
             list($perm_owner,$perm_group,$perm_members,$perm_anon) =
                 SEC_getPermissionValues($A['perm_owner'] ,$A['perm_group'],
@@ -166,8 +164,11 @@ class Category
         }
         if ($this->cat_id == 0) return false;
 
-        $result = DB_query("SELECT * FROM {$_TABLES['ad_category']}
-                WHERE cat_id={$this->cat_id}");
+        $result = DB_query(
+            "SELECT * FROM {$_TABLES['ad_category']}
+            WHERE cat_id={$this->cat_id}
+            LIMIT 1"
+        );
         $A = DB_fetchArray($result, false);
         $this->SetVars($A, true);
         return true;
@@ -202,7 +203,7 @@ class Category
             // If a new image was uploaded, and this is an existing category,
             // then delete the old image, if any. The DB still has the old
             // filename at this point.
-            if (!$this->isNew) {
+            if (!$this->isNew()) {
                 self::DelImage($this->cat_id);
             }
         } else {
@@ -210,19 +211,26 @@ class Category
             $img_sql = '';
         }
 
+        // Safety check, if this is the root category then set the parent ID to zero
+        if ($this->cat_id == 1) {
+            $this->papa_id = 0;
+        }
+
         //$parent_map = DB_escapeString(json_encode($this->MakeBreadcrumbs()));
-        if ($this->isNew) {
+        if ($this->isNew()) {
             $Parent = new self($this->papa_id);
-            if ($Parent->isNew) {
+            if ($Parent->isNew()) {
                 return CLASSIFIEDS_errorMsg($LANG_ADVT['invalid_category'], 'alert');
             }
             $sql = "UPDATE {$_TABLES['ad_category']}
                 SET rgt = rgt + 2 WHERE rgt >= {$Parent->rgt}";
             //echo $sql;die;
+            COM_errorLog($sql);
             DB_query($sql);
             $sql = "UPDATE {$_TABLES['ad_category']}
                 SET lft = lft + 2 WHERE lft >= {$Parent->rgt}";
             //echo $sql;die;
+            COM_errorLog($sql);
             DB_query($sql);
             $lft = $Parent->rgt;
             $rgt = $lft + 1;
@@ -239,7 +247,7 @@ class Category
             papa_id = {$this->papa_id},
             keywords = '{$this->keywords}',
             $img_sql
-            description = '" . DB_escapeString($this->description) . "',
+            description = '" . DB_escapeString($this->dscp) . "',
             owner_id = {$this->owner_id},
             group_id = {$this->group_id},
             perm_owner = {$this->perm_owner},
@@ -258,9 +266,11 @@ class Category
             // When updating, check if the parent category has changed.
             // If so, rebuild the entire tree since we don't know how much
             // changed.
-            if (!$this->isNew &&
-                    isset($A['orig_pcat']) &&
-                    $A['orig_pcat'] != $this->papa_id) {
+            if (
+                !$this->isNew() &&
+                isset($A['orig_pcat']) &&
+                $A['orig_pcat'] != $this->papa_id
+            ) {
                 self::rebuildTree(1, 1);
                 // Propagate the permissions, if requested
                 if (isset($_POST['propagate'])) {
@@ -455,10 +465,9 @@ class Category
             $this->Read();
         }
         $T = new \Template($_CONF_ADVT['path'] . '/templates/admin');
-        $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
-        $T->set_file('modify', "catEditForm$tpltype.thtml");
+        $T->set_file('modify', "catEditForm.thtml");
 
-        if ($this->isNew) {
+        if ($this->isNew()) {
             // A new category gets default values
             $this->owner_id = $_USER['uid'];
             $this->group_id = $_CONF_ADVT['defgrpcat'];
@@ -472,11 +481,11 @@ class Category
         $T->set_var(array(
             'catname'   => $this->cat_name,
             'keywords'  => $this->keywords,
-            'description' => $this->description,
+            'description' => $this->dscp,
             'fgcolor'   => $this->fgcolor,
             'bgcolor'   => $this->bgcolor,
             'cat_id'    => $this->cat_id,
-            'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?admin=cat',
+            'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?categories',
             'img_url'   => self::thumbUrl($this->image),
             'image'     => $this->image,
             'can_delete' => $this->isUsed() ? '' : 'true',
@@ -487,7 +496,7 @@ class Category
             'permissions_editor' => SEC_getPermissionsHTML($this->perm_owner,
                     $this->perm_group, $this->perm_members, $this->perm_anon),
             'sel_parent_cat' => self::buildSelection(self::getParent($this->cat_id), $this->cat_id),
-            'have_propagate' => $this->isNew ? '' : 'true',
+            'have_propagate' => $this->isNew() ? '' : 'true',
             'orig_pcat' => $this->papa_id,
             'colorpicker' => LGLIB_colorpicker(array(
                     'fg_id'     => 'fgcolor',
@@ -538,7 +547,7 @@ class Category
         }
         return $str;
 
-    
+
         // Locate the parent category of this one, or the root categories
         // if papa_id is 0.
         $sql = "SELECT cat_id, cat_name, papa_id, owner_id, group_id,
@@ -600,10 +609,9 @@ class Category
 
         $cat_id = (int)$cat_id;
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
-        $tpltype = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
-        $T->set_file('breadcrumbs', "breadcrumbs$tpltype.thtml");
+        $T->set_file('breadcrumbs', "breadcrumbs.thtml");
         $T->set_block('breadcrumbs', 'BreadCrumbs', 'BC');
-        
+
         $sql = "SELECT parent.cat_name, parent.cat_id
             FROM {$_TABLES['ad_category']} AS node,
                 {$_TABLES['ad_category']} AS parent
@@ -734,7 +742,7 @@ class Category
         //echo $sql;die;
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $subcats[$id][$A['cat_id']] = new self($A['cat_id'], $A);
+            $subcats[$id][$A['cat_id']] = new self($A);
         }
         return $subcats[$id];
     }
@@ -898,7 +906,7 @@ class Category
                 }
             }
             return PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id,
-                    0, $LANG_ADVT['category'], $this->description);
+                    0, $LANG_ADVT['category'], $this->dscp);
         } else {
             if ($_CONF_ADVT['auto_subcats']) {
                 foreach ($subcats as $cat) {
@@ -942,8 +950,15 @@ class Category
     public static function thumbUrl($filename)
     {
         global $_CONF_ADVT;
-        return LGLIB_ImageUrl($_CONF_ADVT['imgpath'] . '/cat/' . $filename,
-                $_CONF_ADVT['thumb_max_size'], $_CONF_ADVT['thumb_max_size']);
+        if ($filename != '') {
+            return LGLIB_ImageUrl(
+                $this->imgPath . $filename,
+                $_CONF_ADVT['thumb_max_size'],
+                $_CONF_ADVT['thumb_max_size']
+            );
+        } else {
+            return '';
+        }
     }
 
 
@@ -1001,7 +1016,7 @@ class Category
             ORDER BY node.lft";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $All[$A['cat_id']] = new self($A['cat_id'], $A);
+            $All[$A['cat_id']] = new self($A);
         }
         return $All;
     }
@@ -1048,7 +1063,7 @@ class Category
                 ORDER BY parent.lft";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $retval[] = new self($A['cat_id'], $A);
+            $retval[] = new self($A);
         }
         return $retval;
     }
@@ -1115,6 +1130,213 @@ class Category
             $parent_id = $A['cat_id'];
         }
         return ($parent_id == $cat_id) ? NULL : $parent_id;
+    }
+
+
+    /**
+     * Get the record ID for this category.
+     *
+     * @return  integer     Category ID
+     */
+    public function getID()
+    {
+        return (int)$this->cat_id;
+    }
+
+
+    /**
+     * Get the parent category's record ID.
+     *
+     * @return  integer     Parent category ID
+     */
+    public function getParentID()
+    {
+        return (int)$this->papa_id;
+    }
+
+
+    /**
+     * Get the category name
+     *
+     * @return  string      Category name
+     */
+    public function getName()
+    {
+        return $this->cat_name;
+    }
+
+
+    /**
+     * Get the category description.
+     *
+     * @return  string      Description text
+     */
+    public function getDscp()
+    {
+        return $this->dscp;
+    }
+
+
+    /**
+     * Get the foreground color string.
+     *
+     * @return  string      Foreground color
+     */
+    public function getFGColor()
+    {
+        return $this->fgcolor;
+    }
+
+
+    /**
+     * Get the background color string.
+     *
+     * @return  string      Background color
+     */
+    public function getBGColor()
+    {
+        return $this->bgcolor;
+    }
+
+
+    /**
+     * Get the image filename.
+     *
+     * @return  string      Image filename
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+
+    /**
+     * Create an admin list of categories.  Currently Unused.
+     *
+     * @return  string  HTML for admin list of categories
+     */
+    public static function adminList()
+    {
+        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS,
+            $_CONF_ADVT, $LANG_ADVT;
+
+        USES_lib_admin();
+        $header_arr = array(
+            array(
+                'text' => $LANG_ADVT['edit'],
+                'field' => 'edit',
+                'sort' => false,
+            ),
+            array(
+                'text' => $LANG_ADVT['name'],
+                'field' => 'cat_name',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['parent_cat'],
+                'field' => 'parent',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['delete'],
+                'field' => 'delete',
+                'sort' => false
+            ),
+        );
+        $defsort_arr = array(
+            'field' => 'cat_name',
+            'direction' => 'ASC',
+        );
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => $_CONF_ADVT['admin_url'] . '/index.php?categories',
+        );
+        $query_arr = array(
+            'table' => 'ad_category',
+            'sql' => "SELECT * FROM {$_TABLES['ad_category']}",
+            'query_fields' => array(),
+            'default_filter' => ''
+        );
+        $form_arr = array();
+        $retval = COM_createLink(
+            $LANG_ADVT['mnu_newcat'],
+            $_CONF_ADVT['admin_url'] . '/index.php?editcat=x',
+            array(
+                'class' => 'uk-button uk-button-success',
+                'style' => 'float:left',
+            )
+        );
+        $retval .= ADMIN_list(
+            'classifieds_adminadlist',
+            array(__CLASS__, 'getListField'),
+            $header_arr, $text_arr, $query_arr, $defsort_arr,
+            '', '', '', $form_arr
+        );
+        return $retval;
+    }
+
+
+    /**
+     * Display field contents for the Category admin list.
+     *
+     * @param   string  $fieldname  Name of the field
+     * @param   string  $fieldvalue Value to be displayed
+     * @param   array   $A          Associative array of all values available
+     * @param   array   $icon_arr   Array of icons available for display
+     * @return  string              Complete HTML to display the field
+     */
+    public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
+    {
+        global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
+
+        $retval = '';
+
+        switch($fieldname) {
+        case 'edit':
+            $retval = COM_createLink('',
+                $_CONF_ADVT['admin_url'] .
+                    "/index.php?editcat=x&cat_id={$A['cat_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit',
+                )
+            );
+            break;
+
+        case 'delete':
+            if ($A['cat_id'] > 1) {
+                $retval .= COM_createLink('',
+                    $_CONF_ADVT['admin_url'] .
+                        "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}",
+                    array(
+                        'title' => $LANG_ADVT['del_item'],
+                        'class' => 'uk-icon uk-icon-trash advt_icon_danger',
+                        'data-uk-tooltip' => '',
+                        'onclick' => "return confirm('{$LANG_ADVT['confirm_delitem']}');",
+                    )
+                );
+            }
+            break;
+
+        case 'parent':
+            $retval = DB_getItem($_TABLES['ad_category'], 'cat_name', 'cat_id='.$A['papa_id']);
+            break;
+
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+        return $retval;
+    }
+
+
+    /**
+     * Check if this is a new record.
+     *
+     * @return  integer     1 if new, False if existing
+     */
+    public function isNew()
+    {
+        return $this->cat_id == 0 ? 1 : 0;
     }
 
 }

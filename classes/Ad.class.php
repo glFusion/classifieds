@@ -3,9 +3,9 @@
  * Class to manage classified ads.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -18,25 +18,81 @@ namespace Classifieds;
  */
 class Ad
 {
+    /** Ad record ID.
+     * @var string */
+    private $ad_id = '';
+
+    /** Category record ID.
+     * @var integer */
+    private $cat_id = 0;
+
+    /** Submitting usesr ID.
+     * @var integer */
+    private $uld = 0;
+
+    /** Subject or short description.
+     * @var string */
+    private $subject = '';
+
+    /** Long text description.
+     * @var string */
+    private $description = '';
+
+    /** User-submitted URL.
+     * @var string */
+    private $url = '';
+
+    /** View counter.
+     * @var integer */
+    private $views = 0;
+
+    /** Submission date object.
+     * @var object */
+    private $add_date = NULL;
+
+    /** Expiration date object.
+     * @var object */
+    private $exp_date = NULL;
+
+    /** Item price, free-form text.
+     * @var string */
+    private $price = '';
+
+    /** Ad type record ID.
+     * @var integer */
+    private $ad_type = 1;   // always have type #1
+
+    /** Search keywords.
+     * @var string */
+    private $keywords = '';
+
+    /** Flag indication expiration notice has been sent.
+     * @var integer */
+    private $exp_sent = 0;
+
+    /** Number of comments submitted.
+     * @var integer */
+    private $comments = 0;
+
+    /** Comments-enabled flag.
+     * @var integer */
+    private $comments_enabled = 0;
+
     /** Error string or value, to be accessible by the calling routines.
      * @var mixed */
-    public $Error;
+    private $Error;
 
     /** Flag to indicate that this is a new record.
      * @var boolean */
-    public $isNew;
+    private $isNew;
 
     /** Related category object.
      * @var object */
-    public $Cat;
+    private $Cat;
 
     /** Ad Type object.
      * @var object */
-    public $Type;
-
-    /** Internal properties accessed via `__set()` and `__get()`.
-     * @var array */
-    private $properties;
+    private $Type;
 
     /** Database table name, either production or submissions.
      * @var string */
@@ -60,8 +116,8 @@ class Ad
         'description' => 'string',
         'url' => 'string',
         'views' => 'int',
-        'add_date' => 'int',
-        'exp_date' => 'int',
+        'add_date' => 'date',
+        'exp_date' => 'date',
         'price' => 'string',
         'ad_type' => 'int',
         'keywords' => 'string',
@@ -81,7 +137,6 @@ class Ad
      */
     public function __construct($id='', $table='ad_ads')
     {
-        $this->properties = array();
         $this->setTable($table);      // default to prod table
         if ($id == '') {
             $this->isNew = true;
@@ -102,68 +157,6 @@ class Ad
 
 
     /**
-     * Set the value of a property.
-     *
-     * @param   string  $key    Name of variable to set
-     * @param   mixed   $value  Value to set for variable
-     */
-    public function __set($key, $value)
-    {
-        switch($key) {
-        case 'ad_id':
-            // Item ID values
-            $this->properties[$key] = COM_sanitizeId($value, false);
-            break;
-
-        case 'subject':
-        case 'url':
-        case 'keywords':
-        case 'price':
-            // String values, strip html
-            $this->properties[$key] = strip_tags(trim($value));
-            break;
-
-        case 'description':
-            // String values, html ok
-            $this->properties[$key] = COM_checkHTML(trim($value));
-            break;
-
-        case 'exp_sent':
-        case 'comments_enabled':
-            // Boolean values
-            $this->properties[$key] = $value == 1 ? 1 : 0;
-            break;
-
-        case 'views':
-        case 'uid':
-        case 'cat_id':
-        case 'add_date':
-        case 'exp_date':
-        case 'comments':
-        case 'ad_type':
-            // Integer values
-            $this->properties[$key] = (int)$value;
-            break;
-        }
-    }
-
-
-    /**
-     * Get the value of a property, NULL if not set.
-     *
-     * @param   string  $key    Name of value to retrieve
-     * @return  mixed           Value for variable or NULL if undefined
-     */
-    public function __get($key)
-    {
-        if (isset($this->properties[$key]))
-            return $this->properties[$key];
-        else
-            return NULL;
-    }
-
-
-    /**
      * Sets all variables to the matching values from $rows.
      *
      * @param   array   $row    Array of values, from DB or $_POST
@@ -175,7 +168,20 @@ class Ad
         // Set the database field values
         foreach ($this->fields as $name=>$type) {
             if (isset($row[$name])) {
-                $this->$name = $row[$name];
+                switch ($type) {
+                case 'date':
+                    // Should be a timestamp value, create the date objects.
+                    // Duplicates the add*Date functions.
+                    $this->$name = new \Date($row[$name]);
+                    $this->$name->setTimeZone($_CONF['timezone']);
+                    break;
+                case 'int':
+                    $this->$name = (int)$row[$name];
+                    break;
+                default:
+                    $this->$name = $row[$name];
+                    break;
+                }
             }
         }
     }
@@ -248,7 +254,7 @@ class Ad
                 $this->setTable('ad_submission');
             }
             // Set the date added for new records
-            $this->add_date = time();
+            $this->setAddDate();
             $sql1 = "INSERT INTO {$this->table} SET ";
             $sql3 = '';
         } else {
@@ -269,12 +275,19 @@ class Ad
 
         $fld_array = array();
         foreach ($this->fields as $name=>$type) {
-            if ($type == 'string') {
+            switch ($type) {
+            case 'date':
+                // stored internally as date objects, save as timestamps
+                $val = $this->$name->toUnix();
+                break;
+            case 'int':
+                $val = (int)$this->$name;
+                break;
+            case 'string':
+            default:
                 // sanitize strings for DB
                 $val = DB_escapeString($this->$name);
-            } else {
-                // int, boolean, etc. are sanitized by __set()
-                $val = $this->$name;
+                break;
             }
             $fld_array[] = "$name = '{$val}'";
         }
@@ -371,6 +384,12 @@ class Ad
             Image::DeleteAll($ad_id);
             // Notify other plugins only if not a submission
             PLG_itemDeleted($ad_id, $_CONF_ADVT['pi_name']);
+            // Delete comment subscriptions
+            DB_delete(
+                $_TABLES['subscriptions'],
+                array('type', 'category', 'id'),
+                array('comment', 'classifieds', $ad_id)
+            );
         }
 
         // After the cleanup stuff, delete the ad record itself.
@@ -414,9 +433,7 @@ class Ad
         if ($id != '') $this->Read($id);
 
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
-        // Detect uikit theme
-        $tpl_path = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
-        $T->set_file('adedit', "edit$tpl_path.thtml");
+        $T->set_file('adedit', "edit.thtml");
         if ($this->isAdmin) {
             $action_url = $_CONF_ADVT['admin_url'] . '/index.php';
             $cancel_url = $_CONF_ADVT['admin_url'] . '/index.php?adminad=x';
@@ -428,8 +445,23 @@ class Ad
                 '&img_id=';
         }
 
-        $add_date = new \Date($this->add_date, $_CONF['timezone']);
-        $exp_date = new \Date($this->exp_date, $_CONF['timezone']);
+        $tpl_var = $_CONF_ADVT['pi_name'] . '_entry';
+        switch (PLG_getEditorType()) {
+        case 'ckeditor':
+            $T->set_var('show_htmleditor', true);
+            PLG_requestEditor($_CONF_ADVT['pi_name'], $tpl_var, 'ckeditor_classifieds.thtml');
+            PLG_templateSetVars($tpl_var, $T);
+            break;
+        case 'tinymce' :
+            $T->set_var('show_htmleditor',true);
+            PLG_requestEditor($_CONF_ADVT['pi_name'], $tpl_var, 'tinymce_classifieds.thtml');
+            PLG_templateSetVars($tpl_var, $T);
+            break;
+        default :
+            // don't support others right now
+            $T->set_var('show_htmleditor', false);
+            break;
+        }
 
         if ($this->isNew) {
             $moredays = $_CONF_ADVT['default_duration'];
@@ -460,8 +492,8 @@ class Ad
             'price'         => $this->price,
             'url'           => $this->url,
             'keywords'      => $this->keywords,
-            'exp_date'      => $exp_date->format($_CONF['daytime'] . ' T', true),
-            'add_date'      => $add_date->format($_CONF['daytime'] . ' T', true),
+            'exp_date'      => $this->exp_date->format($_CONF['daytime'] . ' T', true),
+            'add_date'      => $this->add_date->format($_CONF['daytime'] . ' T', true),
             'ad_type_selection' => AdType::makeSelection($this->ad_type),
             'sel_list_catid'    => Category::buildSelection($this->cat_id, '', '', 'NOT', '1'),
             //'saveoption'    => $saveoption,
@@ -571,8 +603,7 @@ class Ad
 
         $T = new \Template($_CONF_ADVT['path'] . '/templates/detail/' .
                 $_CONF_ADVT['detail_tpl_ver']);
-        $tpl_type = $_CONF_ADVT['_is_uikit'] ? '.uikit' : '';
-        $T->set_file('detail', "detail$tpl_type.thtml");
+        $T->set_file('detail', "detail.thtml");
 
         if ($this->isAdmin) {
             $base_url = $_CONF_ADVT['admin_url'] . '/index.php';
@@ -597,28 +628,25 @@ class Ad
             $have_editlink = '';
         }
 
-        if ($this->exp_date < time()) {
+        if ($this->exp_date->toUnix() < time()) {
             $T->set_var('is_expired', 'true');
         }
-        $add_date = new \Date($this->add_date, $_CONF['timezone']);
-        $exp_date = new \Date($this->exp_date, $_CONF['timezone']);
         $T->set_var(array(
             'base_url'      => $base_url,
             'edit_link'     => $edit_link,
             'del_link'      => $del_link,
             'breadcrumbs'   => $this->Cat->BreadCrumbs(true),
             'subject'       => $subject,
-            'add_date'      => $add_date->format($_CONF['shortdate'], true),
-            'exp_date'      => $exp_date->format($_CONF['shortdate'], true),
+            'add_date'      => $this->add_date->format($_CONF['shortdate'], true),
+            'exp_date'      => $this->exp_date->format($_CONF['shortdate'], true),
             'views_no'      => $this->views,
             'description'   => $description,
-            'ad_type'       => $this->Type->description,
-            'uinfo_address' => $uinfo->address,
-            'uinfo_city'    => $uinfo->city,
-            'uinfo_state'   => $uinfo->state,
-            'uinfo_postcode' => $uinfo->postcode,
-            'uinfo_tel'     => $uinfo->tel,
-            'uinfo_fax'     => $uinfo->fax,
+            'ad_type'       => $this->Type->getDscp(),
+            'uinfo_address' => $uinfo->getAddress(),
+            'uinfo_city'    => $uinfo->getCity(),
+            'uinfo_state'   => $uinfo->getState(),
+            'uinfo_postcode' => $uinfo->getPostal(),
+            'uinfo_tel'     => $uinfo->getTelephone(),
             'price'         => $price,
             'ad_id'         => $this->ad_id,
             'ad_url'        => $url,
@@ -709,9 +737,14 @@ class Ad
 
         // Show the user comments
         if (plugin_commentsupport_classifieds() && $this->comments_enabled < 2) {
-            $T->set_var('usercomments',
-                CMT_userComments($this->ad_id, $this->subject, 'classifieds', '',
-                    '', 0, 1, false, false, $this->comments_enabled));
+            USES_lib_comments();
+            $T->set_var(
+                'usercomments',
+                CMT_userComments(
+                    $this->ad_id, $this->subject, 'classifieds', '',
+                    '', 0, 1, false, false, $this->comments_enabled
+                )
+            );
         }
 
         $T->parse('output','detail');
@@ -765,6 +798,7 @@ class Ad
     {
         global $_TABLES;
         $this->table = $_TABLES[$table];
+        return $this;
     }
 
 
@@ -796,17 +830,21 @@ class Ad
             return;
         }
 
+        $exp_ts = $this->exp_date->toUnix();
+        $save_ts = $exp_ts;
         $moretime = $moredays * 86400;
-        $save_exp_date = $this->exp_date;
-        $basetime = $this->exp_date < time() ? time() : $this->exp_date;
-        $this->exp_date = min(
+        $basetime = $exp_ts < time() ? time() : $exp_ts;
+        $this->setExpDate(min(
             $basetime + $moretime,
-            $this->add_date + ((int)$_CONF_ADVT['max_total_duration'] * 86400)
-        );
+            $this->add_date->toUnix() + ((int)$_CONF_ADVT['max_total_duration'] * 86400)
+        ) );
+
+        // Use the new expiration timestamp value.
+        $exp_ts = $this->exp_date->toUnix();
 
         // Figure out the number of days added to this ad, and subtract
         // it from the user's account.
-        $days_used = (int)(($this->exp_date - $save_exp_date) / 86400);
+        $days_used = (int)(($exp_ts - $save_ts) / 86400);
         if ($_CONF_ADVT['purchase_enabled'] && !$this->isAdmin) {
             $User->UpdateDaysBalance($days_used * -1);
         }
@@ -831,14 +869,15 @@ class Ad
         global $_CONF_ADVT;
 
         // How many days has the ad run?
-        $run_days = ($this->exp_date - $this->add_date)/86400;
+        $run_days = ($this->exp_date->toUnix() - $this->add_date->toUnix())/86400;
         if ($run_days < 0) $rundays = 0;
 
         $max_add_days = intval($_CONF_ADVT['max_total_duration']);
-        if ($max_add_days < $run_days)
+        if ($max_add_days < $run_days) {
             return 0;
-        else
+        } else {
             return (int)($max_add_days - $run_days);
+        }
     }
 
 
@@ -1049,12 +1088,446 @@ class Ad
      * @param   integer $id     ID of ad to update
      * @param   integer $ts     Unix timestamp to set, default is time()
      */
-    public static function setAddDate($id, $ts = NULL)
+    public static function updateAddDate($id, $ts = NULL)
     {
         global $_TABLES;
 
         if (!$ts) $ts = time();
         DB_change($_TABLES['ad_ads'], 'add_date', (int)$ts, 'ad_id', $id);
+    }
+
+
+    /**
+     * Check if this is a new record.
+     *
+     * @return  integer     1 if new, 0 if existing
+     */
+    public function isNew()
+    {
+        return $this->isNew ? 1 : 0;
+    }
+
+
+    /**
+     * Get the submitting user's ID.
+     *
+     * @return  integer     User ID
+     */
+    public function getUid()
+    {
+        return (int)$this->uid;
+    }
+
+
+    /**
+     * Set the category ID for this ad.
+     *
+     * @param   integer $id     Category ID
+     * @return  object  $this
+     */
+    public function setCatID($id)
+    {
+        $this->cat_id = (int)$id;
+        return $this;
+    }
+
+
+    /**
+     * Get the category ID for this ad.
+     *
+     * @return  integer     Category record ID
+     */
+    public function getCatID()
+    {
+        return (int)$this->cat_id;
+    }
+
+
+    /**
+     * Get the ad's DB record ID.
+     *
+     * @return  string      Record ID
+     */
+    public function getID()
+    {
+        return $this->ad_id;
+    }
+
+
+    /**
+     * Get the subject (short description).
+     *
+     * @return  string      Subject text
+     */
+    public function getSubject()
+    {
+        return $this->subject;
+    }
+
+
+    /**
+     * Get the full description.
+     *
+     * @return  string      Description text
+     */
+    public function getDscp()
+    {
+        return $this->description;
+    }
+
+
+    /**
+     * Get the price. This is free-form text.
+     *
+     * @return  text        Price
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+
+    /**
+     * Get the related category object.
+     *
+     * @return  object      Category object
+     */
+    public function getCat()
+    {
+        return $this->Cat;
+    }
+
+
+    /**
+     * Get the add type - For Sale, Wanted, etc.
+     *
+     * @return  object      AdType object
+     */
+    public function getType()
+    {
+        return $this->Type;
+    }
+
+
+    /**
+     * Set the submission date based on a timestamp.
+     *
+     * @param   integer $ts     Timestamp or date/time string
+     * @return  object  $this
+     */
+    private function setAddDate($ts=NULL)
+    {
+        global $_CONF;
+
+        if ($ts === NULL) {
+            $ts = time();
+        }
+        $this->add_date = new \Date($ts);
+        $this->add_date->setTimeZone($_CONF['timezone']);
+        return $this;
+    }
+
+
+    /**
+     * Get the submission date object.
+     *
+     * @return  object      Submission date object
+     */
+    public function getAddDate()
+    {
+        return (int)$this->add_date;
+    }
+
+
+    /**
+     * Set the expiration date based on a timestamp.
+     *
+     * @param   integer $ts     Timestamp or date/time string
+     * @return  object  $this
+     */
+    private function setExpDate($ts=NULL)
+    {
+        global $_CONF;
+
+        if ($ts === NULL) {
+            $ts = time();
+        }
+        $this->exp_date = new \Date($ts);
+        $this->exp_date->setTimeZone($_CONF['timezone']);
+        return $this;
+    }
+
+
+    /**
+     * Get the expiration date object.
+     *
+     * @return  object      Expiration date object
+     */
+    public function getExpDate()
+    {
+        return (int)$this->exp_date;
+    }
+
+
+    /**
+     * Set the `isNew` flag.
+     * This is used to force saving a new ad when copying.
+     *
+     * @param   boolean $flag       True if new, False if not
+     * @return  object  $this
+     */
+    public function setIsNew($flag)
+    {
+        $this->isNew = $flag ? 1 : 0;
+        return $this;
+    }
+
+
+    /**
+     * Uses lib-admin to list the forms definitions and allow updating.
+     *
+     * @return  string  HTML for the list
+     */
+    public static function adminList()
+    {
+        global $_CONF, $_CONF_ADVT, $_TABLES, $LANG_ADMIN, $LANG_ADVT;
+
+        USES_lib_admin();
+        $retval = '';
+
+        $header_arr = array(
+            array(
+                'text' => $LANG_ADMIN['edit'],
+                'field' => 'edit',
+                'sort' => false,
+                'align' => 'center',
+            ),
+            array(
+                'text' => $LANG_ADVT['duplicate'],
+                'field' => 'copy',
+                'sort' => false,
+                'align' => 'center',
+            ),
+            array(
+                'text' => $LANG_ADVT['added_on'],
+                'field' => 'add_date',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['expires'],
+                'field' => 'exp_date',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['subject'],
+                'field' => 'subject',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['owner'],
+                'field' => 'owner_id',
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADVT['delete'],
+                'field' => 'delete',
+                'sort' => false,
+                'align' => 'center',
+            ),
+        );
+        $defsort_arr = array(
+            'field' => 'add_date',
+            'direction' => 'ASC',
+        );
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => $_CONF_ADVT['admin_url'] . '/index.php',
+        );
+        $options = array(
+            'chkdelete' => true,
+            'chkfield' => 'ad_id',
+        );
+        $query_arr = array(
+            'table' => 'ad_ads',
+            'sql' => "SELECT * FROM {$_TABLES['ad_ads']}",
+            'query_fields' => array('subject', 'description', 'keywords'),
+            'default_filter' => 'WHERE 1=1'
+        );
+        $form_arr = array();
+        return ADMIN_list(
+            'classifieds_adlist',
+            array(__CLASS__, 'getListField'),
+            $header_arr,
+            $text_arr, $query_arr, $defsort_arr, '', '', $options, $form_arr
+        );
+    }
+    
+    
+    /**
+     * Create list of Ads for a user to manage.
+     *
+     * @return  string  HTML for admin list
+     */
+    public static function userList()
+    {
+        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, $_CONF_ADVT,
+            $LANG_ADVT, $_USER;
+
+        $retval = '';
+
+        $header_arr = array(
+            array(
+                'text'  => $LANG_ADVT['edit'],
+                'field' => 'user_edit',
+                'sort'  => false,
+                'align' => 'center',
+            ),
+            array(
+                'text'  => $LANG_ADVT['description'],
+                'field' => 'subject',
+                'sort'  => true,
+            ),
+            array(
+                'text'  => $LANG_ADVT['added'],
+                'field' => 'add_date',
+                'sort'  => false,
+                'align' => 'center',
+            ),
+            array(
+                'text'  => $LANG_ADVT['expires'],
+                'field' => 'exp_date',
+                'sort'  => false,
+                'align' => 'center'),
+            array(
+                'text'  => $LANG_ADVT['delete'],
+                'field' => 'user_delete',
+                'sort'  => false,
+                'align' => 'center'),
+        );
+        $defsort_arr = array('field' => 'add_date', 'direction' => 'asc');
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => $_CONF_ADVT['url'] . '/index.php',
+        );
+        $query_arr = array(
+            'table' => 'ad_ads',
+            'sql' => "SELECT * FROM {$_TABLES['ad_ads']} WHERE uid = {$_USER['uid']}",
+            'query_fields' => array(),
+            'default_filter' => ''
+        );
+        $form_arr = array();
+        USES_lib_admin();
+        return ADMIN_list(
+            'classifieds_userlist',
+            array(__CLASS__, 'getListField'),
+            $header_arr, $text_arr, $query_arr, $defsort_arr, '',
+            '', '', $form_arr
+        );
+        return $retval;
+    }
+
+
+    /**
+     * Determine what to display in the admin list for each form.
+     *
+     * @param   string  $fieldname  Name of the field, from database
+     * @param   mixed   $fieldvalue Value of the current field
+     * @param   array   $A          Array of all name/field pairs
+     * @param   array   $icon_arr   Array of system icons
+     * @return  string              HTML for the field cell
+     */
+    public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
+    {
+        global $_CONF, $_CONF_ADVT, $LANG_ACCESS, $LANG_ADVT;
+
+        static $dt = NULL;
+        if ($dt === NULL) {
+            $dt = new \Date('now', $_CONF['timezone']);
+        }
+
+        $retval = '';
+
+        switch($fieldname) {
+        case 'edit':
+            $retval = COM_createLink('',
+                $_CONF_ADVT['admin_url'] .  "/index.php?editad=x&ad_id={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit',
+                )
+            );
+            break;
+
+        case 'user_edit':
+            $retval = COM_createLink(
+                '',
+                $_CONF_ADVT['url'] .
+                    "/index.php?mode=editad&amp;id={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-edit',
+                    'title' => $LANG_ADVT['edit'],
+                    'data-uk-tooltip' => ''
+                )
+            );
+            break;
+
+        case 'copy':
+            $retval = COM_createLink('',
+                $_CONF_ADVT['admin_url'] .  "/index.php?dupad={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-copy',
+                )
+            );
+           break;
+
+        case 'add_date':
+        case 'exp_date':
+            $dt->setTimeStamp($fieldvalue);
+            $retval = $dt->toMySQL(true);
+            break;
+
+        case 'delete':
+            $retval = COM_createLink('',
+                $_CONF_ADVT['admin_url'] .
+                    "/index.php?deletead={$A['ad_id']}",
+                array(
+                    'class' => 'uk-icon uk-icon-trash uk-text-danger',
+                    'data-uk-tooltip' => '',
+                    'title' => $LANG_ADVT['del_item'],
+                    'onclick' => "return confirm('{$LANG_ADVT['confirm_delitem']}');",
+                )
+            );
+            break;
+    
+        case 'user_delete':
+            $retval = COM_createLink(
+                '',
+                $_CONF_ADVT['url'] .
+                    "/index.php?mode=deletead&amp;id={$A['ad_id']}",
+                array(
+                    'title' => $LANG_ADVT['del_item'],
+                    'class' => 'uk-icon uk-icon-trash uk-text-danger',
+                    'data-uk-tooltip' => '',
+                    'onclick' => "return confirm('{$LANG_ADVT['del_item_confirm']}');",
+                )
+            );
+            break;
+
+        case 'subject':
+            $retval = COM_createLink(
+                $fieldvalue,
+                $_CONF_ADVT['url'] . '/index.php?mode=detail&id=' . $A['ad_id']
+            );
+            break;
+
+        case 'owner_id':
+            $retval = COM_getDisplayName($A['uid']);
+            break;
+
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+        return $retval;
     }
 
 }   // class Ad

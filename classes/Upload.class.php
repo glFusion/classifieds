@@ -20,15 +20,15 @@ class Upload extends \upload
 {
     /** Path to actual image (without filename).
      * @var string */
-    var $pathImage;
+    private $pathImage;
 
     /** ID of the current ad.
      * @var string */
-    var $ad_id;
+    private $ad_id;
 
     /** Mime-type of image. Just to save the image library a little work.
     * @var string */
-    var $mime_type;
+    private $mime_type;
 
     /** Indicate that we actually have one or more files to upload.
      * @var boolean */

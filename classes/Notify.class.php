@@ -33,11 +33,17 @@ class Notify
     {
         global $_CONF_ADVT;
 
-        if (!$Ad->isNew)
+        if (!$Ad->isNew()) {
             return false;
+        }
 
-        return PLG_sendSubscriptionNotification($_CONF_ADVT['pi_name'],
-                'category', $Ad->cat_id, $Ad->ad_id, $Ad->uid);
+        return PLG_sendSubscriptionNotification(
+            $_CONF_ADVT['pi_name'],
+            'category',
+            $Ad->getID(),
+            $Ad->getID(),
+            $Ad->getUid()
+        );
     }
 
 
@@ -109,12 +115,12 @@ class Notify
         $T->set_file('message', $template_file);
         $T->set_var(array(
             'username'  => $username,
-            'subject'   => $Ad->subject,
-            'description'  => $Ad->description,
-            'price'     => $Ad->price,
-            'cat'       => $Ad->Cat->description,
-            'ad_type'   => $Ad->Type->description,
-            'ad_url'    => "{$_CONF_ADVT['url']}/index.php?mode=detail&id={$Ad->ad_id}",
+            'subject'   => $Ad->getSubject(),
+            'description'  => $Ad->getDscp(),
+            'price'     => $Ad->getPrice(),
+            'cat'       => $Ad->getCat()->getDscp(),
+            'ad_type'   => $Ad->getType()->getDscp(),
+            'ad_url'    => "{$_CONF_ADVT['url']}/index.php?mode=detail&id={$Ad->getID()}",
             'site_name' => $_CONF['site_name'],
         ) );
         $T->parse('output','message');
