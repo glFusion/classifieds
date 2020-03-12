@@ -828,31 +828,6 @@ class Category
 
 
     /**
-     * When no category is given, show a table of all categories
-     * along with the count of ads for each.
-     * Returns the results from the category
-     * list function, chosen based on the display mode
-     *
-     * @return  string      HTML for category listing page
-     */
-    public static function userList()
-    {
-        global $_CONF_ADVT;
-        USES_classifieds_list();
-
-        switch ($_CONF_ADVT['catlist_dispmode']) {
-        case 'blocks':
-            return CLASSIFIEDS_catList_blocks();
-            break;
-
-        default:
-            return CLASSIFIEDS_catList_normal();
-            break;
-        }
-    }
-
-
-    /**
      * Subscribe the current user to this category's notifications.
      *
      * @param   boolean $sub    True to subscribe to sub-categories also

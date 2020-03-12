@@ -1318,6 +1318,7 @@ function plugin_configmanager_select_detail_tpl_ver_classifieds()
 
 /**
  * Gets all the groups in the glFusion groups table to prepare a selection list.
+ * Helper function for config element selections.
  *
  * @param   string  $grplist    Optional list of groups to include or exclude
  * @param   string  $NOT        Set to "NOT" to exclude $grplist, blank to include it.
@@ -1348,64 +1349,6 @@ function CLASSIFIEDS_getGroups($grplist='', $NOT='')
         \Classifieds\Cache::set($cache_key, $A, 'groups');
     }
     return $A;
-}
-
-
-/**
- * Loads the language array for a specified language.
- * If $requested is an array, the first valid language file is loaded.
- * If not, the $requested language file is loaded.
- * If $requested doesn't refer to a vailid language, then $_CONF['language']
- * is assumed.
- *
- * After loading the base language file, the same filename is loaded from
- * language/custom, if available. The admin can override language strings
- * by creating a language file in that directory.
- *
- * @deprecated
- * @param   mixed   $requested  A single or array of language strings
- * @return  array               $LANG_ADVT, the global language array for the plugin
- */
-function Xplugin_loadlanguage_classifieds($requested='')
-{
-    global $_CONF, $_CONF_ADVT;
-
-    // Set the language to the user's selected language, unless
-    // otherwise specified.
-    $languages = array();
-
-    // Add the requested language, which may be an array or
-    // a single item.
-    if (is_array($requested)) {
-        $languages = $requested;
-    } elseif ($requested != '') {
-        // If no language requested, load the site/user default
-        $languages[] = $requested;
-    }
-
-    // Add the site language as a failsafe
-    if (!in_array($_CONF['language'], $languages)) {
-        $languages[] = $_CONF['language'];
-    }
-    // Final failsafe, include "english.php" whish is known to exist
-    if (!in_array('english', $languages)) {
-        $languages[] = 'english';
-    }
-
-    // Search the array for desired language files, in order.
-    $langpath = $_CONF_ADVT['path'] . '/language';
-    foreach ($languages as $language) {
-        if (file_exists("$langpath/$language.php")) {
-            include "$langpath/$language.php";
-            // Include admin-supplied overrides, if any.
-            if (file_exists("$langpath/custom/$language.php")) {
-                include "$langpath/custom/$language.php";
-            }
-            break;
-        }
-    }
-
-    return $LANG_ADVT;
 }
 
 
@@ -1877,7 +1820,7 @@ function CLASSIFIEDS_auditLog($logentry = '')
  * @param   string  $ad_id      ID of ad to check
  * @return  integer             Count of related comments
  */
-function CLASSIFIEDS_commentCount($ad_id)
+function XCLASSIFIEDS_commentCount($ad_id)
 {
     global $_TABLES;
 
@@ -1951,34 +1894,6 @@ function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
             break;
     }
     return "<div class=\"$class\">$msg_txt</div>";
-}
-
-
-/**
- * Gets the correct template depending on the type of display.
- * Currently supports the new "blocks" display and the old
- * zClassifieds-style display
- *
- * @param   string  $str    Template base name
- * @return  string          Template full name
- */
-function CLASSIFIEDS_getTemplate($str)
-{
-    global $_CONF_ADVT;
-
-    if ($str == '') return '';
-
-    switch ($_CONF_ADVT['catlist_dispmode']) {
-    case 'blocks':
-        $tpl = $str . '_blocks';
-        break;
-
-    default:
-        $tpl = $str;
-        break;
-    }
-
-    return $tpl . '.thtml';
 }
 
 ?>
