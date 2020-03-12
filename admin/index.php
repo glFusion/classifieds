@@ -3,9 +3,9 @@
  * Entry point for Classifieds administrative functions.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.0
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -22,7 +22,7 @@ if (!in_array('classifieds', $_PLUGINS)) {
     exit;
 }
 
-USES_lib_admin();
+//USES_lib_admin();
 
 // Only let admin users access this page
 if (!SEC_hasRights('classifieds.admin')) {
@@ -33,84 +33,14 @@ if (!SEC_hasRights('classifieds.admin')) {
 }
 $admin_mode = '';
 
-/**
- * Create the admin menu at the top of the list and form pages.
- *
- * @param   string  $mode       View mode
- * @param   string  $help_text  Additional help text to show
- * @return  string      HTML for admin menu section
- */
-function CLASSIFIEDS_adminMenu($mode='', $help_text = '')
-{
-    global $_CONF, $_CONF_ADVT, $LANG_ADVT, $LANG01;
-
-    $menu_arr = array ();
-    if ($help_text == '')
-        $help_text = 'admin_text';
-
-    if ($mode == 'ad') {
-        $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?editad',
-            'text' => '<span class="adMenuActive">' . $LANG_ADVT['mnu_submit']
-                    . '</span>',
-            );
-        $help_text = 'hlp_adlist';
-    } else {
-        $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?adminad',
-            'text' => $LANG_ADVT['mnu_adlist'],
-        );
-    }
-
-    if ($mode == 'type') {
-        $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?editadtype=0',
-            'text' => '<span class="adMenuActive">' . $LANG_ADVT['mnu_newtype']
-                    . '</span>',
-        );
-        $help_text = 'hlp_adtypes';
-    } else {
-        $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=type',
-            'text' => $LANG_ADVT['mnu_types'],
-        );
-    }
-
-    if ($mode == 'cat') {
-        $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?editcat=x&cat_id=0',
-            'text' => '<span class="adMenuActive">' .$LANG_ADVT['mnu_newcat']
-                    . '</span>',
-            );
-        $help_text = 'hlp_cats';
-    } else {
-        $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=cat',
-            'text' => $LANG_ADVT['mnu_cats'],
-        );
-    }
-
-    $menu_arr[] = array(
-            'url' => $_CONF_ADVT['admin_url'] . '/index.php?admin=other',
-            'text' => $LANG_ADVT['mnu_other']);
-    if ($mode == 'other') {
-        $help_text = 'hlp_other';
-    }
-
-    $menu_arr[] = array('url' => $_CONF['site_admin_url'],
-            'text' => $LANG01[53]);
-
-    $retval = ADMIN_createMenu($menu_arr, $LANG_ADVT[$help_text],
-                    plugin_geticon_classifieds());
-    return $retval;
-}
-
-
 $action = '';
-$expected = array('edit', 'moderate', 'save', 'deletead', 'deleteimage',
-        'deleteadtype', 'saveadtype', 'editadtype', 'editad', 'dupad',
-        'deletecat', 'editcat', 'savecat', 'delbutton_x', 'resetcatperms',
-        'cancel', 'admin');
+$expected = array(
+    'edit', 'moderate', 'save', 'deletead', 'deleteimage',
+    'deleteadtype', 'saveadtype', 'editadtype', 'editad', 'dupad',
+    'deletecat', 'editcat', 'savecat', 'delbutton_x', 'resetcatperms',
+    'ads', 'types', 'categories', 'other',
+    'cancel', 'admin',
+);
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
         $action = $provided;
@@ -213,7 +143,7 @@ case 'savecat':
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
     $C = new \Classifieds\Category($cat_id);
     $C->Save($_POST);
-    echo COM_refresh($_CONF['site_admin_url'] . '/plugins/classifieds/index.php?admin=cat');
+    echo COM_refresh($_CONF['site_admin_url'] . '/plugins/classifieds/index.php?categories');
     $view = 'admin';
     $actionval = 'cat';
     break;
@@ -237,8 +167,7 @@ case 'delcatimg':
 case 'save':
     if ($_POST['type'] == 'submission') {   // approving a submission
         $Ad = new \Classifieds\Ad($ad_id, 'ad_submission');
-        $Ad->isNew = true;
-        $Ad->setTable('ad_ads');
+        $Ad->setIsNew(true)->$Ad->setTable('ad_ads');
         $status = $Ad->Save($_POST);
         if ($status) {
             DB_delete($_TABLES['ad_submission'], 'ad_id', $ad_id);
@@ -299,7 +228,8 @@ case 'edit':    // if called from submit.php
 case 'editadtype':
     // Edit an ad type. $actionval contains the type_id value
     $AdType = new \Classifieds\AdType($actionval);
-    $content .= CLASSIFIEDS_adminMenu('type');
+    //$content .= CLASSIFIEDS_adminMenu('type');
+    $content .= Classifieds\Menu::Admin('type');
     $content .= $AdType->ShowForm();
     break;
 
@@ -307,8 +237,8 @@ case 'editcat':
     // Display the form to edit a category.
     // $actionval contains the category ID
     $cat_id = CLASSIFIEDS_getParam('cat_id', 'int');
-    $content .= CLASSIFIEDS_adminMenu('cat');
-    $C = new \Classifieds\Category($cat_id);
+    $content .= Classifieds\Menu::Admin('categories');
+    $C = new Classifieds\Category($cat_id);
     $content .= $C->Edit();
     break;
 
@@ -317,7 +247,37 @@ case 'moderate':
     $content .= $Ad->Edit();
     break;
 
+case 'types':
+    $content .= Classifieds\Menu::Admin($view);
+    $content .= Classifieds\AdType::adminList();
+    $admin_mode = ': ' . $LANG_ADVT['mnu_types'];
+    break;
+
+case 'categories':
+    $content .= Classifieds\Menu::Admin($view);
+    $content .= Classifieds\Category::adminList();
+    $admin_mode = ': ' . $LANG_ADVT['mnu_cats'];
+    break;
+
+case 'other':
+    $content .= Classifieds\Menu::Admin($view);
+    $T1 = new Template($_CONF_ADVT['path'] . '/templates/admin/');
+    $T1->set_file('content', 'adminother.thtml');
+    $T1->set_var(array(
+        'cat_list' => SEC_getGroupDropdown($_CONF_ADVT['defgrpcat'], 3),
+        'cat_perms' => SEC_getPermissionsHTML(
+            $_CONF_ADVT['default_perm_cat'][0],
+            $_CONF_ADVT['default_perm_cat'][1],
+            $_CONF_ADVT['default_perm_cat'][2],
+            $_CONF_ADVT['default_perm_cat'][3]
+        ),
+    ) );
+    $T1->parse('output1', 'content');
+    $content .= $T1->finish($T1->get_var('output1'));
+    break;
+
 case 'admin':
+    echo "DEPRECATED";die;
     USES_classifieds_admin();
     switch ($actionval) {
     case 'cat':
@@ -333,7 +293,7 @@ case 'admin':
     case 'ad':
     default:
         $actionval = 'ad';
-        $content .= CLASSIFIEDS_adminMenu($actionval);
+        $content .= Classifieds\Menu::Admin($actionval);
         $content .= CLASSIFIEDS_adminAds();
         $admin_mode = ': '. $LANG_ADVT['manage_ads'];
         break;
@@ -355,10 +315,10 @@ case 'admin':
     }
     break;
 
+case 'ads':
 default:
-    USES_classifieds_admin();
-    $content .= CLASSIFIEDS_adminMenu('ad');
-    $content .= CLASSIFIEDS_adminAds();
+    $content .= Classifieds\Menu::Admin('ads');
+    $content .= Classifieds\Ad::adminList();
     break;
 }
 

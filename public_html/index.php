@@ -3,9 +3,9 @@
  * Public entry point for the Classifieds plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.2.0
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -50,6 +50,7 @@ if (isset($_REQUEST['mode'])) {
 } else {
     $mode = COM_getArgument('mode');
 }
+
 if (isset($_REQUEST['id'])) {
     $id = COM_sanitizeID($_REQUEST['id']);
 } else {
@@ -61,7 +62,7 @@ if (empty($mode) && !empty($id)) {
 
 // Set up the basic menu for all users
 $menu_opt = '';
-USES_class_navbar();
+//USES_class_navbar();
 $menu = new navbar();
 $menu->add_menuitem($LANG_ADVT['mnu_home'], CLASSIFIEDS_makeURL('home'));
 $menu->add_menuitem($LANG_ADVT['mnu_recent'], CLASSIFIEDS_makeURL('recent'));
@@ -96,8 +97,8 @@ case 'submit':
 case 'edit':
     if ($isAnon) COM_404();
     $Ad = new \Classifieds\Ad($id);
-    if (isset($_GET['cat_id']) && $Ad->isNew) {
-        $Ad->cat_id = $_GET['cat_id'];
+    if (isset($_GET['cat_id']) && $Ad->isNew()) {
+        $Ad->setCatID($_GET['cat_id']);
     }
     $content .= $Ad->Edit();
     break;
@@ -174,7 +175,7 @@ case 'recent':
 case 'manage':
     // Manage ads.  Restricted to the user's own ads
     if ($isAnon) COM_404();
-    $content .= CLASSIFIEDS_ManageAds();
+    $content .= Classifieds\Ad::userList();
     $T->set_var('header', $LANG_ADVT['ads_mgnt']);
     $menu_opt = $LANG_ADVT['mnu_myads'];
     break;
@@ -212,13 +213,20 @@ case 'home':
 default:
     // Display either the categories, or the ads under a requested
     // category
+    //$T->set_var('header', $LANG_ADVT['blocktitle']);
+    $L = new \Classifieds\Lists\Ads($id);
+    $L->addCats(CLASSIFIEDS_getParam('cats', 'array'))
+        ->addTypes(CLASSIFIEDS_getParam('types', 'array'));
+    $content .= $L->Render();
+    break;
+
     $C = new \Classifieds\Category($id);
-    if ($C->papa_id > 0) {
+    if ($C->getParentID() > 0) {
         // A sub-category, display the ads
         //$L = new \Classifieds\AdList_Cat($id);
         $L = new \Classifieds\Lists\Ads\byCat($id);
         $content .= $L->Render();
-        $pageTitle = $L->Cat->cat_name;
+        $pageTitle = $L->getCat()->getName();
     } else {
         // The root category, display the sub-categories
         $content .= \Classifieds\Lists\Categories::Render();
@@ -232,162 +240,16 @@ default:
 if (!empty($view)) COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
 
 if ($menu_opt != '') $menu->set_selected($menu_opt);
-$T->set_var('menu', $menu->generate());
+//$T->set_var('menu', $menu->generate());
+$T->set_var('menu', Classifieds\Menu::User($mode));
 $T->set_var('content', $content);
 $T->parse('output', 'page');
-echo CLASSIFIEDS_siteHeader($pageTitle);
-if ($msg != '')
+echo Classifieds\Menu::siteHeader($pageTitle);
+if ($msg != '') {
     echo  COM_showMessage($msg, $_CONF_ADVT['pi_name']);
+}
 echo $T->finish($T->get_var('output'));
-echo CLASSIFIEDS_siteFooter();
+echo Classifieds\Menu::siteFooter();
 exit;
-
-
-/**
- * Get the fields for the ad listing.
- *
- * @param   string   $fieldname     Name of the field
- * @param   string   $fieldvalue    Value to be displayed
- * @param   array    $A             Associative array of all values available
- * @param   array    $icon_arr      Array of icons available for display
- * @return  string                  Complete HTML to display the field
- */
-function CLASSIFIEDS_getField_AdList($fieldname, $fieldvalue, $A, $icon_arr)
-{
-    global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT;
-
-    $retval = '';
-    $dt = new Date('now', $_CONF['timezone']);
-
-    switch($fieldname) {
-    case 'edit':
-        if ($_CONF_ADVT['_is_uikit']) {
-            $retval = COM_createLink('',
-                $_CONF_ADVT['url'] .
-                    "/index.php?mode=editad&amp;id={$A['ad_id']}",
-                array(
-                    'class' => 'uk-icon uk-icon-edit',
-                    'title' => $LANG_ADVT['edit'],
-                    'data-uk-tooltip' => ''
-                )
-            );
-        } else {
-            $retval = COM_createLink(
-                $icon_arr['edit'],
-                $_CONF_ADVT['url'] .
-                "/index.php?mode=editad&amp;id={$A['id']}"
-            );
-        }
-        break;
-
-    case 'add_date':
-    case 'exp_date':
-        $dt->setTimestamp($fieldvalue);
-        $retval = $dt->format($_CONF['shortdate']);
-        break;
-
-    case 'subject':
-        $retval = COM_createLink($fieldvalue,
-                $_CONF_ADVT['url'] .
-                    "/index.php?mode=detail&amp;id={$A['ad_id']}");
-        break;
-
-    case 'delete':
-        if ($_CONF_ADVT['_is_uikit']) {
-            $retval = COM_createLink('',
-                $_CONF_ADVT['url'] .
-                    "/index.php?mode=deletead&amp;id={$A['ad_id']}",
-                array('title' => $LANG_ADVT['del_item'],
-                    'class' => 'uk-icon uk-icon-trash',
-                    'style' => 'color:red;',
-                    'data-uk-tooltip' => '',
-                    'onclick' => "return confirm('{$LANG_ADVT['del_item_confirm']}');",
-                )
-            );
-        } else {
-            $retval .= '&nbsp;&nbsp;' . COM_createLink(
-                COM_createImage($_CONF['layout_url'] . '/images/admin/delete.png',
-                    $LANG_ADVT['del_item'],
-                    array('title' => $LANG_ADVT['del_item'],
-                        'class' => 'gl_mootip',
-                        'onclick' => "return confirm('${LANG_ADVT['del_item_confirm']}');",
-                    )),
-                $_CONF_ADVT['url'] .
-                    "/index.php?mode=deletead&amp;id=={$A['ad_id']}"
-            );
-        }
-        break;
-
-    default:
-        $retval = $fieldvalue;
-        break;
-    }
-
-    return $retval;
-}
-
-
-/**
- * Create admin list of Ads to manage.
- *
- * @return  string  HTML for admin list
- */
-function CLASSIFIEDS_ManageAds()
-{
-    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, $_CONF_ADVT,
-        $LANG_ADVT, $_USER;
-
-    $retval = '';
-
-    $header_arr = array(
-        array(
-            'text'  => $LANG_ADVT['edit'],
-            'field' => 'edit',
-            'sort'  => false,
-            'align' => 'center',
-        ),
-        array(
-            'text'  => $LANG_ADVT['description'],
-            'field' => 'subject',
-            'sort'  => true,
-        ),
-        array(
-            'text'  => $LANG_ADVT['added'],
-            'field' => 'add_date',
-            'sort'  => false,
-            'align' => 'center',
-        ),
-        array(
-            'text'  => $LANG_ADVT['expires'],
-            'field' => 'exp_date',
-            'sort'  => false,
-            'align' => 'center'),
-        array(
-            'text'  => $LANG_ADVT['delete'],
-            'field' => 'delete',
-            'sort'  => false,
-            'align' => 'center'),
-    );
-
-    $defsort_arr = array('field' => 'add_date', 'direction' => 'asc');
-
-    $text_arr = array(
-        'has_extras' => true,
-        'form_url' => $_CONF_ADVT['url'] . '/index.php',
-    );
-
-    $query_arr = array(
-        'table' => 'ad_ads',
-        'sql' => "SELECT * FROM {$_TABLES['ad_ads']} WHERE uid = {$_USER['uid']}",
-        'query_fields' => array(),
-        'default_filter' => ''
-    );
-    $form_arr = array();
-    USES_lib_admin();
-    $retval .= ADMIN_list('classifieds', 'CLASSIFIEDS_getField_AdList',
-            $header_arr, $text_arr, $query_arr, $defsort_arr, '',
-            '', '', $form_arr);
-    return $retval;
-}
 
 ?>

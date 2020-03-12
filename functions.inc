@@ -3,9 +3,9 @@
  * Common functions for the Classifieds plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -47,11 +47,6 @@ if ($_CONF['loginrequired'])
 
 // Feature under development, forcefully disable from release
 $_CONF_ADVT['purchase_enabled'] = 0;
-
-// Mark whether this is a uikit theme. Save to global conf var
-// so it's available where needed.
-$_CONF_ADVT['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
-$_CONF_ADVT['_iconset'] = $_CONF_ADVT['_is_uikit'] ? 'uk-icon' : 'fa fa';
 
 // Language file Include
 $langpath = $_CONF_ADVT['path'] . '/language';
@@ -105,6 +100,13 @@ spl_autoload_register(function ($class)
 function USES_classifieds_admin()
 {
     require_once __DIR__ . '/admin.php';
+}
+
+
+/** Helper function, mainly for dvlpupdate.php */
+function USES_classifieds_upgrade()
+{
+    require_once __DIR__ . '/upgrade.inc.php';
 }
 
 
@@ -209,17 +211,30 @@ function plugin_displaycomment_classifieds($id, $cid, $title, $order, $format, $
 
     $Ad = new \Classifieds\Ad($id);
 
-    if (!$Ad->isNew) {
-        $delete_option = (plugin_ismoderator_classifieds() ||
-                $Ad->uid = $_USER['uid']);
-        $retval .= CMT_userComments($id, $title, 'classifieds', $order, $format,
-                                     $cid, $page, $view, $delete_option,
-                                     plugin_commentsupport_classifieds());
+    if (!$Ad->isNew()) {
+        $delete_option = (
+            plugin_ismoderator_classifieds() ||
+            $Ad->getUid() == $_USER['uid']
+        );
+        $retval .= CMT_userComments(
+            $id,
+            $title,
+            'classifieds',
+            $order,
+            $format,
+            $cid,
+            $page,
+            $view,
+            $delete_option,
+            plugin_commentsupport_classifieds()
+        );
     } else {
-        $retval .= COM_startBlock($LANG_ACCESS['accessdenied'], '',
-                        COM_getBlockTemplate ('_msg_block', 'header'))
-                . $LANG_ACCESS['storydenialmsg']
-                . COM_endBlock(COM_getBlockTemplate ('_msg_block', 'footer'));
+        $retval .= COM_startBlock(
+            $LANG_ACCESS['accessdenied'], '',
+            COM_getBlockTemplate ('_msg_block', 'header')
+        )
+        . $LANG_ACCESS['storydenialmsg']
+        . COM_endBlock(COM_getBlockTemplate ('_msg_block', 'footer'));
     }
     return $retval;
 }
@@ -536,24 +551,24 @@ function plugin_subscription_email_format_classifieds($category, $track_id, $pos
 
     // Get the ad from the DB and make sure it exists
     $Ad = new \Classifieds\Ad($post_id);
-    if ($Ad->isNew) return false;
+    if ($Ad->isNew()) return false;
 
     // Sanitize text fields for the message
-    $permalink = CLASSIFIEDS_makeURL('detail', $Ad->ad_id);
-    $title = COM_checkWords($Ad->subject);
+    $permalink = CLASSIFIEDS_makeURL('detail', $Ad->getID());
+    $title = COM_checkWords($Ad->getSubject());
     $title = @htmlspecialchars($title, ENT_QUOTES, COM_getEncodingt());
-    $text = nl2br($Ad->description);
+    $text = nl2br($Ad->getDscp());
     $text = $filter->_replaceTags($text);
 
     $T = new Template(__DIR__ . '/templates/notify/english');
     $T->set_file('message', 'subscriber.thtml');
     $T->set_var(array(
-        'cat'       => $Ad->Cat->BreadCrumbs(),
+        'cat'       => $Ad->getCat()->BreadCrumbs(),
         'subject'   => $title,
         'description' => $text,
         'ad_url'    => $permalink,
-        'price'     => $Ad->price,
-        'ad_type'   => $Ad->Type->description,
+        'price'     => $Ad->getPrice(),
+        'ad_type'   => $Ad->getType()->getDscp(),
     ), false);
     $T->parse('output','message');
     $message = $T->finish($T->get_var('output'));
@@ -735,8 +750,6 @@ function plugin_getheaderjs_classifieds()
     $js_dir = $_CONF_ADVT['path'] . '/js/';
 
     $files = array(
-        //"$js_dir/catfldsxml.js",
-        //"$js_dir/picker.js",
         "$js_dir/toggleEnabled.js",
         "$js_dir/catsub.js",
         "$js_dir/moredays.js",
@@ -773,7 +786,7 @@ function plugin_configmanager_select_grp_classifieds()
  */
 function plugin_upgrade_classifieds()
 {
-    require_once __DIR__ . '/upgrade.inc.php';
+    USES_classifieds_upgrade();
     return classifieds_do_upgrade();
 }
 
@@ -858,10 +871,10 @@ function plugin_moderationapprove_classifieds($id, $owner_id=0)
 {
     // Notify subscribers.
     $Ad = new \Classifieds\Ad($id);
-    \Classifieds\Notify::Approval($Ad, true);
-    \Classifieds\Notify::Subscribers($Ad);
+    Classifieds\Notify::Approval($Ad, true);
+    Classifieds\Notify::Subscribers($Ad);
     // Update the date added to now.
-    \Classifieds\Ad::setAddDate($id);
+    Classifieds\Ad::updateAddDate($id);
     return '';
 }
 
@@ -883,12 +896,12 @@ function plugin_moderationdelete_classifieds($id)
 
     // Return the unused days back to the user's account
     if ($_CONF_ADVT['purchase_enabled']) {
-        $User = new \Classifieds\UserInfo($Ad->uid);
+        $User = new \Classifieds\UserInfo($Ad->getUid());
         /*list($owner_id, $add_date, $exp_date) = DB_fetchArray(DB_query(
             "SELECT uid, add_date, exp_date
             FROM {$_TABLES['ad_submission']}
             WHERE ad_id='$id'"));*/
-        $days = ($Ad->exp_date - $Ad->add_date) / 86400;
+        $days = ($Ad->getExpDate()- $Ad->getAddDate()) / 86400;
         $User->UpdateDaysBalance($days);
     }
 
@@ -906,6 +919,7 @@ function plugin_moderationdelete_classifieds($id)
  */
 function plugin_submit_classifieds()
 {
+    echo __FUNCTION__ . ' deprecated';die;
     $Ad = new \Classifieds\Ad();
     return $Ad->Edit();
 }
@@ -1211,15 +1225,15 @@ function phpblock_classifieds_random()
     $A = DB_fetchArray($r, false);
     if (!$A) return '';
     $Ad = new \Classifieds\Ad($A);
-    if ($Ad->isNew) return '';
+    if ($Ad->isNew()) return '';
 
-    $img_filename = \Classifieds\Image::getFirst($Ad->ad_id);
+    $img_filename = \Classifieds\Image::getFirst($Ad->getID());
 
     $T = new Template($_CONF_ADVT['path'] . '/templates');
     $T->set_file('rblock', 'randomblock.thtml');
     $T->set_var(array(
-        'ad_url'    => CLASSIFIEDS_makeURL('detail', $Ad->ad_id),
-        'ad_subject' => $Ad->subject,
+        'ad_url'    => CLASSIFIEDS_makeURL('detail', $Ad->getID()),
+        'ad_subject' => $Ad->getSubject(),
         'img_url'   => \Classifieds\Image::thumbUrl($img_filename),
     ) );
 
@@ -1739,7 +1753,6 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
                 }
             }
             $T->set_var(array(
-                'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
                 'ad_id'     => $A['ad_id'],
                 'cat_id'    => $A['cat_id'],
                 'uid'       => $A['uid'],
@@ -1779,9 +1792,9 @@ function plugin_privacy_export_classifieds($uid,$email='',$username='',$ip='')
     $U = new \Classifieds\UserInfo($uid);
     $retval = "<classifieds>\n";
     $retval .= $U->Export();
-    $retval .= "</profile>\n";
+    $retval .= "</classifieds>\n";
 
-    if ( function_exists('tidy_repair_string')) {
+    if (function_exists('tidy_repair_string')) {
         $retval = tidy_repair_string($retval, array('input-xml' => 1));
     }
     return $retval;
@@ -1806,7 +1819,6 @@ function CLASSIFIEDS_getDocURL($file='', $doclang='english')
     $doc_url = '';
 
     if ($file != '') {
-        if (!$_CONF_ADVT['_is_uikit']) $file .= '.legacy';
         $file .= '.html';
         if (!file_exists($doc_path . $file)) {
             $doclang = 'english';
@@ -1824,72 +1836,6 @@ function CLASSIFIEDS_getDocURL($file='', $doclang='english')
     }
 
     return $doc_url;
-}
-
-
-/**
- * Show the site header, with or without left blocks according to config.
- *
- * @since   v1.0.2
- * @uses    COM_siteHeader()
- * @param   string  $subject    Text for page title (ad title, etc)
- * @param   string  $meta       Other meta info
- * @return  string              HTML for site header
- */
-function CLASSIFIEDS_siteHeader($subject='', $meta='')
-{
-    global $_CONF_ADVT, $LANG_ADVT;
-
-    $retval = '';
-
-    $title = $LANG_ADVT['blocktitle'];
-    if ($subject != '')
-        $title = $subject . ' : ' . $title;
-
-    switch($_CONF_ADVT['displayblocks']) {
-    case 2:     // right only
-    case 0:     // none
-        $retval .= COM_siteHeader('none', $title, $meta);
-        break;
-
-    case 1:     // left only
-    case 3:     // both
-    default :
-        $retval .= COM_siteHeader('menu', $title, $meta);
-        break;
-    }
-
-    return $retval;
-}
-
-
-/**
- * Show the site footer, with or without right blocks according to config.
- *
- * @since   v1.0.2
- * @uses    COM_siteFooter()
- * @return  string              HTML for site header
- */
-function CLASSIFIEDS_siteFooter()
-{
-    global $_CONF_ADVT;
-
-    $retval = '';
-
-    switch($_CONF_ADVT['displayblocks']) {
-    case 2 : // right only
-    case 3 : // left and right
-        $retval .= COM_siteFooter(true);
-        break;
-
-    case 0: // none
-    case 1: // left only
-    default :
-        $retval .= COM_siteFooter();
-        break;
-    }
-
-    return $retval;
 }
 
 
@@ -2003,30 +1949,17 @@ function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
     }
     $msg_txt .= '</ul>';
 
-    if ($_CONF_ADVT['_is_uikit']) {
-        $element = 'div';
-        switch ($type) {
-        case 'alert':
-        default:
+    $element = 'div';
+    switch ($type) {
+    case 'alert':
+    default:
             $class .= 'uk-alert uk-alert-danger';
             break;
-        case 'info':
+    case 'info':
             $class .= 'uk-alert';
             break;
-        }
-    } else {
-        $element = 'span';
-        switch ($type) {
-        case 'info':
-        case 'alert':
-            $class = $type;
-            break;
-        default:
-            $class = 'alert';
-            break;
-        }
     }
-    return "<$element class=\"$class\">$msg_txt</$element>\n";
+    return "<div class=\"$class\">$msg_txt</div>";
 }
 
 
@@ -2034,7 +1967,7 @@ function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
  * Gets the correct template depending on the type of display.
  * Currently supports the new "blocks" display and the old
  * zClassifieds-style display
- * 
+ *
  * @param   string  $str    Template base name
  * @return  string          Template full name
  */
