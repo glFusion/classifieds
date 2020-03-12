@@ -2,10 +2,12 @@
 
 ## Version 1.3.0 (Unreleased)
 - Fix namespace usage
-- Implement plugin_privacy_export function
+- Implement `plugin_privacy_export` function
 - Require LGLib 1.0.7 for new colorpicker
 - Remove date-added field for categories, not used
 - Implement Modified Preloaded Tree Traversal for categories
+- Remove non-uikit theme support
+- Remove fax number from user information
 
 ## Version 1.2.1 (Released 2018-01-11)
 - Fix ad type management
