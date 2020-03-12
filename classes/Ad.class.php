@@ -234,6 +234,32 @@ class Ad
 
 
     /**
+     * Get a random ad.
+     *
+     * @return  object      Ad object
+     */
+    public static function getRandom()
+    {
+        global $_TABLES;
+
+        $sql = "SELECT ad.*
+            FROM {$_TABLES['ad_ads']} ad
+            LEFT JOIN {$_TABLES['ad_category']} cat
+                ON cat.cat_id = ad.cat_id
+            WHERE ad.exp_date > " . time() . " "
+            . COM_getPermSQL('AND', 0, 2, 'cat')
+            . ' ORDER BY RAND() LIMIT 1';
+        //echo $sql;
+        $r = DB_query($sql);
+        $A = DB_fetchArray($r, false);
+        if (!$A) {
+            return new self;
+        }
+        return new self($A);
+    }
+
+
+    /**
      * Save the current ad record to the database.
      *
      * @param   array   $A  Optional array of values, e.g. from $_POST
@@ -1363,8 +1389,8 @@ class Ad
             $text_arr, $query_arr, $defsort_arr, '', '', $options, $form_arr
         );
     }
-    
-    
+
+
     /**
      * Create list of Ads for a user to manage.
      *
@@ -1499,7 +1525,7 @@ class Ad
                 )
             );
             break;
-    
+
         case 'user_delete':
             $retval = COM_createLink(
                 '',

@@ -659,7 +659,7 @@ function plugin_dopluginsearch_classifieds(
  *
  * @return  string  Additional Header Code
  */
-function plugin_getheadercode_classifieds()
+function Xplugin_getheadercode_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $_TABLES;
 
@@ -1124,8 +1124,10 @@ function plugin_runScheduledTask_classifieds($standalone=false)
     $purge_cache = false;   // assume there's nothing to delete
 
     // Other plugins should consider expired ads as "deleted"
-    $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']}
-                WHERE exp_date < " . time());
+    $r = DB_query(
+        "SELECT ad_id FROM {$_TABLES['ad_ads']}
+        WHERE exp_date < " . time()
+    );
     while ($A = DB_fetchArray($r, false)) {
         $purge_cache = true;    // Flag to clear cache
         PLG_itemDeleted($A['ad_id'], $_CONF_ADVT['pi_name']);
@@ -1138,8 +1140,10 @@ function plugin_runScheduledTask_classifieds($standalone=false)
     // Check if purging is disabled
     if ($_CONF_ADVT['purge_days'] > 0) {
         $purge_exp_date = time() - ((int)$_CONF_ADVT['purge_days'] * 86400);
-        $r = DB_query("SELECT ad_id FROM {$_TABLES['ad_ads']}
-                    WHERE exp_date < $purge_exp_date");
+        $r = DB_query(
+            "SELECT ad_id FROM {$_TABLES['ad_ads']}
+            WHERE exp_date < $purge_exp_date"
+        );
         if ($r) {
             $numrows = DB_numRows($r);
             while ($row = DB_fetchArray($r, false)) {
@@ -1158,7 +1162,7 @@ function plugin_runScheduledTask_classifieds($standalone=false)
 
     // Notify users of impending ad expirations
     if ((int)$_CONF_ADVT['exp_notify_days'] >= 0) {
-        \Classifieds\Notify::Expiration();
+        Classifieds\Notify::Expiration();
     }
 }
 
@@ -1171,7 +1175,7 @@ function plugin_runScheduledTask_classifieds($standalone=false)
  */
 function plugin_user_create_classifieds($uid)
 {
-    $U = new \Classifieds\UserInfo($uid);
+    $U = new Classifieds\UserInfo($uid);
     $U->Save();
 }
 
@@ -1208,27 +1212,15 @@ function phpblock_classifieds_random()
     global $_TABLES, $LANG_ADVT, $_CONF_ADVT;
 
     $retval = '';
-    $now = time();
-
-    if ($_CONF_ADVT['loginrequired'] == 1 && COM_isAnonUser())
+    if ($_CONF_ADVT['loginrequired'] == 1 && COM_isAnonUser()) {
         return $retval;
+    }
+    $Ad = Classifieds\Ad::getRandom();
+    if ($Ad->isNew()) {
+        return $retvl;
+    }
 
-    $sql = "SELECT ad.*
-            FROM {$_TABLES['ad_ads']} ad
-            LEFT JOIN {$_TABLES['ad_category']} cat
-                ON cat.cat_id = ad.cat_id
-            WHERE ad.exp_date > $now "
-            . COM_getPermSQL('AND', 0, 2, 'cat')
-            . ' ORDER BY RAND() LIMIT 1';
-    //echo $sql;
-    $r = DB_query($sql);
-    $A = DB_fetchArray($r, false);
-    if (!$A) return '';
-    $Ad = new \Classifieds\Ad($A);
-    if ($Ad->isNew()) return '';
-
-    $img_filename = \Classifieds\Image::getFirst($Ad->getID());
-
+    $img_filename = Classifieds\Image::getFirst($Ad->getID());
     $T = new Template($_CONF_ADVT['path'] . '/templates');
     $T->set_file('rblock', 'randomblock.thtml');
     $T->set_var(array(
@@ -1236,7 +1228,6 @@ function phpblock_classifieds_random()
         'ad_subject' => $Ad->getSubject(),
         'img_url'   => \Classifieds\Image::thumbUrl($img_filename),
     ) );
-
     $T->parse('output','rblock');
     return $T->finish($T->get_var('output'));
 }
@@ -1249,7 +1240,7 @@ function phpblock_classifieds_random()
  */
 function plugin_supportadblock_classifieds()
 {
-    return array('classifieds_detail', 'classifieds_list');
+    return array('classifieds_detail');
 }
 
 
