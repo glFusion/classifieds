@@ -54,19 +54,4 @@ $_CONF_ADVT['imgpath'] = $_CONF['path'] . 'data/classifieds/images';
 $_CONF_ADVT['url'] = $_CONF['site_url'] . '/' . $_CONF_ADVT['pi_name'];
 $_CONF_ADVT['admin_url'] = $_CONF['site_admin_url'] . '/plugins/' . $_CONF_ADVT['pi_name'];
 
-/**
- * Plugin-specific global array of category block colors.
- * @global array $CatListcolors
- */
-global $CatListcolors;
-$CatListcolors = array(
-    // background, forground, header
-    array('#CCCC66', '#000000'),
-    array('#FFCC99', '#663300'),
-    array('#EEEEEE', '#444444'),
-    array('#FFCCCC', '#990000'),
-    array('#99CCFF', '#3333CC'),
-    array('#FF00CC', '#CCCC33'),
-);
-
 ?>

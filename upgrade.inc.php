@@ -526,6 +526,8 @@ function classifieds_upgrade_1_3_0($dvlp = false)
         "ALTER TABLE {$_TABLES['ad_category']} DROP parent_map",
         "ALTER TABLE {$_TABLES['ad_category']} DROP add_date",
         "ALTER TABLE {$_TABLES['ad_category']} DROP keywords",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP fgcolor",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP bgcolor",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
         "ALTER TABLE {$_TABLES['ad_uinfo']} DROP fax",
@@ -597,6 +599,7 @@ function classifieds_remove_old_files()
         $_CONF['path_html'] . 'classifieds' => array(
             // 1.3.0
             'js',
+            'docs/english/config.legacy.html',
         ),
         // admin/plugins/classifieds
         $_CONF['path_html'] . 'admin/plugins/classifieds' => array(
