@@ -201,14 +201,6 @@ case 'editad':
     $content .= $Ad->Edit();
     break;
 
-case 'byposter':
-    // Display all open ads for the specified user ID
-    $L = new \Classifieds\Lists\Ads\byPoster($_GET['uid']);
-    $content .= $L->Render();
-    $T->set_var('header', $LANG_ADVT['ads_by']. ' '. COM_getDisplayName($uid));
-    $menu_opt = $LANG_ADVT['mnu_home'];
-    break;
-
 case 'home':
 default:
     // Display the ad listing, possibly filtered by category and type

@@ -198,8 +198,9 @@ class Ad
             $this->ad_id = COM_sanitizeId($id, false);
         }
 
-        $result = DB_query("SELECT * from {$this->table}
-                            WHERE ad_id = '{$this->ad_id}'");
+        $result = DB_query(
+            "SELECT * from {$this->table} WHERE ad_id = '{$this->ad_id}'"
+        );
         $row = DB_fetchArray($result, false);
         if ($row) {
             $this->setVars($row);
@@ -701,9 +702,10 @@ class Ad
         $T->set_var('main_imgname', $main_imgname);
 
         if (DB_count($_TABLES['ad_ads'], 'uid', $this->uid) > 1) {
-            $T->set_var('byposter_url',
-                $_CONF_ADVT['url'] . '/index.php?' .
-                "mode=byposter&uid={$this->uid}");
+            $T->set_var(
+                'byposter_url',
+                $_CONF_ADVT['url'] . '/index.php?uid=' . $this->uid
+            );
         }
 
         // Show previous and next ads
