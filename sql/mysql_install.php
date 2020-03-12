@@ -1,20 +1,21 @@
 <?php
 /**
-*   MySQL table creation statements for the Classifieds plugin
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
-*   @package    classifieds
-*   @version    1.0.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*   GNU Public License v2 or later
-*   @filesource
-*/
+ * MySQL table creation statements for the Classifieds plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @package     classifieds
+ * @version     v1.3.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 
 /**
-*   Global array of new tables to be created
-*   @global array $NEWTABLE
-*/
+ * Global array of new tables to be created.
+ * @global array $NEWTABLE
+ */
 global $NEWTABLE;
 $NEWTABLE = array();
 
@@ -60,9 +61,9 @@ $adtable_create = "
     KEY (exp_date),
     KEY (uid)
 ) ENGINE=MyISAM";
-$NEWTABLE['ad_ads'] = "CREATE TABLE {$_TABLES['ad_ads']} 
+$NEWTABLE['ad_ads'] = "CREATE TABLE {$_TABLES['ad_ads']}
     $adtable_create";
-$NEWTABLE['ad_submission'] = "CREATE TABLE {$_TABLES['ad_submission']} 
+$NEWTABLE['ad_submission'] = "CREATE TABLE {$_TABLES['ad_submission']}
     $adtable_create";
 
 $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
