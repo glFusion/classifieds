@@ -267,7 +267,7 @@ class Ad
      */
     public function Save($A = array())
     {
-        global $_CONF, $_CONF_ADVT;
+        global $_CONF, $_CONF_ADVT, $LANG_ADVT;
 
         // If an array of values is provided, set them in this object
         if (!empty($A)) {
@@ -324,7 +324,7 @@ class Ad
         DB_query($sql, 1);
         if (DB_error()) {
             COM_errorLog("Error executing $sql");
-            LGLIB_storeMessage('Database error saving ad');
+            COM_setMsg($LANG_ADVT['database_error'], 'error');
             return false;
         } else {
             // Category object needed for notifications, but is not yet
