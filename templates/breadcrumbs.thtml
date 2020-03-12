@@ -1,9 +1,11 @@
 {# begin {templatelocation} #}
+<ul class="uk-breadcrumb uk-margin-remove">
 <!-- BEGIN BreadCrumbs -->
-{bc_link}
 {!if last_link}
+  <li class="uk-active">{bc_link}</li>
 {!else}
- :: 
+  <li>{bc_link}</li>
 {!endif}
 <!-- END BreadCrumbs -->
+</ul>
 {# end {templatelocation} #}

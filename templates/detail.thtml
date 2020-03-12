@@ -1,41 +1,27 @@
 {# begin {templatelocation} #}
 {breadcrumbs}
-<div id="adDetailWrapper">
-  {!if have_userlinks}
+<div id="adDetailWrapper" class="v2">
+{!if have_userlinks}
   <div id="adDetailUserLinks">
-    {!if have_editlink}
-    <form action="{edit_link}" method=POST>
-        <input 
-                name="editbutton" type="image" 
-                src="{layout_url}/images/edit.png"
-                alt="{$LANG_ADVT['edit_item']}"
-                title="{$LANG_ADVT['edit_item']}"
-                />
-    </form>
-    {!endif}
-    <form action="{del_link}" method=POST>
-        <input 
-                name="delbutton" type="image" 
-                src="{layout_url}/images/admin/delete.png"
-                alt="{$LANG_ADVT['del_item']}" 
-                title="{$LANG_ADVT['del_item']}" 
-                onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" 
-                />
-    </form>
+{!if have_editlink}
+    <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
+    <a href="{del_link}" data-uk-tooltip
+        onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" 
+        title="{$LANG_ADVT['del_item']}" 
+        ><i class="uk-icon uk-icon-trash uk-icon-danger" style="color:red"></i></a>
+{!endif}
   </div>
-  {!endif}
+{!endif}
   <div class="adImage" style="width:{tn_width}px;max-width:{tn_width}px;">
     <span class=adTypeHeader">{ad_type}</span>:
     <p />
     {!if have_photo}
-      <!-- BEGIN PhotoBlock -->
-      <a href="{disp_url}" target="_blank" rel="slimbox[ad]">
-        <img src="{small_url}" border="0" 
-                alt="{$LANG_ADVT[click_to_enlarge]}" 
-                title="{$LANG_ADVT[click_to_enlarge]}" />
-      </a>
-      <br />
-      <!-- END PhotoBlock -->
+    <!-- BEGIN PhotoBlock -->
+    <a data-lightbox-type="image" data-uk-lightbox="{group:'a'}" href="{disp_url}" target="_blank">
+      <img src="{small_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" data-uk-tooltip />
+    </a>
+    <br />
+    <!-- END PhotoBlock -->
     {!else}
       <br />
       <span class="adNoImage">
@@ -53,20 +39,18 @@
           class="adExpiredText"
         {!endif}
       >
-        {$LANG_ADVT['expires_col']} {exp_date}
+        {$LANG_ADVT['expires_col']} <span id="exp_date">{exp_date}</span>
         <p />
       </span>
 
       {!if max_add_days}
         <hr width="80%" align="left" />
-        <form method="post" 
-          action="{site_url}/classifieds/index.php?mode=moredays&id={ad_id}">
           {$LANG_ADVT['add']}
-          <input type="text" name = "add_days" size="3" /> 
+          <input type="text" id="f_max_add_days" name="add_days" size="3"
+            onchange="javascript:ADVTmoreDays('{ad_id}', this.value);" /> 
           {$LANG_ADVT['days']}
           <br />
-          ({$LANG_ADVT['max']} {max_add_days})
-        </form>
+          ({$LANG_ADVT['max']} <span id="max_add_days">{max_add_days}</span>)
         <hr width="80%" align="left" />
       {!endif}
       {$LANG_ADVT['views']} {views_no}
@@ -84,93 +68,85 @@
     <hr width="100%" />
 
     <p class="title">{$LANG_ADVT['contact_info']}</p>
-    <table id="adContact">
-      <tr>
-        <td class="title">{$LANG_ADVT['contact']}</td>
-        <td class="data">
-          {username}
-          {!if ad_uid}
+    <div class="adContact">
+      <div class="adContactItem">
+        <div class="label">{$LANG_ADVT['contact']}</div>
+        <div class="data">{username}
+{!if ad_uid}
           <a href="{site_url}/profiles.php?uid={ad_uid}">
-            <img 
-                name="editbutton" 
-                alt="{$LANG_ADVT['ask_question']}" 
-                title="{$LANG_ADVT['ask_question']}" 
-                src="{site_url}/classifieds/images/mail.png" />
+            <img name="editbutton" 
+              alt="{$LANG_ADVT['ask_question']}" 
+              title="{$LANG_ADVT['ask_question']}" 
+              src="{site_url}/classifieds/images/mail.png" />
           </a>
-          {!else}
+{!else}
           &nbsp;&nbsp;<i>({$LANG_ADVT['login_to_email']})</i>
-          {!endif}
-        </td>
-      </tr>
-      {!if uinfo_address}
-      <tr>
-        <td class="title">{$LANG_ADVT['address']}</td>
-        <td class="data">{uinfo_address}</td>
-      </tr>
-      {!endif}
-      {!if uinfo_city}
-      <tr>
-        <td class="title">{$LANG_ADVT['city']}</td>
-        <td class="data">{uinfo_city}</td>
-      </tr>
-      {!endif}
-      {!if uinfo_state}
-      <tr>
-        <td class="title">{$LANG_ADVT['state']}</td>
-        <td class="data">{uinfo_state}</td>
-      </tr>
-      {!endif}
-      {!if uinfo_postcode}
-      <tr>
-        <td class="title">{$LANG_ADVT['postal']}</td>
-        <td class="data">{uinfo_postcode}</td>
-      </tr>
-      {!endif}
-      {!if uinfo_tel}
-      <tr>
-        <td class="title">{$LANG_ADVT['telephone']}</td>
-        <td class="data">{uinfo_tel}</td>
-      </tr>
-      {!endif}
-      {!if uinfo_fax}
-      <tr>
-        <td class="title">{$LANG_ADVT['fax']}</td>
-        <td class="data">{uinfo_fax}</td>
-      </tr>
-      {!endif}
-      {!if ad_url}
-      <tr>
-        <td class="title">{$LANG_ADVT['website']}</td>
-        <td class="data">
+{!endif}
+        </div>
+      </div>
+{!if uinfo_address}
+      <div class="adContactItem">
+        <div class="label"> {$LANG_ADVT['address']}</div>
+        <div class="data">{uinfo_address}</div>
+      </div>
+{!endif}
+{!if uinfo_city}
+      <div class="adContactItem">
+        <div class="label">{$LANG_ADVT['city']}</div>
+        <div class="data">{uinfo_city}</div>
+      </div>
+{!endif}
+{!if uinfo_state}
+      <div class="adContactItem">
+        <div class="label">{$LANG_ADVT['state']}</div>
+        <div class="data">{uinfo_state}</div>
+      </div>
+{!endif}
+{!if uinfo_postcode}
+      <div class="adContactItem">
+        <div class="label">{$LANG_ADVT['postal']}</div>
+        <div class="data">{uinfo_postcode}</div>
+      </div>
+{!endif}
+{!if uinfo_tel}
+      <div class="adContactItem">
+        <div class="label">{$LANG_ADVT['telephone']}</div>
+        <div class="data">{uinfo_tel}</div>
+      </div>
+{!endif}
+{!if ad_url}
+      <div class="adContactItem">
+        <div class="title">{$LANG_ADVT['website']}</div>
+        <div class="data">
           <a href="{ad_url}" target="_blank" rel="nofollow">{ad_url}</a>
-        </td>
-      </tr>
-      {!endif}
-      {!if byposter_url}
-      <tr>
-        <td></td>
-        <td>
+        </div>
+      </div>
+{!endif}
+{!if byposter_url}
+      <div class="adContactItem">
+        <div class="label>></div>
+        <div class="data">
           <a href="{byposter_url}">{$LANG_ADVT['ads_by_poster']}</a>
-        </td>
-      </tr>
-      {!endif}
-    </table>
-    <hr />
-    <p />
-    <span class="adDetailHotTitle">{$LANG_ADVT['whats_hot']}</span><br />
+        </div>
+      </div>
+{!endif}
+    </div>
   
-    <table class="adDetailHotTable">
-    <!-- BEGIN HotBlock -->
-    <tr>
-      <td class="hottitle"><a href="{hot_url}">{hot_title}</a></td>
-      <td class="hotcat">{hot_cat}</td>
-    </tr>
-    <!-- END HotBlock -->
-    </table>
-
-    {usercomments}
-
+    <div class="adWhatsHot">
+      <p class="title">{$LANG_ADVT['whats_hot']}</p>
+<!-- BEGIN HotBlock -->
+      <div class="adWhatsHotItem">
+        <div class="label"><a href="{hot_url}">{hot_title}</a></div>
+        <div class="data"><a href="{hot_cat_url}">{hot_cat}</a></div>
+      </div>
+<!-- END HotBlock -->
+    </div>
   </div>
-
+    <div style="clear:both;">
+    {usercomments}
+    </div>
+{!if adblock}
+  <div style="aligncenter">{adblock}</div>
+{!endif}
 </div>
 {# end {templatelocation} #}

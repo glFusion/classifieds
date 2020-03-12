@@ -18,10 +18,10 @@ function loadEditor(id) {
      return instance;
 }
 window.onload = function() {
-    descript = loadEditor('descript');
+    descript = loadEditor('description');
 };
 function won (id) {
-    descript = loadEditor('descript');
+    descript = loadEditor('description');
 }
 function woff (id) {
     descript.destroy();

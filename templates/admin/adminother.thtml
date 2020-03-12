@@ -5,7 +5,7 @@
     method="post">
   {$LANG_ACCESS['group']}: {cat_list}<p />
   {cat_perms}<p />
-  <input type="submit" name="resetcatperms" value="{$LANG12[8]}" />
+  <button class="uk-button uk-button-success" type="submit" name="resetcatperms">{$LANG12[8]}</button>
+  <button class="uk-button" type="submit" name="ads">{$LANG_ADMIN['cancel']}</button>
 </form>
-<hr />
 {# end {templatelocation} #}

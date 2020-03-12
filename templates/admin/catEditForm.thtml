@@ -1,125 +1,110 @@
 {# begin {templatelocation} #}
-<script type="text/javascript">
-<!--
-window.addEvent('domready',function() {
-    var myValidator = new fValidator("submit");
-});
--->
-</script>
-
 <form id="submit" enctype="multipart/form-data" method="post" 
+    class="uk-form uk-form-horizontal"
     action="?mode=update_cat&catid={cat_id}">
   <input type="hidden" name="cat_id" value="{cat_id}" />
   <input type="hidden" name="orig_pcat" value="{orig_pcat}" />
-  <table border=0>
 
-    <tr>
-      <td>
-        <b>{$LANG_ADVT['enter_cat']}:</b>
-      </td>
-      <td>
-        <input type="text" id="catname" class="fValidate['required']" 
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="catname">{$LANG_ADVT['enter_cat']}:</label>
+    <div class="uk-form-controls">
+      <input required type="text" id="catname"
             name="cat_name" length="50" size="20" value="{catname}" />
-      </td>
-    </tr>
+    </div>
+  </div>
 
-    <tr>
-      <td>
-        <b>{$LANG_ADVT['parent_cat']}:</b>
-      </td>
-      <td>
-        <select name="papa_id">
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="papa_id">{$LANG_ADVT['parent_cat']}:</label>
+    <div class="uk-form-controls">
+      <select name="papa_id" id="papa_id">
           {sel_parent_cat}
         </select>
-      </td>
-    </tr>
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ADVT['description']}:</b></td>
-      <td>
-        <textarea id="descript" rows="2" name="description" cols="50" 
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="descript">{$LANG_ADVT['description']}:</label>
+
+    <div class="uk-form-controls">
+      <textarea id="descript" rows="2" name="description" cols="50" 
             style="width:100%" maxlength="256">{description}</textarea>
-      </td>
-    </tr>
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ADVT['keywords']}:</b></td>
-      <td>
-        <input type="text" name="keywords" length="255" size="50" 
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="keywords">{$LANG_ADVT['keywords']}:</label>
+    <div class="uk-form-controls">
+      <input type="text" id="keywords" name="keywords" length="255" size="50" 
             value="{keywords}" />
-      </td>
-    </tr>
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ADVT['image']}:</b><br />{$LANG_ADVT['icon_desc']}</td>
-      <td>
-        <input type="file" name="imagefile" />
-        <input type="hidden" name="image" value="{image}" />
-      </td>
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="imagefile">{$LANG_ADVT['icon_desc']}:</label>
+    <div class="uk-form-controls">
+      <input type="hidden" name="image" value="{image}" />
+      <input type="file" id="imagefile" name="imagefile" />
       {!if img_url}
-      <td>
-        <img src="{img_url}" width="48" height="48" />
+      <img src="{img_url}" width="48" height="48" />
           <a href="?mode=delcatimg&cat_id={cat_id}">{$LANG_ADVT['delete']}</a>
-      </td>
       {!endif}
-    </tr>
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ADVT['block_colors']}: </b></td>
-      <td>
-        <label for="fgcolor">{$LANG_ADVT['foreground']}: </label>
-        <input name="fgcolor" type="text" id="fgcolor" size="7" maxlength="7" 
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="fgcolor">{$LANG_ADVT['block_colors']}:</label>
+    <div class="uk-form-controls">
+      {$LANG_ADVT['foreground']}: <input name="fgcolor" type="text" id="fgcolor" size="7" maxlength="7" 
             value="{fgcolor}" style="background:{fgcolor}" /> 
-        <span onclick="openPicker('fgcolor')">
-          <img src="{site_url}/classifieds/images/colors.png">
-        </span>
-        <label for="bgcolor">{$LANG_ADVT['background']}: </label>
-        <input name="bgcolor" type="text" id="bgcolor" size="7" maxlength="7" 
+      {$LANG_ADVT['background']}: <input name="bgcolor" type="text" id="bgcolor" size="7" maxlength="7" 
             value="{bgcolor}" style="background:{bgcolor}" /> 
-        <span onclick="openPicker('bgcolor')">
-          <img src="{site_url}/classifieds/images/colors.png" />
-        </span>
-      </td>
-    </tr>
+      &nbsp;&nbsp;&nbsp;<span id="sample" style="background-color:{bgcolor};color:{fgcolor};">{$LANG_ADVT['sample']}</span>
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ACCESS['owner']}:</b></td>
-      <td align="left">
-        <select id="owner" name="owner_id">
-        {owner_dropdown}
-        </select>
-      </td>
-    </tr>
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="owner">{$LANG_ACCESS['owner']}:</label>
+    <div class="uk-form-controls">
+      <select id="owner" name="owner_id">
+      {owner_dropdown}
+      </select>
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ACCESS['group']}:</b></td>
-      <td align="left">
-        {group_dropdown}
-      </td>
-    </tr>
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="group">{$LANG_ACCESS['group']}:</label>
+    <div class="uk-form-controls"> 
+      {group_dropdown}
+    </div>
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ACCESS['permissions']}:</b></td>
-      <td align="left">
-        {permissions_editor}
-      </td>
-    </tr>
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="permissions">{$LANG_ACCESS['permissions']}:</label>
+    <div class="uk-form-controls">
+      {permissions_editor}
+    </div
+  </div>
 
-    <tr>
-      <td><b>{$LANG_ADVT['prop_perms']}</b></td>
-      <td><input type="checkbox" name="propagate" value="1" /></td>
-    </tr>
-  </table>
+{!if have_propagate}
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="propagate">{$LANG_ADVT['prop_perms']}:</label>
+    <div class="uk-form-controls">
+      <input type="checkbox" name="propagate" value="1" />
+    </div>
+  </div>
 
-  <p>
-    <input type="hidden" name="owner_id" value="{owner_id}" />
-    <input type="submit" class="lgButton green" name="savecat" value="{$LANG_ADMIN['save']}" />
-    <input type="reset" class="lgButton blue" value="{$LANG_ADVT['reset']}" />
-    <input type="reset" class="lgButton grey" value="{$LANG_ADMIN['cancel']}" name="cancel" 
-        onclick="javascript: document.location.href='{cancel_url}'" />
-    <input type="submit" class="lgButton red" name="deletecat" value="{$LANG_ADVT['delete']}" />
-  </p>
-  <hr />
+{!endif}
+  <div class="uk-form-row">
+    <div class="uk-form-controls">
+      <button type="submit" class="uk-button uk-button-success" name="savecat" value="{$LANG_ADMIN['save']}">{$LANG_ADMIN['save']}</button>
+      <button type="reset" class="uk-button uk-button-primary" value="{$LANG_ADVT['reset']}">{$LANG_ADVT['reset']}</button>
+      <button type="reset" class="uk-button" value="{$LANG_ADMIN['cancel']}" name="cancel" 
+        onclick="javascript: document.location.href='{cancel_url}'">{$LANG_ADMIN['cancel']}</button>
+      {!if can_delete}
+      <button type="submit" class="uk-button uk-button-danger" name="deletecat" value="{$LANG_ADVT['delete']}">{$LANG_ADVT['delete']}</button>
+      {!endif}
+    </div>
+  </div>
 </form>
 {!if 0}
 <!--<form method="post" action="?mode=delcat">
@@ -135,4 +120,5 @@ window.addEvent('domready',function() {
   </table>
 </form>-->
 {!endif}
+{colorpicker}
 {# begin {templatelocation} #}

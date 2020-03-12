@@ -3,12 +3,7 @@
 <div style="clear:both;">
 {!if img_url}
   <div style="float:left;padding:10px;">
-{!if is_uikit}
     <a href="{img_url}" data-uk-lightbox="{group:'ad'}">
-{!else}
-    <a href="{img_url}" target="_blank" rel="slimbox[ad]" 
-      onclick="initLightbox()">
-{!endif}
       <img src="{tn_url}" border="0" 
           alt="{$LANG_ADVT[click_to_enlarge]}" 
           title="{$LANG_ADVT[click_to_enlarge]}"
