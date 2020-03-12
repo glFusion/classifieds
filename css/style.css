@@ -20,16 +20,16 @@ div.adlistItem {
   position:relative;
   border: 2px solid #ddd;
   border-radius: 10px;
-  -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
   width: 100%;
   height: 100%;
 }
 div.adlistItem div.adtype {
-  border-radius: 10px 10px 0px 0px;
-  -moz-border-radius: 10px 10px 0px 0px;
-  -webkit-border-radius: 10px 10px 0px 0px;
+  /* Apparently need to account for the 2px border in the parent div */
+  border-radius: 8px 8px 0px 0px;
+  -webkit-border-radius: 8px 8px 0px 0px;
   width: 100%;
+  padding-bottom:1px;
 }
 
 /* Styles for the category box displays */
