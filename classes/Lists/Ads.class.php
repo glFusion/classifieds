@@ -3,14 +3,18 @@
  * List ads.  By category, recent submissions, etc.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2016-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Classifieds\Lists;
+use Classifieds\Category;
+use Classifieds\AdType;
+use Classifieds\Image;
+
 
 /**
  * Base class to create ad listings.
@@ -34,6 +38,29 @@ class Ads
      * @var string */
     protected $limit_clause = '';
 
+    /** Category IDs to limit search.
+     * @var array */
+    protected $cat_ids = array();
+
+    /** Ad type IDs to limit search.
+     * @var array */
+    protected $type_ids = array();
+
+
+    /**
+     * Set the category if one is specified.
+     *
+     * @param   integer $cat_id     Category ID
+     */
+    public function __construct($cat_id = 0)
+    {
+        $this->cat_id = (int)$cat_id;
+        if ($cat_id > 0) {
+            $this->Cat = new Category($this->cat_id);
+            $this->addCats(array($cat_id));
+        }
+    }
+
 
     /**
      * Display an expanded ad listing.
@@ -51,8 +78,8 @@ class Ads
         $maxAds = isset($_CONF_ADVT['maxads_pg_exp']) ?
                 (int)$_CONF_ADVT['maxads_pg_exp'] : 20;
 
-        $T = new \Template($_CONF_ADVT['path'] . '/templates');
-        $T->set_file('catlist', 'adExpList.thtml');
+        $T = new \Template($_CONF_ADVT['path'] . '/templates/lists');
+        $T->set_file('catlist', 'ads.thtml');
 
         // Get the ads for this category, starting at the requested page
         $sql = "SELECT ad.*, ad.add_date as ad_add_date, cat.*
@@ -60,9 +87,16 @@ class Ads
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON cat.cat_id = ad.cat_id
             WHERE ad.exp_date > $time " .
-                COM_getPermSQL('AND', 0, 2, 'cat');
-        if ($this->where_clause != '')
+            COM_getPermSQL('AND', 0, 2, 'cat');
+        if ($this->where_clause != '') {
             $sql .= " AND $this->where_clause ";
+        }
+        if (!empty($this->type_ids)) {
+            $sql .= ' AND ad.ad_type in (' . implode(',', $this->type_ids) . ')';
+        }
+        if (!empty($this->cat_ids)) {
+            $sql .= ' AND ad.cat_id in (' . implode(',', $this->cat_ids) . ')';
+        }
         $sql .= " ORDER BY ad.add_date DESC";
         //echo $sql;die;
 
@@ -75,12 +109,13 @@ class Ads
 
         // Figure out the page number, and execute the query
         // with the appropriate LIMIT clause.
-        if ($totalAds <= $maxAds)
+        if ($totalAds <= $maxAds) {
             $totalPages = 1;
-        elseif ($totalAds % $maxAds == 0)
+        } elseif ($totalAds % $maxAds == 0) {
             $totalPages = $totalAds / $maxAds;
-        else
+        } else {
             $totalPages = ceil($totalAds / $maxAds);
+        }
 
         $page = isset($_REQUEST['start']) ? (int)$_REQUEST['start'] : 1;
         if ($page < 1 || $page > $totalPages) {
@@ -95,8 +130,9 @@ class Ads
         $pageMenu = '';
         if ($totalPages > 1) {
             $baseURL = $_CONF_ADVT['url'] . "/index.php?page=$pagename";
-            if ($this->cat_id != '')
+            if ($this->cat_id > 0) {
                 $baseURL .= "&amp;id=$this->cat_id";
+            }
             $pageMenu = COM_printPageNavigation($baseURL, $page, $totalPages, "start=");
         }
         $T->set_var('pagemenu', $pageMenu);
@@ -123,34 +159,46 @@ class Ads
                 'ad_id'     => $row['ad_id'],
                 'ad_url'    => CLASSIFIEDS_makeURL('detail', $row['ad_id']),
                 'add_date'  => date($_CONF['shortdate'], $row['ad_add_date']),
-                'ad_type'   => \Classifieds\AdType::getDescription($row['ad_type']),
+                'ad_type'   => AdType::getDescription($row['ad_type']),
                 'cat_name'  => $row['cat_name'],
                 'cat_url'   => CLASSIFIEDS_makeURL('home', $row['cat_id']),
                 'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
                 'descript' => substr(strip_tags($row['description']), 0, 300),
                 'ellipses'  => strlen($row['description']) > 300 ? '...' : '',
                 'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
-                'is_uikit'  => $_CONF_ADVT['_is_uikit'] ? 'true' : '',
                 'tn_cellwidth' => $_CONF_ADVT['thumb_max_size'] - 20,
-                'adblock'   => PLG_displayAdBlock('classifieds_list', ++$counter),
+                //'adblock'   => PLG_displayAdBlock('classifieds_list', ++$counter),
             ) );
-
-            $photos = \Classifieds\Image::getAll($row['ad_id'], 1);
-            if (empty($photos)) {
-                $filename = current($photos);
-                $T->set_var(array(
-                    'img_url'   => '',
-                    'thumb_url' => '',
-                ) );
-            } else {
-                $filename = current($photos);
-                $T->set_var(array(
-                    'img_url'   => \Classifieds\Image::dispUrl($filename),
-                    'thumb_url' => \Classifieds\Image::thumbUrl($filename),
-                ) );
-            }
+            $filename = Image::getFirst($row['ad_id']);
+            $T->set_var(array(
+                'img_url'   => Image::dispUrl($filename),
+                'thumb_url' => Image::thumbUrl($filename),
+            ) );
             $T->parse('QRow', 'QueueRow', true);
         }   // while
+
+
+        $T->set_block('catlist', 'CatChecks', 'CC');
+        foreach (Category::getTree() as $Cat) {
+            if (Category::TotalAds($Cat->getID()) == 0) {
+                continue;
+            }
+            $T->set_var(array(
+                'cat_id'    => $Cat->getID(),
+                'cat_name'  => $Cat->getName(),
+                'cat_chk'   => in_array($Cat->getID(), $this->cat_ids) ? 'checked="checked"' : '',
+            ) );
+            $T->parse('CC', 'CatChecks', true);
+        }
+        $T->set_block('catlist', 'TypeChecks', 'TC');
+        foreach (AdType::getAll() as $AT) {
+            $T->set_var(array(
+                'type_id'   => $AT->getID(),
+                'type_name' => $AT->getDscp(),
+                'type_chk'   => in_array($AT->getID(), $this->type_ids) ? 'checked="checked"' : '',
+            ) );
+            $T->parse('TC', 'TypeChecks', true);
+        }
 
         $T->set_var('totalAds', $totalAds);
         $T->set_var('adsStart', $startEntry);
@@ -158,6 +206,46 @@ class Ads
         $T->parse('output', 'catlist');
         return $T->finish($T->get_var('output'));
     }   // function Render()
+
+
+    public function getCat()
+    {
+        return $this->Cat;
+    }
+
+
+    public function addTypes($types=array())
+    {
+        if (is_array($typs)) {
+            foreach ($types as $id) {
+                $this->type_ids[] = (int)$id;
+            }
+        } elseif ((int)$types > 0) {
+            $this->type_ids[] = (int)$types;
+        }
+        return $this;
+    }
+
+
+    /**
+     * Set the category ID limiters.
+     * May be called multiple times.
+     *
+     * @param   array   $cats   Array of category IDs
+     * @return  object  $this
+     */
+    public function addCats($cats=array())
+    {
+        if (is_array($cats)) {
+            foreach ($cats as $id) {
+                $this->cat_ids[] = (int)$id;
+            }
+        } elseif ((int)$cats > 0) {
+            $this->cat_ids[] = (int)$cats;
+        }
+        return $this;
+    }
+
 }
 
 ?>
