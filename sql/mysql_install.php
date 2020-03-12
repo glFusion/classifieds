@@ -39,7 +39,7 @@ $NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
 
 // common SQL for ad and ad_submission tables
 $adtable_create = "
-    (ad_id VARCHAR(128) NOT NULL DEFAULT '',
+    (ad_id VARCHAR(20) NOT NULL DEFAULT '',
     cat_id SMALLINT UNSIGNED NOT NULL,
     uid SMALLINT UNSIGNED NOT NULL,
     subject varchar(255) NOT NULL,
@@ -54,7 +54,11 @@ $adtable_create = "
     exp_sent tinyint(1) unsigned NOT NULL default '0',
     comments int(4) unsigned NOT NULL default '0',
     comments_enabled tinyint(1) unsigned NOT NULL default '1',
-    PRIMARY KEY(ad_id)
+    PRIMARY KEY(ad_id),
+    KEY (cat_id),
+    KEY (add_date),
+    KEY (exp_date),
+    KEY (uid)
 ) ENGINE=MyISAM";
 $NEWTABLE['ad_ads'] = "CREATE TABLE {$_TABLES['ad_ads']} 
     $adtable_create";

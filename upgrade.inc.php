@@ -531,8 +531,14 @@ function classifieds_upgrade_1_3_0($dvlp = false)
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
         "ALTER TABLE {$_TABLES['ad_uinfo']} DROP fax",
-        "ALTER TABLE {$_TABLES['ad_types']} add fgcolor varchar(10) NOT NULL default '' AFTER description",
-        "ALTER TABLE {$_TABLES['ad_types']} add bgcolor varchar(10) NOT NULL default '' AFTER fgcolor",
+        "ALTER TABLE {$_TABLES['ad_types']} ADD fgcolor varchar(10) NOT NULL default '' AFTER description",
+        "ALTER TABLE {$_TABLES['ad_types']} ADD bgcolor varchar(10) NOT NULL default '' AFTER fgcolor",
+        "ALTER TABLE {$_TABLES['ad_ads']} CHANGE ad_id ad_id VARCHAR(20) NOT NULL DEFAULT ''",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (cat_id)",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (add_date)",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (exp_date)",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (uid)",
+        "ALTER TABLE {$_TABLES['ad_submission']} CHANGE ad_id ad_id VARCHAR(20) NOT NULL DEFAULT ''",
     );
     if (!classifieds_do_upgrade_sql('1.3.0', $sql, $dvlp)) return false;
     // Populate the tree values
