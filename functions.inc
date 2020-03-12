@@ -21,14 +21,9 @@ if (!defined('GVERSION')) {
  */
 global $_CONF_ADVT;
 
-//  Check and see if we need to load the plugin configuration
-if (!isset($_CONF_ADVT['imagecount'])) {
-    /** Include glFusion configuration class if needed */
-    require_once $_CONF['path_system'] . 'classes/config.class.php';
-
-    $classifieds_config = config::get_instance();
-    $_CONF_ADVT = $classifieds_config->get_config('classifieds');
-}
+// Load the plugin configuration
+$cc = config::get_instance();
+$_CONF_ADVT = $cc->get_config('classifieds');
 
 /** Additional config items and table definitions are added here */
 require_once __DIR__ . '/classifieds.php';
