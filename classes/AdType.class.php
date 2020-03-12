@@ -338,6 +338,11 @@ class AdType
     }
 
 
+    /**
+     * Get the record number for this ad type.
+     *
+     * @return  integer     Record ID
+     */
     public function getID()
     {
         return (int)$this->id;

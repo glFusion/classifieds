@@ -1,6 +1,6 @@
 <?php
 /**
- * List ads.  By category, recent submissions, etc.
+ * List ads by category, recent submissions, etc.
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2016-2020 Lee Garner <lee@leegarner.com>
@@ -26,10 +26,6 @@ class Ads
      * @var string */
     protected $pagename = '';
 
-    /** Category ID being listed.
-     * @var integer */
-    protected $cat_id = 0;
-
     /** SQL where clause to select ads.
      * @vqr string */
     protected $where_clause = '';
@@ -52,12 +48,10 @@ class Ads
      *
      * @param   integer $cat_id     Category ID
      */
-    public function __construct($cat_id = 0)
+    public function __construct($cat_id = NULL)
     {
-        $this->cat_id = (int)$cat_id;
-        if ($cat_id > 0) {
-            $this->Cat = new Category($this->cat_id);
-            $this->addCats(array($cat_id));
+        if (!empty($cat_id)) {
+            $this->addCats($cat_id);
         }
     }
 
@@ -130,9 +124,6 @@ class Ads
         $pageMenu = '';
         if ($totalPages > 1) {
             $baseURL = $_CONF_ADVT['url'] . "/index.php?page=$pagename";
-            if ($this->cat_id > 0) {
-                $baseURL .= "&amp;id=$this->cat_id";
-            }
             $pageMenu = COM_printPageNavigation($baseURL, $page, $totalPages, "start=");
         }
         $T->set_var('pagemenu', $pageMenu);
@@ -208,12 +199,12 @@ class Ads
     }   // function Render()
 
 
-    public function getCat()
-    {
-        return $this->Cat;
-    }
-
-
+    /**
+     * Add ad types to the type filter.
+     *
+     * @param   array   $types      Array of type IDs, or a single ID
+     * @return  object  $this
+     */
     public function addTypes($types=array())
     {
         if (is_array($typs)) {
