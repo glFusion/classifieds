@@ -680,8 +680,6 @@ class Ad
             'username'      => $_CONF_ADVT['disp_fullname'] == 1 ?
                 COM_getDisplayName($this->uid) :
                 DB_getItem($_TABLES['users'], 'username', "uid={$this->uid}"),
-            'fgcolor'       => $this->fgcolor,
-            'bgcolor'       => $this->bgcolor,
             'cat_id'        => $this->cat_id,
             'have_editlink' => $have_editlink,
             'have_userlinks' => 'true',
@@ -748,7 +746,7 @@ class Ad
 
         // Show the "hot results"
         $hot_data = '';
-        $hot_ads = self::GetHotAds();
+        $hot_ads = self::getHotAds();
         if (!empty($hot_ads)) {
             $T->set_block('detail', 'HotBlock', 'HBlock');
             foreach ($hot_ads as $hotrow) {
@@ -1038,7 +1036,7 @@ class Ad
      * @param   integer $num    Max number of ads to get
      * @return  array       Array of ad details
      */
-    public static function GetHotAds($num = 4)
+    public static function getHotAds($num = 4)
     {
         global $_TABLES, $_USER;
 
@@ -1048,7 +1046,7 @@ class Ad
 
         // Get the hot results (most viewed ads)
         $sql = "SELECT ad.ad_id, ad.cat_id, ad.subject,
-                    cat.cat_id, cat.fgcolor, cat.bgcolor,
+                    cat.cat_id,
                     cat.cat_name
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
