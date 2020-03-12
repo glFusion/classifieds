@@ -31,6 +31,14 @@ class AdType
      * @var boolean */
     private $enabled = 1;
 
+    /** Foreground color when shown in the ad list block.
+     * @var string */
+    private $fgcolor = '';
+
+    /** Background color when shown in the ad list block.
+     * @var string */
+    private $bgcolor = '';
+
     /** Error string or value, to be accessible by the calling routines.
      * @var mixed */
     public  $Error;
@@ -69,9 +77,11 @@ class AdType
         static $Types = array();
 
         if (is_array($type) && isset($Types['id'])) {
-            $type_id = $type['id'];
+            // This is a record array from the DB
+            $type_id = (int)$type['id'];
         } else {
-            $type_id = $type;
+            // This is a type ID
+            $type_id = (int)$type;
         }
         if (!array_key_exists($type_id, $Types)) {
             $Types[$type_id] = new self($type);
@@ -102,6 +112,8 @@ class AdType
 
         $this->id = (int)$row['id'];
         $this->dscp = $row['description'];
+        $this->fgcolor = $row['fgcolor'];
+        $this->bgcolor = $row['bgcolor'];
         $this->enabled = isset($row['enabled']) && $row['enabled'] ? 1 : 0;
     }
 
@@ -189,6 +201,8 @@ class AdType
             $sql3 = " WHERE id=" . $this->id;
         }
         $sql2 = "description = '" . DB_escapeString($this->dscp) . "',
+            fgcolor = '" . DB_escapeString($this->fgcolor) . "',
+            bgcolor = '" . DB_escapeString($this->bgcolor) . "',
                 enabled = {$this->enabled}";
         $sql = $sql1 . $sql2 . $sql3;
         $res = DB_query($sql);
@@ -234,6 +248,13 @@ class AdType
             'type_id'       => $this->id,
             'description'   => htmlspecialchars($this->dscp),
             'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
+            'colorpicker' => LGLIB_colorpicker(array(
+                    'fg_id'     => 'fgcolor',
+                    'fg_color'  => $this->fgcolor,
+                    'bg_id'     => 'bgcolor',
+                    'bg_color'  => $this->bgcolor,
+                    'sample_id' => 'sample',
+                )),
         ) );
 
         // add a delete button if this ad type isn't used anywhere
@@ -356,6 +377,28 @@ class AdType
     public function getDscp()
     {
         return $this->dscp;
+    }
+
+
+    /**
+     * Get the foreground color for this ad type.
+     *
+     * @return  string      Foreground color string
+     */
+    public function getFGColor()
+    {
+        return empty($this->fgcolor) ? 'inherit' : $this->fgcolor;
+    }
+
+
+    /**
+     * Get the background color for this ad type.
+     *
+     * @return  string      Background color string
+     */
+    public function getBGColor()
+    {
+        return empty($this->bgcolor) ? 'inherit' : $this->bgcolor;
     }
 
 

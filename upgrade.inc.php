@@ -531,6 +531,8 @@ function classifieds_upgrade_1_3_0($dvlp = false)
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
         "ALTER TABLE {$_TABLES['ad_uinfo']} DROP fax",
+        "ALTER TABLE {$_TABLES['ad_types']} add fgcolor varchar(10) NOT NULL default '' AFTER description",
+        "ALTER TABLE {$_TABLES['ad_types']} add bgcolor varchar(10) NOT NULL default '' AFTER fgcolor",
     );
     if (!classifieds_do_upgrade_sql('1.3.0', $sql, $dvlp)) return false;
     // Populate the tree values
@@ -594,6 +596,7 @@ function classifieds_remove_old_files()
 	    'templates/detail/v2/detail.uikit.thtml',
             'templates/edit.uikit.thtml',
             'templates/adList.thtml',
+            'classes/Lists/Ads',
         ),
         // public_html/classifieds
         $_CONF['path_html'] . 'classifieds' => array(

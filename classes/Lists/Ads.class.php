@@ -134,16 +134,19 @@ class Ads
         $T->set_block('catlist', 'QueueRow', 'QRow');
         $counter = 0;
         while ($row = DB_fetchArray($result, false)) {
+            $AT = AdType::getInstance($row['ad_type']);
             $T->set_var(array(
                 'cat_id'    => $row['cat_id'],
                 'subject'   => strip_tags($row['subject']),
                 'ad_id'     => $row['ad_id'],
                 'ad_url'    => CLASSIFIEDS_makeURL('detail', $row['ad_id']),
                 'add_date'  => date($_CONF['shortdate'], $row['ad_add_date']),
-                'ad_type'   => AdType::getDescription($row['ad_type']),
+                'ad_type'   => $AT->getDscp(),
+                'at_fgcolor' => $AT->getFGColor(),
+                'at_bgcolor' => $AT->getBGColor(),
                 'cat_name'  => $row['cat_name'],
                 'cat_url'   => CLASSIFIEDS_makeURL('home', $row['cat_id']),
-                'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
+                //'cmt_count' => CLASSIFIEDS_commentCount($row['ad_id']),
                 //'descript' => substr(strip_tags($row['description']), 0, 300),
                 //'ellipses'  => strlen($row['description']) > 300 ? '...' : '',
                 'price'     => $row['price'] != '' ? strip_tags($row['price']) : '',
@@ -161,6 +164,7 @@ class Ads
         // Create the category filter checkboxes.
         // Only show categories that are in use.
         $T->set_block('catlist', 'CatChecks', 'CC');
+        $i = 0;
         foreach (Category::getTree() as $Cat) {
             if (Category::TotalAds($Cat->getID()) == 0) {
                 continue;
@@ -169,6 +173,7 @@ class Ads
                 'cat_id'    => $Cat->getID(),
                 'cat_name'  => $Cat->getName(),
                 'cat_chk'   => in_array($Cat->getID(), $this->cat_ids) ? 'checked="checked"' : '',
+                'cnt'       => ++$i,
             ) );
             $T->parse('CC', 'CatChecks', true);
         }
@@ -176,6 +181,7 @@ class Ads
         // Create the ad type filter checkboxes.
         // Only show types that are in use.
         $T->set_block('catlist', 'TypeChecks', 'TC');
+        $i = 0;
         foreach (AdType::getAll() as $AT) {
             if (!$AT->isUsed()) {
                 continue;
@@ -184,6 +190,7 @@ class Ads
                 'type_id'   => $AT->getID(),
                 'type_name' => $AT->getDscp(),
                 'type_chk'   => in_array($AT->getID(), $this->type_ids) ? 'checked="checked"' : '',
+                'cnt'       => ++$i,
             ) );
             $T->parse('TC', 'TypeChecks', true);
         }

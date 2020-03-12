@@ -92,6 +92,8 @@ $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
 $NEWTABLE['ad_types'] = "CREATE TABLE {$_TABLES['ad_types']} (
     id int(11) NOT NULL auto_increment,
     description varchar(255) default NULL,
+    fgcolor varchar(10) NOT NULL default '',
+    bgcolor varchar(10) NOT NULL default '',
     enabled tinyint(1) default '1',
     PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM";

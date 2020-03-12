@@ -6,8 +6,19 @@
   <div class="uk-form-row">
     <label for="description" class="uk-form-label">{$LANG_ADVT['description']}</label>
     <div class="uk-form-controls">
-      <input required type="text" id="description" name="description" value="{description}" size="70" 
+      <input required type="text" id="description" name="description" value="{description}" size="70"
         maxlength="250" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="fgcolor">{$LANG_ADVT['block_colors']}:</label>
+    <div class="uk-form-controls">
+      {$LANG_ADVT['foreground']}: <input name="fgcolor" type="text" id="fgcolor" size="7" maxlength="7"
+            value="{fgcolor}" style="background:{fgcolor}" />
+      {$LANG_ADVT['background']}: <input name="bgcolor" type="text" id="bgcolor" size="7" maxlength="7"
+            value="{bgcolor}" style="background:{bgcolor}" />
+      &nbsp;&nbsp;&nbsp;<span id="sample" style="background-color:{bgcolor};color:{fgcolor};">{$LANG_ADVT['sample']}</span>
     </div>
   </div>
 
@@ -23,8 +34,8 @@
       <button type="submit" name="saveadtype" class="uk-button uk-button-success" value="{$LANG_ADMIN['submit']}">{$LANG_ADMIN['submit']}</button>
       <button type="reset" class="uk-button uk-button-primary" value="{$LANG_CONFIG['reset_form']}">{$LANG_CONFIG['reset_form']}</button>
 {!if show_del_btn}
-      <button type="submit" class="uk-button uk-button-danger" name="deleteadtype" 
-          value="{$LANG_ADMIN['delete']}" 
+      <button type="submit" class="uk-button uk-button-danger" name="deleteadtype"
+          value="{$LANG_ADMIN['delete']}"
           onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');">{$LANG_ADMIN['delete']}</button>
 {!endif}
       <button class="uk-button" type="reset" value="{$LANG_ADMIN['cancel']" name="cancel" data-uk-tooltip="{pos:'left'}" title="{$LANG_ADMIN['cancel']}"
@@ -34,4 +45,5 @@
      </div>
   </div>
 </form>
+{colorpicker}
 {# end {templatelocation} #}
