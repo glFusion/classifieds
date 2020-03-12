@@ -525,6 +525,7 @@ function classifieds_upgrade_1_3_0($dvlp = false)
         "ALTER TABLE {$_TABLES['ad_category']} ADD rgt int(5) unsigned NOT NULL default 0",
         "ALTER TABLE {$_TABLES['ad_category']} DROP parent_map",
         "ALTER TABLE {$_TABLES['ad_category']} DROP add_date",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP keywords",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
         "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
         "ALTER TABLE {$_TABLES['ad_uinfo']} DROP fax",
@@ -574,7 +575,7 @@ function classifieds_remove_old_files()
 {
     global $_CONF;
 
-    $old_files = array(
+    $paths = array(
         __DIR__ => array(
             // 1.2.2
             'js/picker.js',
@@ -623,7 +624,7 @@ function CLASSIFIEDS_rmdir($dir)
         foreach ($objects as $object) {
             if ($object != "." && $object != "..") {
                 if (is_dir($dir . '/' . $object)) {
-                    PHC_rmdir($dir . '/' . $object);
+                    CLASSIFIEDS_rmdir($dir . '/' . $object);
                 } else {
                     @unlink($dir . '/' . $object);
                 }

@@ -73,10 +73,6 @@ class Category
      * @var string */
     private $image = '';
 
-    /** Search keywords.
-     * @var string */
-    private $keywords = '';
-
     /** Foreground color.
      * @var string */
     private $fgcolor = '#000000';
@@ -245,7 +241,6 @@ class Category
 
         $sql2 = "cat_name = '" . DB_escapeString($this->cat_name) . "',
             papa_id = {$this->papa_id},
-            keywords = '{$this->keywords}',
             $img_sql
             description = '" . DB_escapeString($this->dscp) . "',
             owner_id = {$this->owner_id},
@@ -480,7 +475,6 @@ class Category
 
         $T->set_var(array(
             'catname'   => $this->cat_name,
-            'keywords'  => $this->keywords,
             'description' => $this->dscp,
             'fgcolor'   => $this->fgcolor,
             'bgcolor'   => $this->bgcolor,

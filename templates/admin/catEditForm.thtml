@@ -32,14 +32,6 @@
   </div>
 
   <div class="uk-form-row">
-    <label class="uk-form-label" for="keywords">{$LANG_ADVT['keywords']}:</label>
-    <div class="uk-form-controls">
-      <input type="text" id="keywords" name="keywords" length="255" size="50" 
-            value="{keywords}" />
-    </div>
-  </div>
-
-  <div class="uk-form-row">
     <label class="uk-form-label" for="imagefile">{$LANG_ADVT['icon_desc']}:</label>
     <div class="uk-form-controls">
       <input type="hidden" name="image" value="{image}" />
