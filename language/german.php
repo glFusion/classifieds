@@ -252,6 +252,7 @@ $LANG_ADVT = array (
 'sample' => 'Sample',
 'msg_account_updated' => 'Your account has been updated.',
 'msg_save_error' => 'There was an error performing the update.',
+'view_ad' => 'View Ad',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';

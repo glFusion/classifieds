@@ -247,6 +247,7 @@ $LANG_ADVT = array (
 'sample' => 'Sample',
 'msg_account_updated' => 'Your account has been updated.',
 'msg_save_error' => 'There was an error performing the update.',
+'view_ad' => 'View Ad',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Su Clasificado ha sido enviado y está en <b>espera de aprobación</b>.';
