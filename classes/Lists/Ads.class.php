@@ -42,7 +42,7 @@ class Ads
      */
     public function __construct($cat_id = NULL)
     {
-        if (!empty($cat_id)) {
+        if (!empty($cat_id) && $cat_id > 1) {
             $this->addCats($cat_id);
         }
     }
