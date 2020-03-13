@@ -1,4 +1,7 @@
 {# begin {templatelocation} #}
+{!if max_add_days}
+<script src="{site_url}/classifieds/js/moredays.js"></script>
+{!endif}
 {breadcrumbs}
 <div id="adDetailWrapper" class="v2">
 {!if have_userlinks}

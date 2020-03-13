@@ -18,13 +18,16 @@ function ADVTmoreDays(id, days)
         url: glfusionSiteUrl + "/classifieds/ajax.php",
         data: data,
         success: function(jsonObj) {
+            console.log(jsonObj);
             try {
+                console.log(jsonObj);
                 document.getElementById("f_max_add_days").value = '';
                 document.getElementById("max_add_days").innerHTML = jsonObj.maxdays;
                 document.getElementById("exp_date").innerHTML = jsonObj.expdate;
                 $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + jsonObj.statusMessage, {timeout: 1000,pos:'top-center'});
             }
             catch(err) {
+                console.log(err);
                 alert(jsonObj.statusMessage);
             }
         }

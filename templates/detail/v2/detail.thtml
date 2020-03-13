@@ -1,4 +1,7 @@
 {# begin {templatelocation} #}
+{!if max_add_days}
+<script src="{site_url}/classifieds/js/moredays.js"></script>
+{!endif}
 <script type="text/javascript">
 function advtUpdateImage(filename)
 {
@@ -166,7 +169,7 @@ function advtUpdateImage(filename)
   <p>
     {$LANG_ADVT['add']}
     <input type="text" id="f_max_add_days" name="add_days" size="3"
-      onchange="javascript:ADVTmoreDays('{ad_id}', this.value);" />
+      onchange="ADVTmoreDays('{ad_id}', this.value);" />
     {$LANG_ADVT['days']}
     <br />
     ({$LANG_ADVT['max']} <span id="max_add_days">{max_add_days}</span>)

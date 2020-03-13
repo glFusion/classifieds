@@ -592,6 +592,7 @@ function classifieds_remove_old_files()
             // 1.3.0
             'admin.php',
             'js/catfldxml.js',
+            'js/moredays.js',
             'templates/account_settings.uikit.thtml',
 	    'templates/admin/adminedit.uikit.thtml',
 	    'templates/admin/catEditForm.uikit.thtml',
@@ -607,7 +608,7 @@ function classifieds_remove_old_files()
         // public_html/classifieds
         $_CONF['path_html'] . 'classifieds' => array(
             // 1.3.0
-            'js',
+            'updatecatxml.php',
             'docs/english/config.legacy.html',
         ),
         // admin/plugins/classifieds
