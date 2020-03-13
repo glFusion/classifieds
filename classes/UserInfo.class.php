@@ -71,7 +71,7 @@ class UserInfo
 
     /** Max days that user can run an ad.
      * @var integer */
-    var $max_ad_days;
+    private $max_ad_days;
 
 
     /**
