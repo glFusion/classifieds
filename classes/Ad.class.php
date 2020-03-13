@@ -519,9 +519,9 @@ class Ad
             'price'         => $this->price,
             'url'           => $this->url,
             'keywords'      => $this->keywords,
-            'exp_date'      => $this->exp_date->format($_CONF['daytime'] . ' T', true),
-            'add_date'      => $this->add_date->format($_CONF['daytime'] . ' T', true),
-            'ad_type_selection' => AdType::makeSelection($this->ad_type),
+            'exp_date'      => $this->exp_date->toMySQL(true),
+            'add_date'      => $this->add_date->toMySQL(true),
+            'ad_type_selection' => AdType::buildSelection($this->ad_type),
             'sel_list_catid'    => Category::buildSelection($this->cat_id, '', '', 'NOT', '1'),
             //'saveoption'    => $saveoption,
             'cancel_url'    => $cancel_url,
@@ -780,41 +780,6 @@ class Ad
 
 
     /**
-     * Sets the "enabled" field to the specified value.
-     *
-     * @param   integer $newval New value to set (1 or 0)
-     * @param   integer $id     ID number of element to modify
-     * @return  integer     New value (old value if failed)
-     */
-    public function toggleEnabled($newval, $id=0)
-    {
-        global $_TABLES;
-
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->ad_id;
-            else
-                return;
-        }
-
-        $id = (int)$id;
-        $newval = $newval == 1 ? 1 : 0;
-
-        $sql = "UPDATE {$_TABLES['ad_types']}
-            SET enabled=$newval
-            WHERE id=$id";
-        //echo $sql;die;
-        DB_query($sql, 1);
-        if (DB_error()) {
-            $retval = $newval == 1 ? 0 : 1;
-        } else {
-            $retval = $newval;
-        }
-        return $retval;
-    }
-
-
-    /**
      * Public access to set the table used for saving/reading.
      * Called from savesubmission in functions.inc.
      *
@@ -977,12 +942,13 @@ class Ad
         $add_days = min($max_days, $days);
         if ($add_days <= 0) return 0;
 
-        $this->exp_date += ($add_days * 86400);
+        $this->setExpDate($this->exp_date->toUnix() + ($add_days * 86400));
+        //$this->exp_date += ($add_days * 86400);
 
         // Finally, we have access to this add and there's a valid number
         // of days to add.
         DB_query("UPDATE {$_TABLES['ad_ads']} SET
-                exp_date={$this->exp_date},
+                exp_date = {$this->exp_date->toUnix()},
                 exp_sent=0
             WHERE ad_id='$this->ad_id'");
         return $max_days - $add_days;
@@ -1261,7 +1227,7 @@ class Ad
      */
     public function getAddDate()
     {
-        return (int)$this->add_date;
+        return $this->add_date;
     }
 
 
@@ -1291,7 +1257,7 @@ class Ad
      */
     public function getExpDate()
     {
-        return (int)$this->exp_date;
+        return $this->exp_date;
     }
 
 
@@ -1541,7 +1507,11 @@ class Ad
         case 'subject':
             $retval = COM_createLink(
                 $fieldvalue,
-                $_CONF_ADVT['url'] . '/index.php?mode=detail&id=' . $A['ad_id']
+                $_CONF_ADVT['url'] . '/index.php?mode=detail&id=' . $A['ad_id'],
+                array(
+                    'title' => $LANG_ADVT['view_ad'],
+                    'class' => 'tooltip',
+                )
             );
             break;
 

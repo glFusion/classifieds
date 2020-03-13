@@ -275,7 +275,7 @@ class AdType
      * @param   integer $sel    Optional item ID to select
      * @return  string      HTML for selection dropdown
      */
-    public static function makeSelection($sel=0)
+    public static function buildSelection($sel=0)
     {
         global $_TABLES;
 
