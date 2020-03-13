@@ -113,7 +113,7 @@ case 'saveadtype':
         COM_errorLog("Error saving ad type");
         COM_errorLog("Type info:" . print_r($AdType,true));
     }
-    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=type');
+    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?types');
     break;
 
 case 'deleteadtype':
