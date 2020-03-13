@@ -30,6 +30,10 @@ class Menu
     {
         global $LANG_ADVT, $_CONF_ADVT;
 
+        if (COM_isAnonUser()) {
+            return '';
+        }
+
         USES_lib_admin();
 
         if ($view == '') {
@@ -61,6 +65,13 @@ class Menu
                 'url' => $_CONF_ADVT['url'] . '/index.php?mode=submit',
                 'text' => $LANG_ADVT['mnu_submit'],
                 'active' => $view == 'submit' ? true : false,
+            );
+        }
+
+        if (plugin_ismoderator_classifieds()) {
+            $menu_arr[] = array(
+                'url' => $_CONF_ADVT['admin_url'] . '/index.php',
+                'text' => $LANG_ADVT['ads_mgnt'],
             );
         }
 
@@ -104,6 +115,11 @@ class Menu
                 'url' => $_CONF_ADVT['admin_url'] . '/index.php?other',
                 'text' => $LANG_ADVT['mnu_other'],
                 'active' => $view == 'other' ? true : false,
+            ),
+            array(
+                'url' => $_CONF_ADVT['url'] . '/index.php',
+                'text' => $LANG_ADVT['mnu_home'],
+                'active' => $view == 'home' ? true : false,
             ),
             array(
                 'url' => $_CONF['site_admin_url'],

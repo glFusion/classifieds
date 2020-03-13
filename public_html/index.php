@@ -60,26 +60,6 @@ if (empty($mode) && !empty($id)) {
     $mode = 'detail';
 }
 
-// Set up the basic menu for all users
-$menu_opt = '';
-//USES_class_navbar();
-$menu = new navbar();
-$menu->add_menuitem($LANG_ADVT['mnu_home'], CLASSIFIEDS_makeURL('home'));
-$menu->add_menuitem($LANG_ADVT['mnu_recent'], CLASSIFIEDS_makeURL('recent'));
-
-// Show additional menu options to logged-in users
-if (!$isAnon) {
-    $menu->add_menuitem($LANG_ADVT['mnu_account'], CLASSIFIEDS_makeURL('account'));
-    $menu->add_menuitem($LANG_ADVT['mnu_myads'], CLASSIFIEDS_makeURL('manage'));
-}
-if (CLASSIFIEDS_canSubmit()) {
-    $url = $_CONF_ADVT['url'] . '/index.php?mode=submit';
-    if ($mode == 'home' && !empty($id)) {
-        $url .= "&cat_id=$id";
-    }
-    $menu->add_menuitem($LANG_ADVT['mnu_submit'], $url);
-}
-
 // Establish the output template
 $T = new Template($_CONF_ADVT['path'] . '/templates');
 $T->set_file('page','index.thtml');
@@ -87,12 +67,10 @@ $T->set_var('site_url',$_CONF['site_url']);
 if (isset($LANG_ADVT['index_msg']) && !empty($LANG_ADVT['index_msg'])) {
     $T->set_var('index_msg', $LANG_ADVT['index_msg']);
 }
-
 $content = '';
 
 // Start by processing the specified action, if any
 switch ($mode) {
-
 case 'submit':
 case 'edit':
     if ($isAnon) COM_404();
@@ -169,7 +147,6 @@ case 'manage':
     if ($isAnon) COM_404();
     $content .= Classifieds\Ad::userList();
     $T->set_var('header', $LANG_ADVT['ads_mgnt']);
-    $menu_opt = $LANG_ADVT['mnu_myads'];
     break;
 
 case 'account':
@@ -177,7 +154,6 @@ case 'account':
     $U = new \Classifieds\UserInfo();
     $content .= $U->showForm('advt');
     $T->set_var('header', $LANG_ADVT['my_account']);
-    $menu_opt = $LANG_ADVT['mnu_account'];
     break;
 
 case 'detail':
@@ -202,14 +178,11 @@ default:
         ->setUid(CLASSIFIEDS_getParam('uid', 'int'));
     $content .= $L->Render();
     $T->set_var('header', $LANG_ADVT['blocktitle']);
-    $menu_opt = $LANG_ADVT['mnu_home'];
     break;
 }   // switch ($mode)
 
 if (!empty($view)) COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
 
-if ($menu_opt != '') $menu->set_selected($menu_opt);
-//$T->set_var('menu', $menu->generate());
 $T->set_var('menu', Classifieds\Menu::User($mode));
 $T->set_var('content', $content);
 $T->parse('output', 'page');
