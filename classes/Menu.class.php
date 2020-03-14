@@ -68,13 +68,6 @@ class Menu
             );
         }
 
-        if (plugin_ismoderator_classifieds()) {
-            $menu_arr[] = array(
-                'url' => $_CONF_ADVT['admin_url'] . '/index.php',
-                'text' => $LANG_ADVT['ads_mgnt'],
-            );
-        }
-
         return \ADMIN_createMenu($menu_arr, '', '');
     }
 

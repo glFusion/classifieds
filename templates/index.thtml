@@ -1,8 +1,17 @@
-{# begin{templatelocation} #}
-<h1>{header}</h1>
+{# begin {templatelocation} #}
+<div style="float:left; margin-left:20px;">
+    <h1>{header}</h1>
+    {help_url}
 {!if index_msg}
-  {index_msg}<br />
+    {index_msg}<br />
 {!endif}
+</div>
+{!if isAdmin}
+<div style="float:right;">
+    <a class="uk-button uk-button-danger uk-button-mini" href="{pi_admin_url}">{$LANG_ADVT['admin']}</a>
+</div>
+{!endif}
+<div style="clear:both;"></div>
 {menu}
 {content}
 {# end {templatelocation} #}

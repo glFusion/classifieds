@@ -1,4 +1,10 @@
-<h1>{$LANG_ADVT['admin_title']}</h1>
-{version}<br />
+<div style="float:left; margin-left:20px;">
+    <h1>{$LANG_ADVT['admin_title']}</h1>
+    {version}<br />
+</div>
+<div style="float:right;">
+    <a class="uk-button uk-button-primary uk-button-mini" href="{pi_url}">{$LANG_ADVT['home']}</a>
+</div>
+<div style="clear:both;"></div>
 {menu}
 {page_content}

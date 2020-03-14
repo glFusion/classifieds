@@ -330,6 +330,7 @@ $T->set_var(array(
     'version'       => "{$LANG_ADVT['version']}: {$_CONF_ADVT['pi_version']}",
     'admin_mode'    => $admin_mode,
     'page_content'  => $content,
+    'pi_url'        => $_CONF_ADVT['url'] . '/index.php',
 ) );
 $T->parse('output','admin');
 echo $T->finish($T->get_var('output'));

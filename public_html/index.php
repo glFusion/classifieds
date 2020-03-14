@@ -63,7 +63,8 @@ if (empty($mode) && !empty($id)) {
 // Establish the output template
 $T = new Template($_CONF_ADVT['path'] . '/templates');
 $T->set_file('page','index.thtml');
-$T->set_var('site_url',$_CONF['site_url']);
+$T->set_var('isAdmin', plugin_ismoderator_classifieds());
+$T->set_var('pi_admin_url', $_CONF_ADVT['admin_url'] . '/index.php');
 if (isset($LANG_ADVT['index_msg']) && !empty($LANG_ADVT['index_msg'])) {
     $T->set_var('index_msg', $LANG_ADVT['index_msg']);
 }
