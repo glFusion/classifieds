@@ -3,7 +3,9 @@
     <div class="uk-width-1-5">
         <form class="uk-form" id="adlistopts" method="get" action="{site_url}/classifieds/index.php?mode=home">
             <div class="uk-form-row">
-                <label class="uk-form-label">{$LANG_ADVT['mnu_cats']}</label>
+                <label class="uk-form-label">{$LANG_ADVT['mnu_cats']}
+                    <i class="uk-icon uk-icon-refresh tooltip" title="{$LANG_ADVT['hlp_unchk_all']}" onclick="ADVT_uncheckAll('cats');"></i>
+                </label>
                 <div class="uk-form-controls">
 <!-- BEGIN CatChecks -->
                     <input id="catchk_{cnt}" class="updform_chk" type="checkbox" value="{cat_id}" name="cats[]" {cat_chk} />
@@ -13,7 +15,9 @@
             </div>
 
             <div class="uk-form-row">
-                <label class="uk-form-label">{$LANG_ADVT['mnu_types']}</label>
+                <label class="uk-form-label">{$LANG_ADVT['mnu_types']}
+                    <i class="uk-icon uk-icon-refresh tooltip" title="{$LANG_ADVT['hlp_unchk_all']}" onclick="ADVT_uncheckAll('types');"></i>
+                </label>
                 <div class="uk-form-controls">
 <!-- BEGIN TypeChecks -->
                     <input id="atchk_{cnt}" class="updform_chk" type="checkbox" value="{type_id}" name="types[]" {type_chk} />
@@ -74,5 +78,26 @@ $('.updform_chk').on('click', function() {
 $('.updform_sel').on('change', function() {
     $( "#adlistopts" ).submit();
 });
+function ADVT_uncheckAll(name)
+{
+    var f = document.getElementById("adlistopts");
+    var n=f.elements.length;
+    var submit = false;
+    for (i=0;i<n; i++) {
+        var field=f.elements[i];
+        if (
+            field.type == 'checkbox' &&
+            field.name.match(name) &&
+            field.checked == true
+        ) {
+            field.checked=false;
+            submit=true;
+        }
+    }
+    if (submit) {
+        $( "#adlistopts" ).submit();
+    }
+    return false;
+}
 </script>
 {# end {templatelocation} #}
