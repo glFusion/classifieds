@@ -147,8 +147,8 @@ class Ad
                 ->setAddDate();
         } elseif (is_array($id)) {
             $this->setVars($id);
-            $this->Cat = new Category($this->cat_id);
-            $this->Type= new AdType($this->ad_type);
+            $this->Cat = Category::getInstance($this->cat_id);
+            $this->Type= AdType::getInstance($this->ad_type);
             $this->isNew = false;   // normally this comes from the DB
         } else {
             $this->ad_id = $id;
@@ -752,11 +752,14 @@ class Ad
         if (!empty($hot_ads)) {
             $T->set_block('detail', 'HotBlock', 'HBlock');
             foreach ($hot_ads as $hotrow) {
+                if ($hotrow->getID() == $this->ad_id) {
+                    continue;
+                }
                 $T->set_var(array(
-                    'hot_title' => $hotrow['subject'],
-                    'hot_url'   => CLASSIFIEDS_makeURL('detail', $hotrow['ad_id']),
-                    'hot_cat_url' => CLASSIFIEDS_makeURL('home', $hotrow['cat_id']),
-                    'hot_cat'   => $hotrow['cat_name'],
+                    'hot_title' => $hotrow->getSubject(),
+                    'hot_url'   => CLASSIFIEDS_makeURL('detail', $hotrow->getID()),
+                    'hot_cat_url' => CLASSIFIEDS_makeURL('home', $hotrow->getCatID()),
+                    'hot_cat'   => $hotrow->getCat()->getName(),
                 ) );
                 $T->parse('HBlock', 'HotBlock', true);
             }
@@ -1002,21 +1005,18 @@ class Ad
      * Requires at least 2 views to be considered.
      *
      * @param   integer $num    Max number of ads to get
-     * @return  array       Array of ad details
+     * @return  array           Array of Ad objects
      */
     public static function getHotAds($num = 4)
     {
-        global $_TABLES, $_USER;
+        global $_TABLES;
 
         $retval = array();
-        $num = (int)$num;
+        $num = (int)max($num, 1);
         $time = time();
 
         // Get the hot results (most viewed ads)
-        $sql = "SELECT ad.ad_id, ad.cat_id, ad.subject,
-                    cat.cat_id,
-                    cat.cat_name
-            FROM {$_TABLES['ad_ads']} ad
+        $sql = "SELECT ad.* FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON ad.cat_id = cat.cat_id
             WHERE ad.exp_date > $time
@@ -1027,7 +1027,7 @@ class Ad
         //echo $sql;die;
         $res = DB_query($sql);
         while ($hotrow = DB_fetchArray($res, false)) {
-            $retval[] = $hotrow;
+            $retval[] = new self($hotrow);
         }
         return $retval;
     }
@@ -1041,7 +1041,7 @@ class Ad
      */
     public function GetNeighbor($dir = 'prev')
     {
-        global $_TABLES, $_USER;
+        global $_TABLES;
 
         switch ($dir) {
         case 'prev':
