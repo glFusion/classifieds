@@ -99,6 +99,28 @@ class Category
 
 
     /**
+     * Get a category instance. Caches objects in an array.
+     *
+     * @param   integer $cat_id     Category record ID
+     * @return  object      Category object
+     */
+    public static function getInstance($cat_id)
+    {
+        static $Cats = array();
+
+        if (is_array($cat_id)) {
+            $id = (int)$cat_id['cat_id'];
+        } else {
+            $id = (int)$cat_id;
+        }
+        if (!isset($Cats[$id])) {
+            $Cats[$id] = new self($cat_id);
+        }
+        return $Cats[$id];
+    }
+
+
+    /**
      * Sets all variables to the matching values from the provided array.
      *
      * @param   array   $A      Array of values, from DB or $_POST
@@ -793,12 +815,16 @@ class Category
     {
         global $_CONF_ADVT;
 
-        if (SEC_hasRights($_CONF_ADVT['pi_name']. '.admin')) {
+        if (plugin_ismoderator_classifieds()) {
             // Admin rights trump all
             return true;
-        } elseif (SEC_hasAccess($this->owner_id, $this->group_id,
+        } elseif (
+            SEC_hasAccess(
+                $this->owner_id, $this->group_id,
                 $this->perm_owner, $this->perm_group,
-                $this->perm_members, $this->perm_anon) >= $required) {
+                $this->perm_members, $this->perm_anon
+            ) >= $required
+        ) {
             // Check category permission array
             return true;
         }
