@@ -65,6 +65,7 @@ $LANG_ADVT = array (
 'clearform'         => 'Limpiar',
 'click_to_enlarge'  => 'Clic para ampliar',
 'confirm_delitem'   => 'Esta seguro que quiere borrar este elemento?',
+'confirm_delcat'    => 'All subcategories and related ads will be deleted.',
 'contact'           => 'Contacto',
 'contact_info'      => 'Información de Contacto',
 'category'          => 'Categoría',
