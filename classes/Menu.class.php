@@ -20,6 +20,19 @@ namespace Classifieds;
 class Menu
 {
     /**
+     * Get the URL to submit ads.
+     *
+     * @return  string      URL to label printing screen
+     */
+    public static function getSubmitUrl()
+    {
+        global $_CONF_ADVT;
+
+        return $_CONF_ADVT['url'] . '/index.php?mode=submit';
+    }
+
+
+    /**
      * Returns the user-facing main menu.
      *
      * @param   string  $view       The menu option to set as selected
@@ -62,7 +75,7 @@ class Menu
 
         if (CLASSIFIEDS_canSubmit()) {
             $menu_arr[] = array(
-                'url' => $_CONF_ADVT['url'] . '/index.php?mode=submit',
+                'url' => self::getSubmitUrl(),
                 'text' => $LANG_ADVT['mnu_submit'],
                 'active' => $view == 'submit' ? true : false,
             );
@@ -110,11 +123,6 @@ class Menu
                 'active' => $view == 'other' ? true : false,
             ),
             array(
-                'url' => $_CONF_ADVT['url'] . '/index.php',
-                'text' => $LANG_ADVT['mnu_home'],
-                'active' => $view == 'home' ? true : false,
-            ),
-            array(
                 'url' => $_CONF['site_admin_url'],
                 'text' => $LANG01[53],
             ),
@@ -160,8 +168,8 @@ class Menu
         }
         return $retval;
     }
-    
-    
+
+
     /**
      * Show the site footer, with or without right blocks according to config.
      *
@@ -188,7 +196,7 @@ class Menu
         }
         return $retval;
     }
-    
+
 }
 
 ?>

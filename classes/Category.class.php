@@ -577,7 +577,7 @@ class Category
      */
     public static function showBreadCrumbs($cat_id, $showlink=true)
     {
-        global $_CONF_ADVT, $_TABLES;
+        global $_CONF_ADVT, $_TABLES, $LANG_ADVT;
 
         $cat_id = (int)$cat_id;
         $T = new \Template($_CONF_ADVT['path'] . '/templates');
@@ -595,6 +595,9 @@ class Category
         $i = 0;
         while ($A = DB_fetchArray($res, false)) {
             $i++;
+            if ($i == 1) {
+                $A['cat_name'] = $LANG_ADVT['home'];
+            }
             if ($showlink) {
                 $location = '<a href="' .
                     CLASSIFIEDS_makeURL('home', $A['cat_id']) .
@@ -1229,6 +1232,8 @@ class Category
 
         case 'delete':
             if ($A['cat_id'] > 1) {
+                $conf_txt = $LANG_ADVT['confirm_delitem'] . ' ' .
+                    $LANG_ADVT['confirm_delcat'];
                 $retval .= COM_createLink('',
                     $_CONF_ADVT['admin_url'] .
                         "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}",
@@ -1236,7 +1241,7 @@ class Category
                         'title' => $LANG_ADVT['del_item'],
                         'class' => 'uk-icon uk-icon-trash advt_icon_danger',
                         'data-uk-tooltip' => '',
-                        'onclick' => "return confirm('{$LANG_ADVT['confirm_delitem']}');",
+                        'onclick' => "return confirm('{$conf_txt}');",
                     )
                 );
             }

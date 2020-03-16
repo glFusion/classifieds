@@ -143,6 +143,8 @@ class Ad
             $this->ad_id = '';
             $this->subject = '';
             $this->description = '';
+            $this->setExpDate()
+                ->setAddDate();
         } elseif (is_array($id)) {
             $this->setVars($id);
             $this->Cat = new Category($this->cat_id);
@@ -1346,12 +1348,21 @@ class Ad
             'default_filter' => 'WHERE 1=1'
         );
         $form_arr = array();
-        return ADMIN_list(
+        $retval .= COM_createLink(
+            $LANG_ADVT['mnu_submit'],
+            Menu::getSubmitUrl(),
+            array(
+                'class' => 'uk-button uk-button-success',
+                'style' => 'float:left',
+            )
+        );
+        $retval .= ADMIN_list(
             'classifieds_adlist',
             array(__CLASS__, 'getListField'),
             $header_arr,
             $text_arr, $query_arr, $defsort_arr, '', '', $options, $form_arr
         );
+        return $retval;
     }
 
 
