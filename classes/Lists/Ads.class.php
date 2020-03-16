@@ -166,7 +166,10 @@ class Ads
         $T->set_block('catlist', 'CatChecks', 'CC');
         $i = 0;
         foreach (Category::getTree() as $Cat) {
-            if (Category::TotalAds($Cat->getID()) == 0) {
+            if (
+                Category::TotalAds($Cat->getID()) == 0 ||
+                !$Cat->checkAccess(2)
+            ) {
                 continue;
             }
             $T->set_var(array(
