@@ -11,6 +11,7 @@
 - Viewer can filter ads by category, type, and/or poster
 - Remove Recent Ads menu option
 - Remove original list-style ad display, now use UIkit-styled blocks
+- Add drag-n-drop image uploading
 
 ## Version 1.2.1 (Released 2018-01-11)
 - Fix ad type management

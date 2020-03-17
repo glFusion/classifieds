@@ -54,6 +54,51 @@ case 'moredays':
         'statusMessage' => sprintf($LANG_ADVT['msg_added_days'], $_POST['days']),
     );
     break;
+
+case 'dropupload':
+    // Handle a drag-and-drop image upload
+    $ad_id = LGLIB_getVar($_POST, 'ad_id', 'string');
+    $nonce = LGLIB_getVar($_POST, 'nonce', 'string');
+    $result = array(
+        'status'    => true,    // assume OK
+        'statusMessage' => '',
+        'filenames' => array(),
+    );
+
+    // Handle image uploads.  This is done last because we need
+    // the product id to name the images filenames.
+    if (!empty($_FILES['files'])) {
+        $sent = count($_FILES['files']['name']);
+        $U = new Classifieds\Upload($ad_id);
+        $U->setNonce($nonce);
+        $filenames = $U->uploadFiles();
+        $processed = count($filenames);
+        // Only one filename here, this to get the image id also
+        foreach ($filenames as $img_id=>$filename) {
+            $result['filenames'][] = array(
+                'img_url'   => Classifieds\Image::dispUrl($filename),
+                'thumb_url' => Classifieds\Image::thumbUrl($filename),
+                'img_id' => $img_id,
+            );
+        }
+        $msg = '<ul>';
+        $msg .= '<li>' . sprintf($LANG_ADVT['x_of_y_uploaded'], $processed, $sent, $_CONF_ADVT['imagecount']) . '</li>';
+        $msg .= '</ul>';
+        $result['statusMessage'] = $msg;
+    } else {
+        $result['status'] = false;
+        $result['statusMessage'] = $LANG_ADVT['no_files_uploaded'];
+    }
+    break;
+
+case 'delImage':
+    $img_id = LGLIB_getVar($_POST, 'img_id', 'integer');
+    $Image = new Classifieds\Image($img_id);
+    $result = array(
+        //'status' => true,     // testing javascript
+        'status' => $Image->Delete(),
+    );
+    break;
 }
 
 header('Content-Type: application/json; charset=utf-8');

@@ -1094,6 +1094,9 @@ function plugin_runScheduledTask_classifieds($standalone=false)
         }
     }
 
+    // Clean up orphaned image records.
+    Classifieds\Image::cleanOrphans();
+
     // Notify users of impending ad expirations
     if ((int)$_CONF_ADVT['exp_notify_days'] >= 0) {
         Classifieds\Notify::Expiration();

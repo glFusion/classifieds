@@ -276,6 +276,9 @@ class Ad
             $this->setVars($A);
         }
 
+        // Get the nonce to associate images
+        $nonce = SHOP_getVar($A, 'nonce');
+
         if ($this->isNew) {
             if (!$this->isAdmin && $_CONF_ADVT['submission']) {
                 // If using the queue and not an admin, then switch
@@ -334,6 +337,9 @@ class Ad
             $this->Cat = new Category($this->cat_id);
             $this->Type = new AdType($this->ad_type);
             if ($this->isNew) {
+                if (!empty($nonce)) {
+                    Image::setAdID($nonce, $this->ad_id);
+                }
                 if ($this->isSubmission()) {
                     // Submission, notify moderators
                     Notify::Submission($this);
@@ -499,6 +505,8 @@ class Ad
             $moredays = 0;
         }
 
+        $nonce = Upload::makeNonce();
+        $maxfiles = max(0, $_CONF_ADVT['imagecount'] - Image::countByAd($this->ad_id, $nonce));
         $T->set_var(array(
             'isNew'         => $this->isNew ? 'true' : '',
             'isAdmin'       => $this->isAdmin ? 'true' : '',
@@ -512,8 +520,6 @@ class Ad
             'gltoken_name'  => CSRF_TOKEN,
             'gltoken'       => SEC_createToken(),
             'has_delbtn'    => 'true',
-            'txt_photo'     => "{$LANG_ADVT['photo']}<br />" .
-                    sprintf($LANG_ADVT['image_max'], (int)$_CONF_ADVT['imagecount']),
             'type'          => $this->isSubmission() ? 'submission' : 'prod',
             'action_url'    => $action_url,
             'max_file_size' => $_CONF['max_image_size'],
@@ -533,29 +539,23 @@ class Ad
             'cls_exp_date'  => $this->exp_date < time() ? 'adExpiredText' : '',
             'ownerselect'   => self::userDropdown($this->uid),
             'uid'           => $_USER['uid'],
-            'iconset'       => $_CONF_ADVT['_iconset'],
+            'nonce'         => $nonce,
+            'max_images'    => $maxfiles,
          ) );
 
-        if ($this->isNew) {
-            $photocount = 0;
-        } else {
+        if (!empty($this->ad_id)) {
             // get the photo information
-            $sql = "SELECT photo_id, filename
-                    FROM {$_TABLES['ad_photo']}
-                    WHERE ad_id='{$this->ad_id}'";
-            $photo = DB_query($sql, 1);
-
-            // save the count of photos for later use
-            if ($photo)
-                $photocount = DB_numRows($photo);
-            else
-                $photocount = 0;
-        }
-
-        $T->set_block('adedit', 'PhotoRow', 'PRow');
-        $i = 0;
-        if ($photocount > 0) {
-            while ($prow = DB_fetchArray($photo, false)) {
+            $sql = "SELECT * FROM {$_TABLES['ad_photo']}
+                WHERE ad_id='{$this->ad_id}'";
+            $imgres = DB_query($sql, 1);
+            $T->set_block('adedit', 'PhotoRow', 'PRow');
+            $i = 0;
+            while ($prow = DB_fetchArray($imgres, false)) {
+                $Img = new Image($prow);
+                if (!$Img->Exists()) {
+                    $Img->Delete();
+                    continue;
+                }
                 $i++;
                 $T->set_var(array(
                     'img_url'   => Image::dispUrl($prow['filename']),
@@ -563,16 +563,10 @@ class Ad
                     'seq_no'    => $i,
                     'ad_id'     => $this->ad_id,
                     'del_img_url'   => $del_img_url . $prow['photo_id'],
+                    'img_id'    => $prow['photo_id'],
                 ) );
                 $T->parse('PRow', 'PhotoRow', true);
             }
-        } else {
-            $T->parse('PRow', '');
-        }
-        // add upload fields for unused images
-        $T->set_block('adedit', 'UploadFld', 'UFLD');
-        for ($j = $i; $j < $_CONF_ADVT['imagecount']; $j++) {
-            $T->parse('UFLD', 'UploadFld', true);
         }
 
         $T->parse('output','adedit');

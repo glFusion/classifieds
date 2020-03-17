@@ -22,40 +22,67 @@ class Image
 {
     /** Path to actual image (without filename).
      * @var string */
-    private $pathImage;
+    private $pathImage = '';
+
+    /** Record ID of the image.
+     * @var integer */
+    private $photo_id = 0;
 
     /** ID of the current ad.
      * @var string */
-    private$ad_id;
+    private $ad_id = '';
+
+    /** Imgae filename, no path.
+     * @var string */
+    private $filename = '';
+
+    /** Nonce, used to correlate images uploaded to new ads.
+     * @var string */
+    private $nonce = '';
+
+    /** Timestamp when the image is uploaded.
+     * Only used to purge orphaned images.
+     * @var integer */
+    private $ts = 0;
 
 
     /**
      * Constructor.
      *
-     * @param   integer $photo_id   ID of image record to read
+     * @param   integer $img    ID of image record or array of data
      */
-    public function __construct($photo_id)
+    public function __construct($img)
     {
         global $_TABLES;
 
         $this->pathImage = $_CONF_ADVT['imgpath'];
-        $photo_id = (int)$photo_id;
-
-        $res = DB_query("SELECT * FROM {$_TABLES['ad_photo']}
-                WHERE photo_id = '$photo_id'");
-        if ($res) {
-            $row = DB_fetchArray($res, false);
+        $row = array();
+        if (is_array($img)) {
+            $row = $img;
+        } else {
+            $img_id  = (int)$img;
+            $res = DB_query(
+                "SELECT * FROM {$_TABLES['ad_photo']}
+                WHERE photo_id = '$img_id'"
+            );
+            if ($res) {
+                $row = DB_fetchArray($res, false);
+            }
+        }
+        if (!empty($row)) {
             $this->photo_id = (int)$row['photo_id'];
             $this->ad_id = $row['ad_id'];
             $this->filename = $row['filename'];
-        } else {
-            $this->photo_id = 0;
+            $this->nonce = $row['nonce'];
+            $this->ts = (int)$row['ts'];
         }
     }
 
 
     /**
-     * Delete this image from disk.
+     * Delete this image from the database and disk.
+     *
+     * @return  boolean     True if image was deleted, False if not.
      */
     public function Delete()
     {
@@ -64,15 +91,16 @@ class Image
         // If we're deleting from disk also, get the filename and
         // delete it and its thumbnail from disk.
         if ($this->filename == '') {
-            return;
+            return false;
         }
 
         if (self::UsedCount($this->photo_id) == 1 &&
-            file_exists($imgpath . '/' . $this->filename)) {
+            file_exists($this->pathImage . '/' . $this->filename)) {
             unlink($imgpath . '/' . $this->filename);
         }
         DB_delete($_TABLES['ad_photo'], 'photo_id', $this->photo_id);
         $this->photo_id = 0;
+        return true;
     }
 
 
@@ -209,6 +237,100 @@ class Image
         $args[2] = $_CONF_ADVT['thumb_max_size'];
         $args[3] = $_CONF_ADVT['thumb_max_size'];
         return PLG_callFunctionForOnePlugin('LGLIB_ImageUrl', $args);
+    }
+
+
+    /**
+     * Update the image record with the Ad ID.
+     * Used where the ID of a new ad is not known until saving
+     * so images are identified by a nonce value.
+     *
+     * @param   string  $nonce      Nonce used to identify images
+     * @param   string  $ad_id      New ad ID
+     */
+    public static function setAdID($nonce, $ad_id)
+    {
+        global $_TABLES;
+
+        $ad_id = DB_escapeString($ad_id);
+        $nonce = DB_escapeString($nonce);
+        $sql = "UPDATE {$_TABLES['ad_photo']}
+            SET ad_id = '$ad_id'
+            WHERE nonce = '$nonce'";
+        DB_query($sql);
+    }
+
+
+    /**
+     * Count the number of images uploaded for an ad.
+     *
+     * @param   string  $ad_id      Ad record ID
+     * @param   string  $nonce      Optional nonce
+     * @return  intger      Number of related images
+     */
+    public static function countByAd($ad_id, $nonce='')
+    {
+        global $_TABLES;
+
+        if (empty($ad_id)) {
+            // Empty Ad ID, then it's a new ad. Use the nonce
+            return DB_count(
+                $_TABLES['ad_photo'],
+                'nonce',
+                DB_escapeString($nonce)
+            );
+        } else {
+            // Existing Ad, just check the ad_id
+            return DB_count(
+                $_TABLES['ad_photo'],
+                'ad_id',
+                DB_escapeString($ad_id)
+            );
+        }
+    }
+
+    public static function fileExists($filename)
+    {
+        global $_CONF_ADVT;
+
+        return is_file($_CONF_ADVT['imgpath'] . '/user/' . $filename);
+    }
+
+    public function Exists()
+    {
+        return self::fileExists($this->filename);
+    }
+
+
+    public static function deleteFile($filename)
+    {
+        global $_CONF_ADVT;
+
+        @unlink($_CONF_ADVT['imgpath'] . '/user/' . $filename);
+    }
+
+
+    /**
+     * Clean up orphaned images that are more than an hour old.
+     */
+    public static function cleanOrphans()
+    {
+        global $_TABLES;
+
+        $min_ts = time() - 3600;    // now - 1 hour
+        $res = DB_query(
+            "SELECT * FROM {$_TABLES['ad_photo']}
+            WHERE ad_id = '' AND ts < $min_ts"
+        );
+        while ($A = DB_fetchArray($res, false)) {
+            self::deleteFile($A['filename']);
+        }
+
+        // Now delete from the DB, just using one query.
+        DB_query(
+            "DELETE FROM {$_TABLES['ad_photo']}
+            WHERE ad_id = '' AND ts < $min_ts"
+        );
     }
 
 }   // class Image

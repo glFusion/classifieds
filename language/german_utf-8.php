@@ -254,6 +254,9 @@ $LANG_ADVT = array (
 'msg_save_error' => 'There was an error performing the update.',
 'view_ad' => 'View Ad',
 'hlp_unchk_all' => 'Uncheck all',
+'x_of_y_uploaded' => '%d of %d files uploaded. The maximum allowed is %d.',
+'no_files_uploaded' => 'No files were uploaded',
+'drop_or_select'    => 'Drop or select a file',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';
