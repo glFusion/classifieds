@@ -356,3 +356,8 @@ form#adlistopts div.uk-form-controls input[type="checkbox"] {
 form#adlistopts div.uk-form-controls label {
     font-weight:inherit;
 }
+
+ul#imagegrid figure {
+    min-width: 125px;
+    min-height: 125px;
+}
