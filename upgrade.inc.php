@@ -594,6 +594,7 @@ function classifieds_remove_old_files()
             'js/catfldxml.js',
             'js/moredays.js',
             'templates/account_settings.uikit.thtml',
+	    'templates/admin/adminedit.thtml',
 	    'templates/admin/adminedit.uikit.thtml',
 	    'templates/admin/catEditForm.uikit.thtml',
             'templates/adtypeform.uikit.thtml',

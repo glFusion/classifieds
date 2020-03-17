@@ -3,7 +3,7 @@
 {wysiwyg}
 {!endif}
 <h2>{txt_edit_type}</h2>
-<form class="uk-form uk-form-horizontal" id="adminedit" enctype="multipart/form-data"
+<form class="uk-form uk-form-horizontal" id="adeditform" enctype="multipart/form-data"
     method="post"
     action="{action_url}">
     <input type="hidden" name="type" value="{type}" />
