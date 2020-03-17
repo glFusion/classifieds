@@ -932,20 +932,25 @@ class Ad
     {
         global $_USER, $_CONF, $_CONF_ADVT, $_TABLES;
 
-        $days = (int)$days;
+        $req_days = (int)$days;
 	$max_days = $this->calcMaxAddDays();
 
-        if ($days == 0) return $max_days;
-        if (!$this->canEdit()) return $max_days;
+        if (
+            $req_days < 1 ||
+            !$this->canEdit()
+        ) {
+            return $max_days;
+        }
 
-        $add_days = min($max_days, $days);
-        if ($add_days <= 0) return 0;
+        $add_days = min($max_days, $req_days);
+        if ($add_days <= 0) {
+            return 0;       // can't add any more days
+        }
 
-        $this->setExpDate($this->exp_date->toUnix() + ($add_days * 86400));
-        //$this->exp_date += ($add_days * 86400);
 
         // Finally, we have access to this add and there's a valid number
         // of days to add.
+        $this->setExpDate($this->exp_date->toUnix() + ($add_days * 86400));
         DB_query("UPDATE {$_TABLES['ad_ads']} SET
                 exp_date = {$this->exp_date->toUnix()},
                 exp_sent=0

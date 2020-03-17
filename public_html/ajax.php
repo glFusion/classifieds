@@ -46,12 +46,14 @@ case 'moredays':
     if (!isset($_POST['id'])) exit;
     $Ad = new Classifieds\Ad($_POST['id']);
     if ($Ad->isNew()) exit;
-    $maxdays = $Ad->addDays($_POST['days']);
+    $old_max = $Ad->calcMaxAddDays();
+    $new_max = $Ad->addDays($_POST['days']);
+    $added = $old_max - $new_max;
     $expdate = $Ad->getExpDate()->format($_CONF['shortdate'], true);
     $result = array(
-        'maxdays' => $maxdays,
+        'maxdays' => $new_max,
         'expdate' => $expdate,
-        'statusMessage' => sprintf($LANG_ADVT['msg_added_days'], $_POST['days']),
+        'statusMessage' => sprintf($LANG_ADVT['msg_added_days'], $added),
     );
     break;
 
