@@ -60,7 +60,7 @@
     </small>
   </div>
 
-  <div id="adDetailData">
+  <div class="adDetailData v1">
     <p class="title">{subject}</p>
     <p>{description}</p>
     {!if price}
@@ -86,7 +86,7 @@
         </div>
       </div>
 {!if uinfo_address}
-      <div class="adContactItem">
+      <div class="adContactItem v1">
         <div class="label"> {$LANG_ADVT['address']}</div>
         <div class="data">{uinfo_address}</div>
       </div>

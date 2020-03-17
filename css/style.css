@@ -223,13 +223,19 @@ img.RandBlock {
     margin-left: 20px;
 }*/
 
+.adDetailData.v1 {
+    min-width: 20%;
+    float:left;
+    flex: 1;
+}
+
 .adDetailData.v2 {
     min-width: 20%;
     float:left;
     flex: 1;
 }
 
-#adDetailData img {
+.adDetailData img {
     padding: 5px 0px 0px 9px;
 }
 
@@ -250,7 +256,7 @@ img.RandBlock {
     border-padding: 0px;
 }
 
-#adContact {
+.adContact {
     width: 70%;
 }
 #adContact .title {
@@ -293,6 +299,12 @@ div.adContactItem,div.adWhatsHotItem {
     clear: both;
 }
 
+p.title {
+    font-weight:bold;
+}
+div.adContactItem div.label {
+    font-weight: bold;
+}
 div.adContactItem div.label, div.adWhatsHotItem div.label {
     margin-left: 5px;
     float: left;
@@ -300,14 +312,9 @@ div.adContactItem div.label, div.adWhatsHotItem div.label {
     display: inline;
 }
 
-div.adContactItem div.data, div.adWhatsHOtItem div.label {
+div.adContactItem div.data {
     float: left;
     display: inline;
-}
-
-div.adContactItem div.label {
-    width: 30%;
-    font-weight: bold;
 }
 
 .adMenuActive {
