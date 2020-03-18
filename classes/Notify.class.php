@@ -33,7 +33,7 @@ class Notify
     {
         global $_CONF_ADVT;
 
-        if (!$Ad->isNew()) {
+        if (!$Ad || $Ad->isNew()) {
             return false;
         }
 
@@ -62,6 +62,8 @@ class Notify
 
         // First, determine if we even notify users of this condition
         if (
+            !$Ad || $Ad->isNew()
+            ||
             $_CONF_ADVT['emailusers'] == 0       // Never notify
             ||
             ($_CONF_ADVT['emailusers'] == 2 && !$approved)  // approval only
@@ -72,12 +74,12 @@ class Notify
         }
 
         // Sanitizing this since it gets used in another query.
-        $username = COM_getDisplayName($Ad->uid);
+        $username = COM_getDisplayName($Ad->getUid());
         $sql = "SELECT email, language FROM {$_TABLES['users']}
-                WHERE uid={$Ad->uid} AND status > 0";
+                WHERE uid={$Ad->getUid()} AND status > 0";
         $result = DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("adNotify::Approval sql error: $sql");
+            COM_errorLog("Notify::Approval sql error: $sql");
             return;
         } elseif (DB_numRows($result) < 1) {
             return;
@@ -85,7 +87,7 @@ class Notify
         $user = DB_fetchArray($result, false);
         // Shouldn't be an empty email address, but just in case...
         if (empty($user['email'])) {
-            COM_errorLog("adNotify::Approval user {$Ad->uid} has an empty email address");
+            COM_errorLog("Notify::Approval user {$Ad->getUid()} has an empty email address");
             return;
         }
 
@@ -233,8 +235,9 @@ class Notify
             return true;
 
         // require a valid ad ID
-        if ($Ad->ad_id == '')
+        if (!$Ad || $Ad->isNew()) {
             return false;
+        }
 
         COM_clearSpeedlimit(300,'advtnotify');
         $last = COM_checkSpeedlimit('advtnotify');
@@ -251,11 +254,11 @@ class Notify
         $T = new \Template($template_dir);
         $T->set_file('message', 'admin.thtml');
         $T->set_var(array(
-            'cat'       => $Ad->Cat->BreadCrumbs(),
-            'subject'   => $Ad->subject,
-            'description' => $Ad->description,
-            'price'     => $Ad->price,
-            'ad_type'   => $Ad->Type->description,
+            'cat'       => $Ad->getCat()->BreadCrumbs(),
+            'subject'   => $Ad->getSubject(),
+            'description' => $Ad->getDscp(),
+            'price'     => $Ad->getPrice(),
+            'ad_type'   => $Ad->getType()->getDscp(),
             'admin_url' => $_CONF['site_url'] . '/admin/moderation.php',
         ) );
 
@@ -306,20 +309,29 @@ class Notify
         global $_TABLES, $LANG_ADVT, $_USER;
 
         // Don't notify the owner of their own comments
-        if ($Ad->uid == $_USER['uid']) return;
+        if ($Ad->getUid() == $_USER['uid']) {
+            return;
+        }
 
         // Find whether the ad owner wants to be notified of new comments
-        $notify = (int)DB_getItem($_TABLES['ad_uinfo'], 'notify_comment',
-                "uid = '{$Ad->uid}'");
+        $notify = (int)DB_getItem(
+            $_TABLES['ad_uinfo'],
+            'notify_comment',
+            "uid = '{$Ad->getUid()}'"
+        );
         if ($notify > 0) {
-            $res = DB_query("SELECT email, language FROM {$_TABLES['users']}
-                        WHERE uid = {$Ad->uid} AND status > 0");
-            if (!$res || DB_numRows($res) < 1) return;
+            $res = DB_query(
+                "SELECT email, language FROM {$_TABLES['users']}
+                WHERE uid = {$Ad->getUid()} AND status > 0"
+            );
+            if (!$res || DB_numRows($res) < 1) {
+                return;
+            }
             $U = DB_fetchArray($res, false);
             $LANG = self::loadLanguage($U['language']);
-            $username = COM_getDisplayName($Ad->uid);
-            $msg = sprintf($LANG_ADVT['comment_notification'], $Ad->subject);
-            $msg .= '<br /><br />' . CLASSIFIEDS_makeURL('detail', $Ad->ad_id);
+            $username = COM_getDisplayName($Ad->getUid());
+            $msg = sprintf($LANG_ADVT['comment_notification'], $Ad->getSubject());
+            $msg .= '<br /><br />' . CLASSIFIEDS_makeURL('detail', $Ad->getID());
             COM_mail(
                 array($U['email'], $username),
                 $LANG['comment_notif_subject'],
