@@ -334,8 +334,8 @@ class Ad
         } else {
             // Category object needed for notifications, but is not yet
             // set in the current Ad object
-            $this->Cat = new Category($this->cat_id);
-            $this->Type = new AdType($this->ad_type);
+            $this->Cat = Category::getInstance($this->cat_id);
+            $this->Type = AdType::getInstance($this->ad_type);
             if ($this->isNew) {
                 if (!empty($nonce)) {
                     Image::setAdID($nonce, $this->ad_id);
