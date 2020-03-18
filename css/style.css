@@ -24,12 +24,23 @@ div.adlistItem {
   width: 100%;
   height: 100%;
 }
-div.adlistItem div.adtype {
+div.adlistItem div.adType {
   /* Apparently need to account for the 2px border in the parent div */
   border-radius: 8px 8px 0px 0px;
   -webkit-border-radius: 8px 8px 0px 0px;
   width: 100%;
   padding-bottom:1px;
+}
+
+.adlistItem .adSubject,
+.adlistItem .adPrice
+{
+    font-weight: bold;
+}
+.adlistItem .catName,
+.adlistItem .adDate
+{
+    font-size: smaller;
 }
 
 /* Styles for the category box displays */

@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<div class="uk-grid" style="width:100%">
+<div class="uk-grid">
     <div class="uk-width-1-5">
         <form class="uk-form" id="adlistopts" method="get" action="{site_url}/classifieds/index.php?mode=home">
             <div class="uk-form-row">
@@ -46,22 +46,19 @@
             <li class="adlistItem">
                 <a href="{ad_url}">
                     <div class="adlistItem">
-                        <div class="adtype" style="background-color:{at_bgcolor};color:{at_fgcolor}">{ad_type}</div>
-                        {subject}<br />
-                        <small>{cat_name}</small><br />
+                        <div class="adType" style="background-color:{at_bgcolor};color:{at_fgcolor}">{ad_type}</div>
+                        <div class="adSubject">{subject}</div>
+                        <div class="catName">{cat_name}</div>
 {!if img_url}
                         <img src="{thumb_url}" border="0" 
                             alt="{$LANG_ADVT['click_to_enlarge']}" />
                         <br />
 {!endif}
-                        {descript}{ellipses}<br />
+                        <div class="adDscp">{descript}{ellipses}</div>
 {!if price}
-                        {$LANG_ADVT['price']}: {price}<br />
+                        <div class="adPrice">{$LANG_ADVT['price']}: {price}</div>
 {!endif}
-                        <small>{add_date}</small><br />
-{!if adblock}
-                        {adblock}<br />
-{!endif}
+                        <div class="adDate">{add_date}</small></div>
                     </div>
                 </a>
             </li>
