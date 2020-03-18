@@ -72,7 +72,8 @@ class Ads
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON cat.cat_id = ad.cat_id
-            WHERE ad.exp_date > $time " .
+            WHERE ad.exp_date > $time
+            AND approved = 1 " .
             COM_getPermSQL('AND', 0, 2, 'cat');
         if ($this->uid > 0) {
             $sql .= " AND ad.uid = {$this->uid}";

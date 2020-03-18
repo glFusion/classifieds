@@ -102,6 +102,10 @@ class Ad
      * @var boolean */
     private $isAdmin;
 
+    /** Approval flag to indicate the add can be displayed.
+     * @var boolean */
+    private $approved = 1;
+
     /** Tag to be part of all cache key names.
      * @var string */
     private static $tag = 'ad_';
@@ -124,6 +128,7 @@ class Ad
         'exp_sent' => 'int',
         'comments' => 'int',
         'comments_enabled' => 'int',
+        'approved' => 'checkbox',
     );
 
 
@@ -179,6 +184,9 @@ class Ad
                     break;
                 case 'int':
                     $this->$name = (int)$row[$name];
+                    break;
+                case 'checkbox':
+                    $this->$name = $row[$name] ? 1 : 0;
                     break;
                 default:
                     $this->$name = $row[$name];
@@ -283,7 +291,8 @@ class Ad
             if (!$this->isAdmin && $_CONF_ADVT['submission']) {
                 // If using the queue and not an admin, then switch
                 // to the submission table for new items.
-                $this->setTable('ad_submission');
+                //$this->setTable('ad_submission');
+                $this->approved = 0;
             }
             // Set the date added for new records
             $this->setAddDate();
@@ -314,6 +323,9 @@ class Ad
                 break;
             case 'int':
                 $val = (int)$this->$name;
+                break;
+            case 'checkbox':
+                $val = $this->$name ? 1 : 0;
                 break;
             case 'string':
             default:
@@ -541,6 +553,7 @@ class Ad
             'uid'           => $_USER['uid'],
             'nonce'         => $nonce,
             'max_images'    => $maxfiles,
+            'approved_chk'  => $this->isApproved() ? 'checked="checked"' : '',
          ) );
 
         if (!empty($this->ad_id)) {
@@ -1534,6 +1547,30 @@ class Ad
             break;
         }
         return $retval;
+    }
+
+
+    public function Approve()
+    {
+        global $_TABLES;
+
+        Notify::Approval($Ad, true);
+        Notify::Subscribers($Ad);
+        // Update the date added to now.
+        DB_query(
+            "UPDATE {$_TABLES['ad_ads']} SET
+                add_date = UNIX_TIMESTAMP(),
+                approved = 1
+            WHERE ad_id = '" . DB_escapeString($this->ad_id) . "'"
+        );
+        //self::updateAddDate($this->ad_id);
+        return $this;
+    }
+
+
+    public function isApproved()
+    {
+        return $this->approved ? 1 : 0;
     }
 
 }   // class Ad

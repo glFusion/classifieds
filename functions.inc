@@ -742,7 +742,8 @@ function plugin_moderationvalues_classifieds()
         $_TABLES['ad_ads'],
         'ad_id, cat_id, subject, description, url, add_date, exp_date,
             uid, price, ad_type, keywords',
-        $_TABLES['ad_submission']);
+        //$_TABLES['ad_submission'],
+    );
 }
 
 
@@ -783,7 +784,9 @@ function plugin_itemlist_classifieds()
                     ad_id as id, subject,
                     FROM_UNIXTIME(add_date) as date, price,
                     uid
-                FROM {$_TABLES['ad_submission']}";
+                FROM {$_TABLES['ad_ads']}
+                WHERE approved = 0";
+//                FROM {$_TABLES['ad_submission']}";
         $plugin->addSubmissionHeading($LANG_ADVT['subject']);
         $plugin->addSubmissionHeading($LANG_ADVT['added_on']);
         $plugin->addSubmissionHeading($LANG_ADVT['price']);
@@ -804,11 +807,12 @@ function plugin_itemlist_classifieds()
 function plugin_moderationapprove_classifieds($id, $owner_id=0)
 {
     // Notify subscribers.
-    $Ad = new \Classifieds\Ad($id);
-    Classifieds\Notify::Approval($Ad, true);
-    Classifieds\Notify::Subscribers($Ad);
+    $Ad = new Classifieds\Ad($id);
+    $Ad->Approve();
+    //Classifieds\Notify::Approval($Ad, true);
+    //Classifieds\Notify::Subscribers($Ad);
     // Update the date added to now.
-    Classifieds\Ad::updateAddDate($id);
+    //Classifieds\Ad::updateAddDate($id);
     return '';
 }
 

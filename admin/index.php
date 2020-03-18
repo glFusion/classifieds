@@ -93,14 +93,17 @@ case 'delbutton_x':
 case 'deletead':
     $ad_id = $actionval;
     $type = CLASSIFIEDS_getParam('type', 'string');
-    if ($type == 'submission' || $type == 'editsubmission' ||
-            $type == 'moderate') {
+    if (
+        $type == 'submission' ||
+        $type == 'editsubmission' ||
+        $type == 'moderate'
+    ) {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
-        \Classifieds\Ad::Delete($ad_id, 'ad_submission');
+        Classifieds\Ad::Delete($ad_id, 'ad_submission');
         echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
         exit;
     } else {
-        \Classifieds\Ad::Delete($ad_id);
+        Classifieds\Ad::Delete($ad_id);
         echo COM_refresh($_CONF_ADVT['admin_url'] . '/index.php');
         exit;
     }
@@ -243,7 +246,8 @@ case 'editcat':
     break;
 
 case 'moderate':
-    $Ad = new \Classifieds\Ad($ad_id, 'ad_submission');
+    //$Ad = new \Classifieds\Ad($ad_id, 'ad_submission');
+    $Ad = new Classifieds\Ad($ad_id);
     $content .= $Ad->Edit();
     break;
 
@@ -331,6 +335,7 @@ $T->set_var(array(
     'admin_mode'    => $admin_mode,
     'page_content'  => $content,
     'pi_url'        => $_CONF_ADVT['url'] . '/index.php',
+    'icon'          => plugin_geticon_classifieds(),
 ) );
 $T->parse('output','admin');
 echo $T->finish($T->get_var('output'));

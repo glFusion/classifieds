@@ -18,6 +18,13 @@
             <select id="cat_id" name="cat_id">
                 {sel_list_catid}
             </select>
+            <div class="floatright">
+                <label class="uk-form_label">
+                    {$LANG_ADVT['approved']}?
+                </label>
+                &nbsp;
+                <input type="checkbox" name="approved" {approved_chk} />
+            </div>
         </div>
     </div>
 
