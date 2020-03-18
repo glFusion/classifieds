@@ -33,7 +33,7 @@ class Notify
     {
         global $_CONF_ADVT;
 
-        if (!$Ad->isNew()) {
+        if (!$Ad || $Ad->isNew()) {
             return false;
         }
 
@@ -62,6 +62,8 @@ class Notify
 
         // First, determine if we even notify users of this condition
         if (
+            !$Ad || $Ad->isNew()
+            ||
             $_CONF_ADVT['emailusers'] == 0       // Never notify
             ||
             ($_CONF_ADVT['emailusers'] == 2 && !$approved)  // approval only
@@ -233,8 +235,9 @@ class Notify
             return true;
 
         // require a valid ad ID
-        if ($Ad->ad_id == '')
+        if (!$Ad || $Ad->isNew()) {
             return false;
+        }
 
         COM_clearSpeedlimit(300,'advtnotify');
         $last = COM_checkSpeedlimit('advtnotify');
