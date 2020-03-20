@@ -315,6 +315,8 @@ p.title {
 }
 div.adContactItem div.label {
     font-weight: bold;
+    /* Set max-width in case there is no image */
+    max-width: 180px;
 }
 div.adContactItem div.label, div.adWhatsHotItem div.label {
     margin-left: 5px;
