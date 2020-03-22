@@ -156,7 +156,6 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='', $dvlp = false
         COM_errorLOG("Classifieds Plugin $version update: Executing SQL => $s");
         DB_query($s, '1');
         if (DB_error()) {
-            var_dump(DB_error());die;
             COM_errorLog("SQL Error during Classifieds plugin update",1);
             if (!$dvlp) return false;
         }
