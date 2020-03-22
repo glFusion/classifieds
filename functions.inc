@@ -22,8 +22,7 @@ if (!defined('GVERSION')) {
 global $_CONF_ADVT;
 
 // Load the plugin configuration
-$cc = config::get_instance();
-$_CONF_ADVT = $cc->get_config('classifieds');
+$_CONF_ADVT = config::get_instance()->get_config('classifieds');
 
 /** Additional config items and table definitions are added here */
 require_once __DIR__ . '/classifieds.php';
