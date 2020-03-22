@@ -165,6 +165,8 @@ class Ad
      */
     public function setVars($row)
     {
+        global $_CONF;
+
         if (!is_array($row)) return;
 
         // Set the database field values
@@ -175,7 +177,7 @@ class Ad
                     // Should be a timestamp value, create the date objects.
                     // Duplicates the add*Date functions.
                     $this->$name = new \Date($row[$name]);
-                    $this->$name->setTimeZone($_CONF['timezone']);
+                    $this->$name->setTimezone(new \DateTimeZone($_CONF['timezone']));
                     break;
                 case 'int':
                     $this->$name = (int)$row[$name];
@@ -1219,7 +1221,7 @@ class Ad
             $ts = time();
         }
         $this->add_date = new \Date($ts);
-        $this->add_date->setTimeZone($_CONF['timezone']);
+        $this->add_date->setTimezone(new \DateTimeZone($_CONF['timezone']));
         return $this;
     }
 
@@ -1249,7 +1251,7 @@ class Ad
             $ts = time();
         }
         $this->exp_date = new \Date($ts);
-        $this->exp_date->setTimeZone($_CONF['timezone']);
+        $this->exp_date->setTimezone(new \DateTimeZone($_CONF['timezone']));
         return $this;
     }
 
