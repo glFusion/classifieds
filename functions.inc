@@ -32,12 +32,15 @@ if (file_exists(__DIR__ . '/config.php')) {
     include_once __DIR__ . '/config.php';
 }
 // New feature not fully implemented, different template options
-if (!isset($_CONF_ADVT['detail_tpl_ver'])) $_CONF_ADVT['detail_tpl_ver'] = '/v1';
+if (!isset($_CONF_ADVT['detail_tpl_ver'])) {
+    $_CONF_ADVT['detail_tpl_ver'] = '/v1';
+}
 
 // End of loading configurations.  Now, if login is required globally,
 // set our configuration accordingly
-if ($_CONF['loginrequired'])
+if ($_CONF['loginrequired']) {
     $_CONF_ADVT['loginrequired'] = 1;
+}
 
 // Feature under development, forcefully disable from release
 $_CONF_ADVT['purchase_enabled'] = 0;
