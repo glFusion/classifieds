@@ -193,12 +193,14 @@ function plugin_load_configuration_classifieds()
 {
     global $_CONF, $_CONF_ADVT, $_TABLES;
 
-    require_once $_CONF_ADVT['path'] . '/install_defaults.php';
+    require_once __DIR__ . '/install_defaults.php';
 
     // Get the admin group ID that was saved previously.
-    $group_id = (int)DB_getItem($_TABLES['groups'], 'grp_id',
-            "grp_name='{$_CONF_ADVT['pi_name']} Admin'");
-
+    $group_id = (int)DB_getItem(
+        $_TABLES['groups'],
+        'grp_id',
+        "grp_name='{$_CONF_ADVT['pi_name']} Admin'"
+    );
     return plugin_initconfig_classifieds($group_id);
 }
 
