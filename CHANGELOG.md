@@ -1,6 +1,6 @@
 # Classifieds Plugin for glFusion - Change Log
 
-## Version 1.3.0 (Unreleased)
+## Version 1.3.0 (Released 2020-03-22)
 - Fix namespace usage
 - Implement `plugin_privacy_export` function
 - Remove date-added field for categories, not used

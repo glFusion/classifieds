@@ -250,6 +250,11 @@ $LANG_ADVT = array (
 'msg_save_error' => 'There was an error performing the update.',
 'view_ad' => 'View Ad',
 'hlp_unchk_all' => 'Uncheck all',
+'x_of_y_uploaded' => '%d of %d files uploaded. The maximum allowed is %d.',
+'no_files_uploaded' => 'No files were uploaded',
+'drop_or_select'    => 'Drop or select a file',
+'duplicate'         => 'Duplicate',
+'newadtypehdr'      => 'Creating an Ad Type',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Su Clasificado ha sido enviado y está en <b>espera de aprobación</b>.';
@@ -314,6 +319,7 @@ $LANG_confignames['classifieds'] = array(
     'visible_to' => 'Visible To',
     'detail_tpl_ver' => 'Ad Detail Template Version',
     'auto_subcats' => '(Un)Subscriptions act on sub-categories?',
+    'disp_fullname' => 'Show owner full name with ads?',
 );
 
 $LANG_configsubgroups['classifieds'] = array(

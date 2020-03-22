@@ -257,6 +257,8 @@ $LANG_ADVT = array (
 'x_of_y_uploaded' => '%d of %d files uploaded. The maximum allowed is %d.',
 'no_files_uploaded' => 'No files were uploaded',
 'drop_or_select'    => 'Drop or select a file',
+'duplicate'         => 'Duplicate',
+'newadtypehdr'      => 'Creating an Ad Type',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Ihre Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';
@@ -321,6 +323,7 @@ $LANG_confignames['classifieds'] = array(
     'visible_to'         => 'Sichtbar für',
     'detail_tpl_ver'     => 'Template Version',
     'auto_subcats'       => 'Abo wirkt auf Unterkategorie',
+    'disp_fullname' => 'Show owner full name with ads?',
 );
 
 $LANG_configsubgroups['classifieds'] = array(
