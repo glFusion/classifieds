@@ -154,8 +154,9 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='', $dvlp = false
     COM_errorLOG("--Updating Classified Ads to version $version");
     foreach ($sql as $s) {
         COM_errorLOG("Classifieds Plugin $version update: Executing SQL => $s");
-        DB_query($s,'1');
+        DB_query($s, '1');
         if (DB_error()) {
+            var_dump(DB_error());die;
             COM_errorLog("SQL Error during Classifieds plugin update",1);
             if (!$dvlp) return false;
         }
@@ -521,24 +522,28 @@ function classifieds_upgrade_1_3_0($dvlp = false)
 
     $sql = array(
         // Add tree fields, drop auto_increment key for renumbering
-        "ALTER TABLE {$_TABLES['ad_category']} ADD lft int(5) unsigned NOT NULL default 0",
-        "ALTER TABLE {$_TABLES['ad_category']} ADD rgt int(5) unsigned NOT NULL default 0",
-        "ALTER TABLE {$_TABLES['ad_category']} DROP parent_map",
-        "ALTER TABLE {$_TABLES['ad_category']} DROP add_date",
-        "ALTER TABLE {$_TABLES['ad_category']} DROP keywords",
-        "ALTER TABLE {$_TABLES['ad_category']} DROP fgcolor",
-        "ALTER TABLE {$_TABLES['ad_category']} DROP bgcolor",
-        "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (lft)",
-        "ALTER TABLE {$_TABLES['ad_category']} ADD KEY (rgt)",
-        "ALTER TABLE {$_TABLES['ad_uinfo']} DROP fax",
-        "ALTER TABLE {$_TABLES['ad_types']} ADD fgcolor varchar(10) NOT NULL default '' AFTER description",
-        "ALTER TABLE {$_TABLES['ad_types']} ADD bgcolor varchar(10) NOT NULL default '' AFTER fgcolor",
-        "ALTER TABLE {$_TABLES['ad_ads']} CHANGE ad_id ad_id VARCHAR(20) NOT NULL DEFAULT ''",
-        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (cat_id)",
-        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (add_date)",
-        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (exp_date)",
-        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY (uid)",
-        "ALTER TABLE {$_TABLES['ad_submission']} CHANGE ad_id ad_id VARCHAR(20) NOT NULL DEFAULT ''",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD `lft` int(5) unsigned NOT NULL default 0",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD `rgt` int(5) unsigned NOT NULL default 0",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP `parent_map`",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP `add_date`",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP `keywords`",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP `fgcolor`",
+        "ALTER TABLE {$_TABLES['ad_category']} DROP `bgcolor`",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD KEY `idxLft` (lft)",
+        "ALTER TABLE {$_TABLES['ad_category']} ADD KEY `idxRgt` (rgt)",
+        "ALTER TABLE {$_TABLES['ad_uinfo']} DROP `fax`",
+        "ALTER TABLE {$_TABLES['ad_uinfo']} CHANGE `uid` `uid` smallint(5) unsigned NOT NULL",
+        "ALTER TABLE {$_TABLES['ad_types']} ADD `fgcolor` varchar(10) NOT NULL default '' AFTER `description`",
+        "ALTER TABLE {$_TABLES['ad_types']} ADD `bgcolor` varchar(10) NOT NULL default '' AFTER `fgcolor`",
+        "ALTER TABLE {$_TABLES['ad_types']} ADD `enabled` tinyint(1) DEFAULT '1' AFTER `bgcolor`",
+        "ALTER TABLE {$_TABLES['ad_ads']} CHANGE `ad_id` `ad_id` VARCHAR(20) NOT NULL DEFAULT ''",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY `idxCatId` (cat_id)",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY `idxAddDate` (add_date)",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY `idxExpDate` (exp_date)",
+        "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY `idxUid` (uid)",
+        "ALTER TABLE {$_TABLES['ad_submission']} CHANGE `ad_id` `ad_id` VARCHAR(20) NOT NULL DEFAULT ''",
+        "ALTER TABLE {$_TABLES['ad_photo']} ADD `nonce` varchar(20) DEFAULT NULL AFTER `filename`",
+        "ALTER TABLE {$_TABLES['ad_photo']} ADD `ts` int(11) unsigned NOT NULL DEFAULT '0' AFTER `nonce`",
     );
     if (!classifieds_do_upgrade_sql('1.3.0', $sql, $dvlp)) return false;
     // Populate the tree values

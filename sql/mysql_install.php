@@ -34,8 +34,8 @@ $NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
   `lft` int(5) unsigned NOT NULL DEFAULT '0',
   `rgt` int(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`cat_id`),
-  KEY `lft` (`lft`),
-  KEY `rgt` (`rgt`)
+  KEY `idxLft` (`lft`),
+  KEY `idxRgt` (`rgt`)
 ) ENGINE=MyISAM";
 
 // common SQL for ad and ad_submission tables
@@ -56,10 +56,10 @@ $adtable_create = "
     comments int(4) unsigned NOT NULL default '0',
     comments_enabled tinyint(1) unsigned NOT NULL default '1',
     PRIMARY KEY(ad_id),
-    KEY (cat_id),
-    KEY (add_date),
-    KEY (exp_date),
-    KEY (uid)
+    KEY `idxCatId` (cat_id),
+    KEY `idxAddDate` (add_date),
+    KEY `idxExpDate` (exp_date),
+    KEY `idxUid` (uid)
 ) ENGINE=MyISAM";
 $NEWTABLE['ad_ads'] = "CREATE TABLE {$_TABLES['ad_ads']}
     $adtable_create";
@@ -70,6 +70,8 @@ $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
     photo_id SMALLINT UNSIGNED NOT NULL auto_increment,
     ad_id VARCHAR(128) NOT NULL DEFAULT '',
     filename varchar(255),
+    `nonce` varchar(20) DEFAULT NULL,
+    `ts` int(11) unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY(photo_id),
     KEY `idxAd` (`ad_id`,`photo_id`)
 ) ENGINE=MyISAM";
@@ -81,26 +83,26 @@ $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
     PRIMARY KEY(cat_id, uid))";*/
 
 $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
-    uid SMALLINT UNSIGNED NOT NULL auto_increment,
-    tel VARCHAR(20) NOT NULL,
-    city VARCHAR(20) NOT NULL,
-    state VARCHAR(20) NOT NULL,
-    lastup_date INT NOT NULL,
-    postcode VARCHAR(20) NOT NULL,
-    address VARCHAR(30) NOT NULL,
-    notify_exp TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
-    notify_comment TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
-    days_balance INT(11) DEFAULT 0,
-    PRIMARY KEY(uid)
+  `uid` smallint(5) unsigned NOT NULL,
+  `tel` varchar(20) NOT NULL,
+  `city` varchar(20) NOT NULL,
+  `state` varchar(20) NOT NULL,
+  `lastup_date` int(11) NOT NULL,
+  `postcode` varchar(20) NOT NULL,
+  `address` varchar(30) NOT NULL,
+  `notify_exp` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `notify_comment` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `days_balance` int(11) DEFAULT '0',
+  PRIMARY KEY (`uid`)
 ) ENGINE=MyISAM";
 
 $NEWTABLE['ad_types'] = "CREATE TABLE {$_TABLES['ad_types']} (
-    id int(11) NOT NULL auto_increment,
-    description varchar(255) default NULL,
-    fgcolor varchar(10) NOT NULL default '',
-    bgcolor varchar(10) NOT NULL default '',
-    enabled tinyint(1) default '1',
-    PRIMARY KEY  (`id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) DEFAULT NULL,
+  `fgcolor` varchar(10) NOT NULL DEFAULT '',
+  `bgcolor` varchar(10) NOT NULL DEFAULT '',
+  `enabled` tinyint(1) DEFAULT '1',
+   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM";
 
 /*
