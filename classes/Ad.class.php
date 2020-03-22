@@ -473,11 +473,13 @@ class Ad
             $action_url = $_CONF_ADVT['admin_url'] . '/index.php';
             $cancel_url = $_CONF_ADVT['admin_url'] . '/index.php?adminad=x';
             $del_img_url = $action_url . '?ad_id=' . $this->ad_id . '&deleteimg=';
+            $can_delete = true;
         } else {
             $action_url = $_CONF_ADVT['url'] . '/index.php';
             $cancel_url = $_CONF_ADVT['url'] . '/index.php';
             $del_img_url = $action_url . '?mode=delete_img&ad_id=' . $this->ad_id .
                 '&img_id=';
+            $can_delete = false;
         }
 
         $tpl_var = $_CONF_ADVT['pi_name'] . '_entry';
@@ -544,6 +546,7 @@ class Ad
          ) );
 
         if (!empty($this->ad_id)) {
+            $T->set_var('can_delete', $can_delete);
             // get the photo information
             $sql = "SELECT * FROM {$_TABLES['ad_photo']}
                 WHERE ad_id='{$this->ad_id}'";

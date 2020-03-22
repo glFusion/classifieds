@@ -153,8 +153,10 @@
             <button type="reset" class="uk-button" value="{$LANG_ADMIN['cancel']}" name="cancel"
                 onclick="javascript: document.location.href='{cancel_url}'"
                 >{$LANG_ADMIN['cancel']}</button>
+{!if can_delete}
             <button type="submit" class="uk-button uk-button-danger" name="deletead" value="{$LANG_ADMIN['delete']}"
                 onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');">{$LANG_ADMIN['delete']}</button>
+{!endif}
         </div>
     </div>
 
