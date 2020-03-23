@@ -64,8 +64,12 @@
             </li>
 <!-- END QueueRow -->
         </ul>
-<p align="center">
-        {pagemenu}
+        <div class="aligncenter">
+{!if no_ads}
+            <div class="uk-alert">{$LANG_ADVT['no_ads']}</div>
+{!endif}
+            {pagemenu}
+        </div>
     </div>
 </div>
 <script>

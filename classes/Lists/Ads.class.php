@@ -127,7 +127,7 @@ class Ads
 
         if ($totalAds == 0) {
             $T->set_block('catlist', 'No_Ads', 'NoAdBlk');
-            $T->set_var('no_ads', $LANG_ADVT['no_ads_listed_cat']);
+            $T->set_var('no_ads', true);
             $T->parse('NoAdBlk', 'No_Ads', true);
         }
 
