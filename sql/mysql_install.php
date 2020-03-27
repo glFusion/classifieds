@@ -124,11 +124,11 @@ $DEFVALUES['ad_types'] = "INSERT INTO {$_TABLES['ad_types']}
 $DEFVALUES['category'] = "INSERT INTO {$_TABLES['ad_category']} (
         papa_id, cat_name, description,
         group_id, owner_id, perm_owner, perm_group, perm_members, perm_anon,
-        image
+        image, lft, rgt
     ) VALUES (
-        1, 'Root', 'Root Category',
+        0, 'Root', 'Root Category',
         13, 2, 3, 3, 2, 2,
-        ''
+        '', 1, 2
     )";
 
 ?>

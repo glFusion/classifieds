@@ -371,7 +371,7 @@ $classifiedsConfigItems = array(
     ),
     array(
         'name' => 'defgrpcat',
-        'default_value' => 0,
+        'default_value' => 13,
         'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 10,
@@ -382,7 +382,7 @@ $classifiedsConfigItems = array(
     ),
     array(
         'name' => 'default_perm_cat',
-        'default_value' => 0,
+        'default_value' => array(3, 2, 2, 2),
         'type' => '@select',
         'subgroup' => 0,
         'fieldset' => 10,
