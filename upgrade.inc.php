@@ -534,7 +534,6 @@ function classifieds_upgrade_1_3_0($dvlp = false)
         "ALTER TABLE {$_TABLES['ad_uinfo']} CHANGE `uid` `uid` smallint(5) unsigned NOT NULL",
         "ALTER TABLE {$_TABLES['ad_types']} ADD `fgcolor` varchar(10) NOT NULL default '' AFTER `description`",
         "ALTER TABLE {$_TABLES['ad_types']} ADD `bgcolor` varchar(10) NOT NULL default '' AFTER `fgcolor`",
-        "ALTER TABLE {$_TABLES['ad_types']} ADD `enabled` tinyint(1) DEFAULT '1' AFTER `bgcolor`",
         "ALTER TABLE {$_TABLES['ad_ads']} CHANGE `ad_id` `ad_id` VARCHAR(20) NOT NULL DEFAULT ''",
         "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY `idxCatId` (cat_id)",
         "ALTER TABLE {$_TABLES['ad_ads']} ADD KEY `idxAddDate` (add_date)",
