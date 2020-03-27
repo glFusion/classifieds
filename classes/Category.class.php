@@ -137,7 +137,7 @@ class Category
         $this->dscp     = $A['description'];
         $this->group_id = (int)$A['group_id'];
         $this->owner_id = (int)$A['owner_id'];
-        $this->image    = (int)$A['image'];
+        $this->image    = $A['image'];
         if ($fromDB) {      // perm values are already int
             $this->perm_owner = (int)$A['perm_owner'];
             $this->perm_group = (int)$A['perm_group'];
@@ -178,7 +178,7 @@ class Category
             LIMIT 1"
         );
         $A = DB_fetchArray($result, false);
-        $this->SetVars($A, true);
+        $this->setVars($A, true);
         return true;
     }
 
@@ -193,7 +193,7 @@ class Category
     {
         global $_TABLES, $_CONF_ADVT;
 
-        if (!empty($A)) $this->SetVars($A);
+        if (!empty($A)) $this->setVars($A);
         $time = time();
 
         // Handle the uploaded category image, if any.  We don't want to delete
@@ -460,7 +460,7 @@ class Category
      */
     public function Edit($cat_id = 0)
     {
-        global $_CONF, $_TABLES, $LANG_ADVT, $_CONF_ADVT, $LANG_ACCESS, $_USER;
+        global $_TABLES, $LANG_ADVT, $_CONF_ADVT, $_USER;
 
         $cat_id = (int)$cat_id;
         if ($cat_id > 0) {
@@ -473,13 +473,12 @@ class Category
 
         if ($this->isNew()) {
             // A new category gets default values
-            $this->owner_id = $_USER['uid'];
-            $this->group_id = $_CONF_ADVT['defgrpcat'];
-            $this->owner_id = $_USER['uid'];
-            $this->perm_owner = $_CONF_ADVT['default_perm_cat'][0];
-            $this->perm_group = $_CONF_ADVT['default_perm_cat'][1];
-            $this->perm_members = $_CONF_ADVT['default_perm_cat'][2];
-            $this->perm_anon = $_CONF_ADVT['default_perm_cat'][3];
+            $this->owner_id = (int)$_USER['uid'];
+            $this->group_id = (int)$_CONF_ADVT['defgrpcat'];
+            $this->perm_owner = (int)$_CONF_ADVT['default_perm_cat'][0];
+            $this->perm_group = (int)$_CONF_ADVT['default_perm_cat'][1];
+            $this->perm_members = (int)$_CONF_ADVT['default_perm_cat'][2];
+            $this->perm_anon = (int)$_CONF_ADVT['default_perm_cat'][3];
         }
 
         $T->set_var(array(
@@ -487,15 +486,17 @@ class Category
             'description' => $this->dscp,
             'cat_id'    => $this->cat_id,
             'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?categories',
-            'img_url'   => self::thumbUrl($this->image),
+            'img_url'   => $this->thumbUrl($this->image),
             'image'     => $this->image,
             'can_delete' => $this->isUsed() ? '' : 'true',
             'owner_dropdown' => COM_optionList($_TABLES['users'],
                     'uid,username', $this->owner_id, 1, 'uid > 1'),
             'group_dropdown' => SEC_getGroupDropdown($this->group_id, 3),
             'ownername' => COM_getDisplayName($_USER['uid']),
-            'permissions_editor' => SEC_getPermissionsHTML($this->perm_owner,
-                    $this->perm_group, $this->perm_members, $this->perm_anon),
+            'permissions_editor' => SEC_getPermissionsHTML(
+                $this->perm_owner, $this->perm_group,
+                $this->perm_members, $this->perm_anon
+            ),
             'sel_parent_cat' => self::buildSelection(self::getParent($this->cat_id), $this->cat_id),
             'have_propagate' => $this->isNew() ? '' : 'true',
             'orig_pcat' => $this->papa_id,
@@ -923,9 +924,10 @@ class Category
      * @param   string  $filename   Filename to view
      * @return  string      URL to the resized image
      */
-    public static function thumbUrl($filename)
+    public function thumbUrl($filename)
     {
         global $_CONF_ADVT;
+
         if ($filename != '') {
             return LGLIB_ImageUrl(
                 $this->imgPath . $filename,
@@ -1171,8 +1173,7 @@ class Category
      */
     public static function adminList()
     {
-        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS,
-            $_CONF_ADVT, $LANG_ADVT;
+        global $_TABLES, $_CONF_ADVT, $LANG_ADVT;
 
         USES_lib_admin();
         $header_arr = array(
@@ -1241,7 +1242,7 @@ class Category
      */
     public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
     {
-        global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
+        global $_CONF_ADVT, $LANG_ADVT, $_TABLES;
 
         $retval = '';
 
@@ -1274,7 +1275,13 @@ class Category
             break;
 
         case 'parent':
-            $retval = DB_getItem($_TABLES['ad_category'], 'cat_name', 'cat_id='.$A['papa_id']);
+            if ($A['papa_id'] > 0) {
+                $retval = DB_getItem(
+                    $_TABLES['ad_category'],
+                    'cat_name',
+                    'cat_id='.$A['papa_id']
+                );
+            }
             break;
 
         default:
