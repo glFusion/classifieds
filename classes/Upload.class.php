@@ -240,6 +240,7 @@ class Upload extends \upload
     /**
      * Create the target filename for the image file.
      *
+     * @param   string  $ext    File extension
      * @return  string      File name
      */
     private function makeFilename($ext='jpg')

@@ -8,9 +8,11 @@
 - Remove non-uikit theme support
 - Remove fax number from user information
 - Remove category block color options.
+- Add color options for ad type banner in list
 - Viewer can filter ads by category, type, and/or poster
 - Remove Recent Ads menu option
 - Remove original list-style ad display, now use UIkit-styled blocks
+- Remove category image handling, no longer used
 - Add drag-n-drop image uploading
 
 ## Version 1.2.1 (Released 2018-01-11)

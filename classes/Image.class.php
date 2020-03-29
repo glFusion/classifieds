@@ -289,6 +289,13 @@ class Image
         }
     }
 
+
+    /**
+     * Check if a specific ad image exists
+     *
+     * @param   string  $filename   Name of file to check
+     * @return  boolean     True if image file exists, False if not
+     */
     public static function fileExists($filename)
     {
         global $_CONF_ADVT;
@@ -296,12 +303,24 @@ class Image
         return is_file($_CONF_ADVT['imgpath'] . '/user/' . $filename);
     }
 
+
+    /**
+     * Check this specific ad image exists
+     *
+     * @uses    self::fileExists()
+     * @return  boolean     True if image file exists, False if not
+     */
     public function Exists()
     {
         return self::fileExists($this->filename);
     }
 
 
+    /**
+     * Delete a specific ad image from disk.
+     *
+     * @param   string  $filename   Name of file to delete
+     */
     public static function deleteFile($filename)
     {
         global $_CONF_ADVT;
