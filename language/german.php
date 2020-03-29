@@ -260,6 +260,7 @@ $LANG_ADVT = array (
 'drop_or_select'    => 'Drop or select a file',
 'duplicate'         => 'Duplicate',
 'newadtypehdr'      => 'Creating an Ad Type',
+'posted' => 'Posted',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';
