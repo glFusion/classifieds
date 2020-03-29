@@ -2,6 +2,7 @@
 <div class="uk-grid">
     <div class="uk-width-1-5">
         <form class="uk-form" id="adlistopts" method="get" action="{site_url}/classifieds/index.php?mode=home">
+
             <div class="uk-form-row">
                 <label class="uk-form-label">{$LANG_ADVT['mnu_cats']}
                     <i class="uk-icon uk-icon-refresh tooltip" title="{$LANG_ADVT['hlp_unchk_all']}" onclick="ADVT_uncheckAll('cats');"></i>
@@ -37,6 +38,7 @@
                     </select>
                 </div>
             </div>
+
         </form>
     </div>
 
@@ -58,7 +60,7 @@
 {!if price}
                         <div class="adPrice">{$LANG_ADVT['price']}: {price}</div>
 {!endif}
-                        <div class="adDate">{add_date}</small></div>
+                        <div class="adDate">{$LANG_ADVT['posted']}: {add_date}</small></div>
                     </div>
                 </a>
             </li>
