@@ -144,15 +144,19 @@ class AdType
     /**
      * Get all the ad types, ordered by name.
      *
+     * @param   boolean $enabled    True to return only enabled ad types
      * @return  array   Array of AdType objects
      */
-    public static function getAll()
+    public static function getAll($enabled=true)
     {
         global $_TABLES;
 
         $retval = array();
+        $ena_sql = $enabled ? ' WHERE enabled = 1 ' : '';
         $sql = "SELECT * FROM {$_TABLES['ad_types']}
+            $ena_sql
             ORDER BY description ASC";
+        //echo $sql;die;
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
             $retval[] = new self($A);

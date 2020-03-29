@@ -57,29 +57,27 @@ class Ads
     {
         global $_TABLES, $LANG_ADVT, $_CONF, $_USER, $_CONF_ADVT;
 
-        // Fix time to check ad expiration
-        $time = time();
-
         // Max number of ads per page
         $maxAds = isset($_CONF_ADVT['maxads_pg_exp']) ?
                 (int)$_CONF_ADVT['maxads_pg_exp'] : 20;
-
-        $T = new \Template($_CONF_ADVT['path'] . '/templates/lists');
-        $T->set_file('catlist', 'ads.thtml');
 
         // Get the ads for this category, starting at the requested page
         $sql = "SELECT ad.*, ad.add_date as ad_add_date, cat.cat_id, cat.cat_name
             FROM {$_TABLES['ad_ads']} ad
             LEFT JOIN {$_TABLES['ad_category']} cat
                 ON cat.cat_id = ad.cat_id
-            WHERE ad.exp_date > $time " .
+            LEFT JOIN {$_TABLES['ad_types']} at
+                ON at.id = ad.ad_type
+            WHERE ad.exp_date > UNIX_TIMESTAMP() " .
             COM_getPermSQL('AND', 0, 2, 'cat');
+
         if ($this->uid > 0) {
             $sql .= " AND ad.uid = {$this->uid}";
         }
         if (!empty($this->type_ids)) {
             $sql .= ' AND ad.ad_type in (' . implode(',', $this->type_ids) . ')';
         }
+        $sql .= ' AND at.enabled = 1';
         if (!empty($this->cat_ids)) {
             $sql .= ' AND ad.cat_id in (' . implode(',', $this->cat_ids) . ')';
         }
@@ -107,6 +105,9 @@ class Ads
         $startEntry = ($totalAds == 0) ? 0 : $maxAds * $page - $maxAds + 1;
         $endEntry = ($page == $totalPages) ? $totalAds : $maxAds * $page;
         $initAds = $maxAds * ($page - 1);
+
+        $T = new \Template($_CONF_ADVT['path'] . '/templates/lists');
+        $T->set_file('catlist', 'ads.thtml');
 
         // Create the page menu string for display if there is more
         // than one page
@@ -159,13 +160,14 @@ class Ads
                 'thumb_url' => Image::thumbUrl($filename),
             ) );
             $T->parse('QRow', 'QueueRow', true);
-        }   // while
+        }
 
         // Create the category filter checkboxes.
         // Only show categories that are in use.
         $T->set_block('catlist', 'CatChecks', 'CC');
         $i = 0;
-        foreach (Category::getTree() as $Cat) {
+        $prefix = '<i class="uk-icon uk-icon-angle-right uk-text-disabled uk-icon-justify"></i>';
+        foreach (Category::getTree(0, $prefix) as $Cat) {
             if (
                 Category::TotalAds($Cat->getID()) == 0 ||
                 !$Cat->checkAccess(2)
@@ -174,7 +176,7 @@ class Ads
             }
             $T->set_var(array(
                 'cat_id'    => $Cat->getID(),
-                'cat_name'  => $Cat->getName(),
+                'cat_name'  => $Cat->getDispName(),
                 'cat_chk'   => in_array($Cat->getID(), $this->cat_ids) ? 'checked="checked"' : '',
                 'cnt'       => ++$i,
             ) );
@@ -206,6 +208,7 @@ class Ads
             LEFT JOIN {$_TABLES['users']} u
             ON ad.uid = u.uid";
         $res = DB_query($sql);
+        $T->set_var('num_posters', DB_numrows($res));
         while ($A = DB_fetchArray($res, false)) {
             $T->set_var(array(
                 'uid'   => $A['uid'],
@@ -269,26 +272,6 @@ class Ads
             }
         } elseif ((int)$cats > 0) {
             $this->cat_ids[] = (int)$cats;
-        }
-        return $this;
-    }
-
-
-    /**
-     * Add user IDs to the filter.
-     * May be called multiple times.
-     *
-     * @param   array   $ids    Array of user IDs
-     * @return  object  $this
-     */
-    public function addUsers($ids=array())
-    {
-        if (is_array($ids)) {
-            foreach ($ids as $id) {
-                $this->uids[] = (int)$id;
-            }
-        } elseif ((int)$ids > 0) {
-            $this->uids[] = (int)$ids;
         }
         return $this;
     }
