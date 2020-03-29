@@ -3,9 +3,9 @@
  * Class for managing ad categories
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2012-2018 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2012-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.4.0
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -69,14 +69,6 @@ class Category
      * @var string */
     private $dscp = '';
 
-    /** Image filename.
-     * @var string */
-    private $image = '';
-
-    /** Path to category images.
-     * @var string */
-    private $imgPath = '';
-
 
     /**
      * Constructor - Load default values and read a record.
@@ -88,7 +80,6 @@ class Category
         global $_CONF_ADVT;
 
         $catid = (int)$catid;
-        $this->imgPath = $_CONF_ADVT['imgpath'] . '/cat/';
         if (is_array($data)) {
             $this->setVars($data, true);
         } else {
@@ -137,7 +128,6 @@ class Category
         $this->dscp     = $A['description'];
         $this->group_id = (int)$A['group_id'];
         $this->owner_id = (int)$A['owner_id'];
-        $this->image    = $A['image'];
         if ($fromDB) {      // perm values are already int
             $this->perm_owner = (int)$A['perm_owner'];
             $this->perm_group = (int)$A['perm_group'];
@@ -196,29 +186,6 @@ class Category
         if (!empty($A)) $this->setVars($A);
         $time = time();
 
-        // Handle the uploaded category image, if any.  We don't want to delete
-        // the image if one isn't uploaded, we should leave it unchanged.  So
-        // we'll first retrieve the existing image filename, if any.
-        if (is_uploaded_file($_FILES['imagefile']['tmp_name'])) {
-            $img_filename = $time . "_" . rand(1,100) . "_" .
-                $_FILES['imagefile']['name'];
-            $img_sql = "image = '$img_filename',";
-            if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
-                $this->imgPath . $img_filename)) {
-                $retval .= CLASSIFIEDS_errorMsg("Error Moving Image", 'alert');
-            }
-
-            // If a new image was uploaded, and this is an existing category,
-            // then delete the old image, if any. The DB still has the old
-            // filename at this point.
-            if (!$this->isNew()) {
-                self::DelImage($this->cat_id);
-            }
-        } else {
-            $img_filename = '';
-            $img_sql = '';
-        }
-
         // Safety check, if this is the root category then set the parent ID to zero
         if ($this->cat_id == 1) {
             $this->papa_id = 0;
@@ -253,7 +220,6 @@ class Category
 
         $sql2 = "cat_name = '" . DB_escapeString($this->cat_name) . "',
             papa_id = {$this->papa_id},
-            $img_sql
             description = '" . DB_escapeString($this->dscp) . "',
             owner_id = {$this->owner_id},
             group_id = {$this->group_id},
@@ -349,31 +315,6 @@ class Category
         DB_query("UPDATE {$_TABLES['ad_category']} SET lft = lft - $width WHERE lft > $rgt");
         PLG_itemDeleted($id, 'classifieds_category');
         return true;
-    }
-
-
-    /**
-     * Delete a single category's icon.
-     * Deletes the icon from the filesystem, and updates the category table.
-     *
-     * @param   integer $cat_id     Category ID of image to delete
-     */
-    public static function DelImage($cat_id = 0)
-    {
-        global $_TABLES, $_CONF_ADVT;
-
-        if ($cat_id == 0)
-            return;
-
-        $img_name = DB_getItem($_TABLES['ad_category'], 'image', "cat_id=$cat_id");
-        if ($img_name != '') {
-            if (file_exists($this->imgPath . $img_name)) {
-                unlink($this->imgPath . $img_name);
-            }
-            DB_query("UPDATE {$_TABLES['ad_category']}
-                SET image=''
-                WHERE cat_id=$cat_id");
-        }
     }
 
 
@@ -486,8 +427,6 @@ class Category
             'description' => $this->dscp,
             'cat_id'    => $this->cat_id,
             'cancel_url' => $_CONF_ADVT['admin_url']. '/index.php?categories',
-            'img_url'   => $this->thumbUrl($this->image),
-            'image'     => $this->image,
             'can_delete' => $this->isUsed() ? '' : 'true',
             'owner_dropdown' => COM_optionList($_TABLES['users'],
                     'uid,username', $this->owner_id, 1, 'uid > 1'),
@@ -905,7 +844,7 @@ class Category
      * @param   integer $id     Database ID of the ad type
      * @return  string          Ad Type Description
      */
-    public static function XX_GetDescription($id)
+    public static function _GetDescription($id)
     {
         global $_TABLES;
         static $desc = array();
@@ -915,28 +854,6 @@ class Category
             $desc[$id] = DB_getItem($_TABLES['ad_category'], 'description', "id='$id'");
         }
         return $desc[$id];
-    }
-
-
-    /**
-     * Shortcut functions to get resized thumbnail URLs.
-     *
-     * @param   string  $filename   Filename to view
-     * @return  string      URL to the resized image
-     */
-    public function thumbUrl($filename)
-    {
-        global $_CONF_ADVT;
-
-        if ($filename != '') {
-            return LGLIB_ImageUrl(
-                $this->imgPath . $filename,
-                $_CONF_ADVT['thumb_max_size'],
-                $_CONF_ADVT['thumb_max_size']
-            );
-        } else {
-            return '';
-        }
     }
 
 
@@ -1145,6 +1062,19 @@ class Category
 
 
     /**
+     * Get the display name for the category.
+     * This is the name prefixed by spacers or punctuaion to indicate
+     * the depth under the top parent category.
+     *
+     * @return  string      Display name, indented
+     */
+    public function getDispName()
+    {
+        return empty($this->disp_name) ? $this->cat_name : $this->disp_name;
+    }
+
+
+    /**
      * Get the category description.
      *
      * @return  string      Description text
@@ -1152,17 +1082,6 @@ class Category
     public function getDscp()
     {
         return $this->dscp;
-    }
-
-
-    /**
-     * Get the image filename.
-     *
-     * @return  string      Image filename
-     */
-    public function getImage()
-    {
-        return $this->image;
     }
 
 
