@@ -617,6 +617,7 @@ function classifieds_remove_old_files()
         ),
         // admin/plugins/classifieds
         $_CONF['path_html'] . 'admin/plugins/classifieds' => array(
+            'docs',     // old help file dir
         ),
     );
 
