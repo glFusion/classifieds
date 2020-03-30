@@ -12,32 +12,6 @@
  */
 
 
-/**
- * Global array of new tables to be created.
- * @global array $NEWTABLE
- */
-global $NEWTABLE;
-$NEWTABLE = array();
-
-$NEWTABLE['ad_category'] = "CREATE TABLE {$_TABLES['ad_category']} (
-  `cat_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `papa_id` smallint(5) unsigned NOT NULL,
-  `cat_name` varchar(40) NOT NULL,
-  `description` varchar(255) DEFAULT '',
-  `group_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
-  `owner_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
-  `perm_owner` tinyint(1) unsigned NOT NULL DEFAULT '3',
-  `perm_group` tinyint(1) unsigned NOT NULL DEFAULT '3',
-  `perm_members` tinyint(1) unsigned NOT NULL DEFAULT '2',
-  `perm_anon` tinyint(1) unsigned NOT NULL DEFAULT '2',
-  `image` varchar(100) DEFAULT NULL,
-  `lft` int(5) unsigned NOT NULL DEFAULT '0',
-  `rgt` int(5) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`cat_id`),
-  KEY `idxLft` (`lft`),
-  KEY `idxRgt` (`rgt`)
-) ENGINE=MyISAM";
-
 // common SQL for ad and ad_submission tables
 $adtable_create = "
     (ad_id VARCHAR(20) NOT NULL DEFAULT '',
@@ -61,12 +35,39 @@ $adtable_create = "
     KEY `idxExpDate` (exp_date),
     KEY `idxUid` (uid)
 ) ENGINE=MyISAM";
-$NEWTABLE['ad_ads'] = "CREATE TABLE {$_TABLES['ad_ads']}
-    $adtable_create";
-$NEWTABLE['ad_submission'] = "CREATE TABLE {$_TABLES['ad_submission']}
-    $adtable_create";
 
-$NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
+/**
+ * Global array of new tables to be created.
+ * @global array $NEWTABLE
+ */
+global $NEWTABLE;
+$NEWTABLE = array(
+'ad_category' => "CREATE TABLE {$_TABLES['ad_category']} (
+  `cat_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `papa_id` smallint(5) unsigned NOT NULL,
+  `cat_name` varchar(40) NOT NULL,
+  `description` varchar(255) DEFAULT '',
+  `group_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
+  `owner_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
+  `perm_owner` tinyint(1) unsigned NOT NULL DEFAULT '3',
+  `perm_group` tinyint(1) unsigned NOT NULL DEFAULT '3',
+  `perm_members` tinyint(1) unsigned NOT NULL DEFAULT '2',
+  `perm_anon` tinyint(1) unsigned NOT NULL DEFAULT '2',
+  `image` varchar(100) DEFAULT NULL,
+  `lft` int(5) unsigned NOT NULL DEFAULT '0',
+  `rgt` int(5) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`cat_id`),
+  KEY `idxLft` (`lft`),
+  KEY `idxRgt` (`rgt`)
+) ENGINE=MyISAM",
+
+'ad_ads' => "CREATE TABLE {$_TABLES['ad_ads']}
+    $adtable_create",
+
+'ad_submission' => "CREATE TABLE {$_TABLES['ad_submission']}
+    $adtable_create",
+
+'ad_photo' => "CREATE TABLE {$_TABLES['ad_photo']} (
     photo_id SMALLINT UNSIGNED NOT NULL auto_increment,
     ad_id VARCHAR(128) NOT NULL DEFAULT '',
     filename varchar(255),
@@ -74,15 +75,17 @@ $NEWTABLE['ad_photo'] = "CREATE TABLE {$_TABLES['ad_photo']} (
     `ts` int(11) unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY(photo_id),
     KEY `idxAd` (`ad_id`,`photo_id`)
-) ENGINE=MyISAM";
+) ENGINE=MyISAM",
 
-/*$NEWTABLE['ad_notice'] = "CREATE TABLE {$_TABLES['ad_notice']} (
+/*
+'ad_notice' => "CREATE TABLE {$_TABLES['ad_notice']} (
     cat_id SMALLINT UNSIGNED NOT NULL,
     uid VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL,
-    PRIMARY KEY(cat_id, uid))";*/
+    PRIMARY KEY(cat_id, uid))",
+ */
 
-$NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
+'ad_uinfo' => "CREATE TABLE {$_TABLES['ad_uinfo']} (
   `uid` smallint(5) unsigned NOT NULL,
   `tel` varchar(20) NOT NULL,
   `city` varchar(20) NOT NULL,
@@ -94,41 +97,44 @@ $NEWTABLE['ad_uinfo'] = "CREATE TABLE {$_TABLES['ad_uinfo']} (
   `notify_comment` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `days_balance` int(11) DEFAULT '0',
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM";
+) ENGINE=MyISAM",
 
-$NEWTABLE['ad_types'] = "CREATE TABLE {$_TABLES['ad_types']} (
+'ad_types' => "CREATE TABLE {$_TABLES['ad_types']} (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `description` varchar(255) DEFAULT NULL,
   `fgcolor` varchar(10) NOT NULL DEFAULT '',
   `bgcolor` varchar(10) NOT NULL DEFAULT '',
   `enabled` tinyint(1) DEFAULT '1',
    PRIMARY KEY  (`id`)
-) ENGINE=MyISAM";
+) ENGINE=MyISAM",
 
 /*
-$NEWTABLE['ad_trans'] = "CREATE TABLE {$_TABLES['ad_trans']} (
+'ad_trans' => "CREATE TABLE {$_TABLES['ad_trans']} (
     `tid` int(10) NOT NULL auto_increment,
     `uid` int(11) NOT NULL default '0',
     `dt` timestamp NOT NULL default CURRENT_TIMESTAMP,
     `trans_id` varchar(40) default '',
     `days` int(10) NOT NULL default '0',
-    PRIMARY KEY  (`tid`))";
-*/
+    PRIMARY KEY  (`tid`))",
+ */
+);
 
-$DEFVALUES['ad_types'] = "INSERT INTO {$_TABLES['ad_types']}
+$DEFVALUES= array(
+    'ad_types' => "INSERT INTO {$_TABLES['ad_types']}
         (description)
     VALUES
         ('For Sale'),
         ('Wanted')
-    ";
-$DEFVALUES['category'] = "INSERT INTO {$_TABLES['ad_category']} (
+    ",
+    'category' => "INSERT INTO {$_TABLES['ad_category']} (
         papa_id, cat_name, description,
         group_id, owner_id, perm_owner, perm_group, perm_members, perm_anon,
         image, lft, rgt
     ) VALUES (
-        0, 'Root', 'Root Category',
+        0, 'Uncategorized', 'Root Category',
         13, 2, 3, 3, 2, 2,
         '', 1, 2
-    )";
+    )",
+);
 
 ?>
