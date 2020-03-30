@@ -14,6 +14,7 @@
 - Remove original list-style ad display, now use UIkit-styled blocks
 - Remove category image handling, no longer used
 - Add drag-n-drop image uploading
+- Users can no longer edit ads after approval
 
 ## Version 1.2.1 (Released 2018-01-11)
 - Fix ad type management

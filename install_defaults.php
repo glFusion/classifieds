@@ -280,17 +280,6 @@ $classifiedsConfigItems = array(
         'group' => 'classifieds',
     ),
     array(
-        'name' => 'usercanedit',
-        'default_value' => 1,
-        'type' => 'select',
-        'subgroup' => 0,
-        'fieldset' => 0,
-        'selection_array' => 3,
-        'sort' => 210,
-        'set' => true,
-        'group' => 'classifieds',
-    ),
-    array(
         'name' => 'use_gl_cron',
         'default_value' => 1,
         'type' => 'select',

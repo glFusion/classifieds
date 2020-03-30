@@ -139,17 +139,17 @@ function advtUpdateImage(filename)
     </div>
   </div>
 
-{!if have_userlinks}
   <div id="adDetailUserLinks">
 {!if have_editlink}
     <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
+{!endif}
+{!if have_deletelink}
     <a href="{del_link}" data-uk-tooltip
         onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
         title="{$LANG_ADVT['del_item']}"
         ><i class="uk-icon uk-icon-trash uk-text-danger"></i></a>
 {!endif}
   </div>
-{!endif}
 
 </div>
 

@@ -291,12 +291,12 @@ class Ad
             $this->setAddDate();
             $sql1 = "INSERT INTO {$this->table} SET ";
             $sql3 = '';
-        } else {
-            if (!$this->canEdit()) {
-                return false;
-            }
+        } elseif ($this->isAdmin) {
             $sql1 = "UPDATE {$this->table} SET ";
             $sql3 = " WHERE ad_id = '{$this->ad_id}'";
+        } else {
+            // Regular ad owners can't edit
+            return false;
         }
 
         $this->_calcExpDate($A['moredays']);
@@ -473,7 +473,11 @@ class Ad
         $T->set_file('adedit', "edit.thtml");
         if ($this->isAdmin) {
             $action_url = $_CONF_ADVT['admin_url'] . '/index.php';
-            $cancel_url = $_CONF_ADVT['admin_url'] . '/index.php?adminad=x';
+            if ($this->isSubmission()) {
+                $cancel_url = $_CONF['site_admin_url'] . '/moderation.php';
+            } else {
+                $cancel_url = $_CONF_ADVT['admin_url'] . '/index.php?adminad=x';
+            }
             $del_img_url = $action_url . '?ad_id=' . $this->ad_id . '&deleteimg=';
             $can_delete = true;
         } else {
@@ -643,17 +647,10 @@ class Ad
             $edit_link = $base_url . '?mode=editad&id=' . $this->ad_id;
         }
 
-        // Set up the "add days" form if this user is the owner
-        // or an admin
-        if ($this->canEdit()) {
-            // How many days can be added to the ad.
-            $max_add_days = $this->calcMaxAddDays();
-            if ($max_add_days > 0) {
-                $T->set_var('max_add_days', $max_add_days);
-            }
-            $have_editlink = 'true';
-        } else {
-            $have_editlink = '';
+        // Set up the "add days" form if this user is the owner or an admin
+        $max_add_days = $this->calcMaxAddDays();
+        if ($max_add_days > 0) {
+            $T->set_var('max_add_days', $max_add_days);
         }
 
         if ($this->exp_date->toUnix() < time()) {
@@ -682,11 +679,11 @@ class Ad
                 COM_getDisplayName($this->uid) :
                 DB_getItem($_TABLES['users'], 'username', "uid={$this->uid}"),
             'cat_id'        => $this->cat_id,
-            'have_editlink' => $have_editlink,
-            'have_userlinks' => 'true',
+            'have_editlink' => $this->isAdmin,
             'session_id'    => session_id(),
             'timthumb'  => true,
             'adblock'   => PLG_displayAdBlock('classifieds_detail', 0),
+            'have_deletelink' => $this->canDelete(),
         ) );
 
         // Display a link to email the poster, or other message as needed
@@ -942,7 +939,7 @@ class Ad
 
         if (
             $req_days < 1 ||
-            !$this->canEdit()
+            ( !$_USER['uid'] != $this->uid && !$this->isAdmin )
         ) {
             return $max_days;
         }
@@ -951,7 +948,6 @@ class Ad
         if ($add_days <= 0) {
             return 0;       // can't add any more days
         }
-
 
         // Finally, we have access to this add and there's a valid number
         // of days to add.
@@ -965,19 +961,18 @@ class Ad
 
 
     /**
-     * Check if the current user can edit this ad.
+     * Check if the current user can delete this ad.
      *
-     * @return  boolean     True if access allows edit, False if not
+     * @return  boolean     True if access allows deletion, False if not
      */
-    public function canEdit()
+    public function canDelete()
     {
-        global $_CONF_ADVT, $_USER;
-        if ($this->isAdmin ||
-            ($this->uid == $_USER['uid'] &&
-            $_CONF_ADVT['usercanedit'] == 1) ) {
+        global $_USER;
+        if ($this->isAdmin || $this->uid == $_USER['uid']) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
 

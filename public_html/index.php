@@ -87,8 +87,8 @@ case 'deletead':
     if ($isAnon) COM_404();
     if ($id != '') {
         $Ad = new \Classifieds\Ad($id);
-        if ($Ad->canEdit()) {
-            \Classifieds\Ad::Delete($id);
+        if ($Ad->canDelete()) {
+            Classifieds\Ad::Delete($id);
             $msg = '&msg=11';
         } else {
             $msg = '';
