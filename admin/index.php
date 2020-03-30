@@ -93,8 +93,11 @@ case 'delbutton_x':
 case 'deletead':
     $ad_id = $actionval;
     $type = CLASSIFIEDS_getParam('type', 'string');
-    if ($type == 'submission' || $type == 'editsubmission' ||
-            $type == 'moderate') {
+    if (
+        $type == 'submission' ||
+        $type == 'editsubmission' ||
+        $type == 'moderate'
+    ) {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
         \Classifieds\Ad::Delete($ad_id, 'ad_submission');
         echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
@@ -166,19 +169,17 @@ case 'delcatimg':
 
 case 'save':
     if ($_POST['type'] == 'submission') {   // approving a submission
-        $Ad = new \Classifieds\Ad($ad_id, 'ad_submission');
-        $Ad->setIsNew(true)->$Ad->setTable('ad_ads');
+        $Ad = new Classifieds\Ad($ad_id, 'ad_submission');
+        $Ad->setIsNew(true)->setTable('ad_ads');
         $status = $Ad->Save($_POST);
         if ($status) {
             DB_delete($_TABLES['ad_submission'], 'ad_id', $ad_id);
             plugin_moderationapprove_classifieds($ad_id);
-            echo COM_refresh($_CONF_ADVT['admin_url']);
-        } else {
-            echo COM_refresh($_CONF['site_url'] . '/admin/moderation.php');
         }
+        echo COM_refresh($_CONF['site_url'] . '/admin/moderation.php');
         exit;
     } else {
-        $Ad = new \Classifieds\Ad($ad_id);
+        $Ad = new Classifieds\Ad($ad_id);
         $status = $Ad->Save($_POST);
         if ($status) {
             echo COM_refresh($_CONF_ADVT['admin_url']);
