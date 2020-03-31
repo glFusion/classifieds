@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 <div class="uk-grid">
-    <div class="uk-width-1-5">
+    <div class="uk-width-1-5 uk-hidden-small">
         <form class="uk-form" id="adlistopts" method="get" action="{site_url}/classifieds/index.php?mode=home">
 
             <div class="uk-form-row">

@@ -18,172 +18,173 @@ function advtUpdateImage(filename)
 }
 </script>
 
-{breadcrumbs}
-<div id="adDetailWrapper" class="adDetailWrapper v2">
-  <div style="clear:both;margin-top:20px;"></div>
-
-{!if main_img}
-  <div id="mainImageWrapper" class="mainImageWrapper v2">
-  <div id="advtMainImage" class="advtMainImage v2">
-{!if timthumb}
-    <img id="advt_disp_img" src="{site_url}/lglib/img.php?src={main_imgname}&sess={session_id}&width=300&height=300&plugin=classifieds" />
-{!else}
-    <img id="advt_disp_img" src="{main_img}" class="advtMainImage v2" />
-{!endif}
-  </div>
-
-  <div class="advtThumbnails v2">
-<!-- BEGIN PhotoBlock -->
-    <div class="advtImageThumb v2" style="float:left;width:80px;">
-      <a data-uk-lightbox-type="image" data-uk-lightbox="{group:'a'}" href="{disp_url}">
-{!if timthumb}
-        <img src="{site_url}/lglib/img.php?src={small_imgname}&plugin=classifieds&sess={session_id}&width=75&height=75" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" 
-        onmouseover="javascript:advtUpdateImage('{small_imgname}');" data-uk-tooltip />
-      </a>
-{!else}
-        <img src="{small_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}"
-          onmouseover="javascript:advtUpdateImage('{disp_url}');"
-          class="advtImageThumb v2" />
-{!endif}
-      </a>
-    </div>
-<!-- END PhotoBlock -->
-  </div>
-  </div>
-{!endif}
-
-  <div id="adDetailData" class="adDetailData v2">
-    <p class="title">{ad_type}: {subject}</p>
-    {!if price}
-      <p>
-      <span class="title">{$LANG_ADVT['price']}:</span>{price}
-      </p>
-    {!endif}
-
-{# Begin full-width description #}
-<div class="advtFullDescrip v2">{description}</div>
-
-    <hr width="100%" />
-
-    <p class="title">{$LANG_ADVT['contact_info']}</p>
-    <div class="adContact">
-      <div class="adContactItem">
-        <div class="label">{$LANG_ADVT['contact']}</div>
-        <div class="data">{username}
-{!if ad_uid}
-          <a href="{site_url}/profiles.php?uid={ad_uid}&subject={subject}">
-            <i class="uk-icon uk-icon-envelope" title="{$LANG_ADVT['ask_question']}"
-                data-uk-tooltip></i>
-          </a>
-{!else}
-          &nbsp;&nbsp;<i>({$LANG_ADVT['login_to_email']})</i>
-{!endif}
-        </div>
-      </div>
-{!if uinfo_address}
-      <div class="adContactItem">
-        <div class="label"> {$LANG_ADVT['address']}</div>
-        <div class="data">{uinfo_address}</div>
-      </div>
-{!endif}
-{!if uinfo_city}
-      <div class="adContactItem">
-        <div class="label">{$LANG_ADVT['city']}</div>
-        <div class="data">{uinfo_city}</div>
-      </div>
-{!endif}
-{!if uinfo_state}
-      <div class="adContactItem">
-        <div class="label">{$LANG_ADVT['state']}</div>
-        <div class="data">{uinfo_state}</div>
-      </div>
-{!endif}
-{!if uinfo_postcode}
-      <div class="adContactItem">
-        <div class="label">{$LANG_ADVT['postal']}</div>
-        <div class="data">{uinfo_postcode}</div>
-      </div>
-{!endif}
-{!if uinfo_tel}
-      <div class="adContactItem">
-        <div class="label">{$LANG_ADVT['telephone']}</div>
-        <div class="data">{uinfo_tel}</div>
-      </div>
-{!endif}
-{!if ad_url}
-      <div class="adContactItem">
-        <div class="title">{$LANG_ADVT['website']}</div>
-        <div class="data">
-          <a href="{ad_url}" target="_blank" rel="nofollow">{ad_url}</a>
-        </div>
-      </div>
-{!endif}
-{!if byposter_url}
-      <div class="adContactItem">
-        <div class="label>></div>
-        <div class="data">
-          <a href="{byposter_url}">{$LANG_ADVT['ads_by_poster']}</a>
-        </div>
-      </div>
-{!endif}
-    </div>
- 
-    <div class="adWhatsHot">
-      <p class="title">{$LANG_ADVT['whats_hot']}</p>
-<!-- BEGIN HotBlock -->
-      <div class="adWhatsHotItem">
-        <div class="label"><a href="{hot_url}">{hot_title}</a></div>
-        <div class="data"><a href="{hot_cat_url}">{hot_cat}</a></div>
-      </div>
-<!-- END HotBlock -->
-    </div>
-  </div>
-
-  <div id="adDetailUserLinks">
-    <i id="catsub_ico_{cat_id}" class="uk-icon uk-icon-{sub_cls}" data-value="{sub_status}"
-        title="{sub_title}" data-uk-tooltip
-        onclick="ADVT_catsub(this, {cat_id});"></i>
+<div class="uk-margin-bottom">
+    <div style="float:left;">{breadcrumbs}</div>
+    <div id="adDetailUserLinks" style="float:right;">
+        <i id="catsub_ico_{cat_id}" class="uk-icon uk-icon-{sub_cls}" data-value="{sub_status}"
+            title="{sub_title}" data-uk-tooltip
+            onclick="ADVT_catsub(this, {cat_id});"></i>
 {!if have_editlink}
-    <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
+        <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
 {!endif}
 {!if have_deletelink}
-    <a href="{del_link}" data-uk-tooltip
-        onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
-        title="{$LANG_ADVT['del_item']}"
-        ><i class="uk-icon uk-icon-trash uk-text-danger"></i></a>
+        <a href="{del_link}" data-uk-tooltip
+            onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
+            title="{$LANG_ADVT['del_item']}"
+            ><i class="uk-icon uk-icon-trash uk-text-danger"></i></a>
 {!endif}
-  </div>
+    </div>
+</div>
 
+<div id="adDetailWrapper" class="uk-container uk-container-center uk-width-1-1 uk-margin-large-bottom uk-clearfix adDetailWrapper v2">
+    <div class="uk-grid uk-width-1-1" data-uk-grid-margin>
+{!if main_img}
+        <div id="mainImageWrapper" class="uk-width-medium-1-2 mainImageWrapper v2">
+            <div id="advtMainImage" class="advtMainImage v2">
+{!if timthumb}
+                <img id="advt_disp_img" src="{site_url}/lglib/img.php?src={main_imgname}&sess={session_id}&width=300&height=300&plugin=classifieds" />
+{!else}
+                <img id="advt_disp_img" src="{main_img}" class="advtMainImage v2" />
+{!endif}
+            </div>
+
+            <div class="advtThumbnails v2">
+<!-- BEGIN PhotoBlock -->
+                <div class="advtImageThumb v2" style="float:left;width:80px;">
+                    <a data-uk-lightbox-type="image" data-uk-lightbox="{group:'a'}" href="{disp_url}">
+{!if timthumb}
+                        <img src="{site_url}/lglib/img.php?src={small_imgname}&plugin=classifieds&sess={session_id}&width=75&height=75"
+                                border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}" 
+                                onmouseover="javascript:advtUpdateImage('{small_imgname}');" data-uk-tooltip />
+{!else}
+                        <img src="{small_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}" title="{$LANG_ADVT[click_to_enlarge]}"
+                                onmouseover="javascript:advtUpdateImage('{disp_url}');"
+                                class="advtImageThumb v2" />
+{!endif}
+                    </a>
+                </div>
+<!-- END PhotoBlock -->
+            </div>
+        </div>
+{!endif}
+
+        <div id="adDetailData" class="uk-width-medium-1-2 adDetailData v2">
+            <h2 class="title">{ad_type}: {subject}</h2>
+{!if price}
+            <p>
+                <span class="title">{$LANG_ADVT['price']}:</span>{price}
+            </p>
+{!endif}
+
+{# Begin full-width description #}
+            <div class="advtFullDescrip v2">{description}</div>
+            <hr width="100%" />
+
+            <p class="title">{$LANG_ADVT['contact_info']}</p>
+            <div class="adContact">
+                <div class="adContactItem">
+                    <div class="label">{$LANG_ADVT['contact']}</div>
+                    <div class="data">{username}
+{!if ad_uid}
+                        <a href="{site_url}/profiles.php?uid={ad_uid}&subject={subject}">
+                            <i class="uk-icon uk-icon-envelope" title="{$LANG_ADVT['ask_question']}"
+                                data-uk-tooltip></i>
+                        </a>
+{!else}
+                        &nbsp;&nbsp;<i>({$LANG_ADVT['login_to_email']})</i>
+{!endif}
+                    </div>
+                </div>
+{!if uinfo_address}
+                <div class="adContactItem">
+                    <div class="label"> {$LANG_ADVT['address']}</div>
+                    <div class="data">{uinfo_address}</div>
+                </div>
+{!endif}
+{!if uinfo_city}
+                <div class="adContactItem">
+                    <div class="label">{$LANG_ADVT['city']}</div>
+                    <div class="data">{uinfo_city}</div>
+                </div>
+{!endif}
+{!if uinfo_state}
+                <div class="adContactItem">
+                    <div class="label">{$LANG_ADVT['state']}</div>
+                    <div class="data">{uinfo_state}</div>
+                </div>
+{!endif}
+{!if uinfo_postcode}
+                <div class="adContactItem">
+                    <div class="label">{$LANG_ADVT['postal']}</div>
+                    <div class="data">{uinfo_postcode}</div>
+                </div>
+{!endif}
+{!if uinfo_tel}
+                    <div class="adContactItem">
+                    <div class="label">{$LANG_ADVT['telephone']}</div>
+                    <div class="data">{uinfo_tel}</div>
+                </div>
+{!endif}
+{!if ad_url}
+                <div class="adContactItem">
+                    <div class="title">{$LANG_ADVT['website']}</div>
+                    <div class="data">
+                        <a href="{ad_url}" target="_blank" rel="nofollow">{ad_url}</a>
+                    </div>
+                </div>
+{!endif}
+{!if byposter_url}
+                <div class="adContactItem">
+                    <div class="label>></div>
+                    <div class="data">
+                        <a href="{byposter_url}">{$LANG_ADVT['ads_by_poster']}</a>
+                    </div>
+                </div>
+{!endif}
+            </div>
+ 
+            <div class="adWhatsHot">
+                <p class="title">{$LANG_ADVT['whats_hot']}</p>
+<!-- BEGIN HotBlock -->
+                <div class="adWhatsHotItem">
+                    <div class="label"><a href="{hot_url}">{hot_title}</a></div>
+                    <div class="data"><a href="{hot_cat_url}">{hot_cat}</a></div>
+                </div>
+<!-- END HotBlock -->
+            </div>
+        </div>
+    </div>
 </div>
 
 <div>
-<small>
-  {$LANG_ADVT['added_col']} {add_date}
-  <br />
-  <span
+    <small>
+        {$LANG_ADVT['added_col']} {add_date}
+        <br />
+        <span
 {!if is_expired}
-    class="adExpiredText"
+            class="adExpiredText"
 {!endif}
-  >
-    {$LANG_ADVT['expires_col']} <span id="exp_date">{exp_date}</span>
-  </span>
+        >
+            {$LANG_ADVT['expires_col']} <span id="exp_date">{exp_date}</span>
+        </span>
 
 {!if max_add_days}
-  <p>
-    {$LANG_ADVT['add']}
-    <input type="text" id="f_max_add_days" name="add_days" size="3"
-      onchange="ADVTmoreDays('{ad_id}', this.value);" />
-    {$LANG_ADVT['days']}
-    <br />
-    ({$LANG_ADVT['max']} <span id="max_add_days">{max_add_days}</span>)
-  </p>
+        <p>
+            {$LANG_ADVT['add']}
+            <input type="text" id="f_max_add_days" name="add_days" size="3"
+                onchange="ADVTmoreDays('{ad_id}', this.value);" />
+            {$LANG_ADVT['days']}
+            <br />
+            ({$LANG_ADVT['max']} <span id="max_add_days">{max_add_days}</span>)
+        </p>
 {!endif}
-  <p>{$LANG_ADVT['views']} {views_no}</p>
-</small>
+        <p>{$LANG_ADVT['views']} {views_no}</p>
+    </small>
 </div>
 
-<div style="clear:both;">
-  {usercomments}
+<!--<div style="clear:both;">-->
+<div>
+    {usercomments}
 </div>
 {!if adblock}
 <div class="aligncenter">{adblock}</div>

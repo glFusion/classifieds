@@ -207,9 +207,8 @@ img.RandBlock {
     position: relative;
     margin-top: 2rem;
 }
-
 .adDetailWrapper.v2 {
-    display:flex;
+    padding-top:20px;
 }
 
 #adDetailWrapper .adImage {
@@ -250,7 +249,7 @@ img.RandBlock {
     padding: 5px 0px 0px 9px;
 }
 
-#adDetailData .title {
+div#adDetailData .title {
     font-weight: bold;
     margin-right: 3rem;
 }
@@ -348,7 +347,7 @@ img.advtImageThumb.v2 {
 }
 
 .mainImageWrapper.v2 {
-    width: 375px;
+    /*width: 375px;*/
 }
 .advtThumbnails.v2 {
     width: 100%;
