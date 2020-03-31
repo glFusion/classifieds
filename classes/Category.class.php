@@ -200,12 +200,12 @@ class Category
             $sql = "UPDATE {$_TABLES['ad_category']}
                 SET rgt = rgt + 2 WHERE rgt >= {$Parent->rgt}";
             //echo $sql;die;
-            COM_errorLog($sql);
+            //COM_errorLog($sql);
             DB_query($sql);
             $sql = "UPDATE {$_TABLES['ad_category']}
                 SET lft = lft + 2 WHERE lft >= {$Parent->rgt}";
             //echo $sql;die;
-            COM_errorLog($sql);
+            //COM_errorLog($sql);
             DB_query($sql);
             $lft = $Parent->rgt;
             $rgt = $lft + 1;
@@ -797,9 +797,20 @@ class Category
 
 
     /**
+     * Shortcut to see if the current user is subscribed to notifications.
+     *
+     * @return  boolean     True if subscribed, False otherwise
+     */
+    public function isSubscribed()
+    {
+        return PLG_isSubscribed('classifieds', 'category', $this->cat_id);
+    }
+
+
+    /**
      * Subscribe the current user to this category's notifications.
      *
-     * @param   boolean $sub    True to subscribe to sub-categories also
+     * @param   boolean $sub    True to subscribe, False to unsubscribe
      * @return  boolean     True on success, False on failure
      */
     public function Subscribe($sub = true)
@@ -808,25 +819,42 @@ class Category
 
         // only registered users can subscribe, and make sure this is an
         // existing category
-        if (COM_isAnonUser() || $this->cat_id < 1)
+        if (COM_isAnonUser() || $this->cat_id < 1) {
             return false;;
+        }
 
-        $sub = $sub == true ? true : false;
+        $sub = $sub ? true : false;
         $subcats = self::SubCats($this->cat_id);
 
         if ($sub === true) {
             if ($_CONF_ADVT['auto_subcats']) {
                 foreach ($subcats as $cat) {
-                    PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $cat['cat_id'],
-                            0, $LANG_ADVT['category'], $cat['description']);
+                    PLG_subscribe(
+                        $_CONF_ADVT['pi_name'],
+                        'category',
+                        $cat->getID(),
+                        0,
+                        $LANG_ADVT['category'],
+                        $cat->getDscp()
+                    );
                 }
             }
-            return PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id,
-                    0, $LANG_ADVT['category'], $this->dscp);
+            return PLG_subscribe(
+                $_CONF_ADVT['pi_name'],
+                'category',
+                $this->cat_id,
+                0,
+                $LANG_ADVT['category'],
+                $this->dscp
+            );
         } else {
             if ($_CONF_ADVT['auto_subcats']) {
                 foreach ($subcats as $cat) {
-                    PLG_unsubscribe($_CONF_ADVT['pi_name'], 'category', $cat['cat_id']);
+                    PLG_unsubscribe(
+                        $_CONF_ADVT['pi_name'],
+                        'category',
+                        $cat['cat_id']
+                    );
                 }
             }
             return PLG_unsubscribe($_CONF_ADVT['pi_name'], 'category', $this->cat_id);

@@ -19,26 +19,23 @@ require_once '../lib-common.php';
 $result = array();
 switch ($_REQUEST['action']) {
 case 'catsub':
-    if (!isset($_POST['id'])) exit;
-    $C = new \Classifieds\Category($_POST['id']);
-    $status = $C->Subscribe(true);
+    // Subscribe or unsubscribe from a category
+    if (!isset($_POST['cat_id'])) exit;
+    $is_sub = $_POST['is_subscribed'] ? 1 : 0;
+    $do_sub = $is_sub == 0 ? 1 : 0;
+    $status = Classifieds\Category::getInstance($_POST['cat_id'])->Subscribe($do_sub);
+    if ($status) {
+        $sub_stat = $do_sub;
+        $msg = $do_sub ? $LANG_ADVT['msg_catsub'] : $LANG_ADVT['msg_catunsub'];
+    } else {
+        $sub_stat = $is_sub;    // return same value
+        $msg = $LANG_ADVT['msg_error'];
+    }
     $result = array(
-        'cat_id' => $_POST['id'],
-        'newstate' => $status ? 1 : 0,
-        'statusMessage' => $status ? $LANG_ADVT['msg_catsub'] :
-                $LANG_ADVT['msg_error'],
-    );
-    break;
-
-case 'catunsub':
-    if (!isset($_POST['id'])) exit;
-    $C = new \Classifieds\Category($_POST['id']);
-    $status = $C->Subscribe(false);
-    $result = array(
-        'cat_id' => $_POST['id'],
-        'newstate' => $status ? 0 : 1,
-        'statusMessage' => $status ? $LANG_ADVT['msg_catunsub'] :
-                $LANG_ADVT['msg_error'],
+        'cat_id' => $_POST['cat_id'],
+        'subscribed' => $sub_stat,
+        'statusMessage' => $msg,
+        'title' => $LANG_ADVT['catsub_title_' . $sub_stat],
     );
     break;
 

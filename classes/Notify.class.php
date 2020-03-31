@@ -33,14 +33,10 @@ class Notify
     {
         global $_CONF_ADVT;
 
-        if (!$Ad || $Ad->isNew()) {
-            return false;
-        }
-
         return PLG_sendSubscriptionNotification(
             $_CONF_ADVT['pi_name'],
             'category',
-            $Ad->getID(),
+            $Ad->getCatID(),
             $Ad->getID(),
             $Ad->getUid()
         );
@@ -62,8 +58,6 @@ class Notify
 
         // First, determine if we even notify users of this condition
         if (
-            !$Ad || $Ad->isNew()
-            ||
             $_CONF_ADVT['emailusers'] == 0       // Never notify
             ||
             ($_CONF_ADVT['emailusers'] == 2 && !$approved)  // approval only
@@ -82,6 +76,7 @@ class Notify
             COM_errorLog("Notify::Approval sql error: $sql");
             return;
         } elseif (DB_numRows($result) < 1) {
+            COM_errorLog("Notify::Approval - user {$Ad->getUid()} not found for {$Ad->getID()}");
             return;
         }
         $user = DB_fetchArray($result, false);
@@ -281,7 +276,7 @@ class Notify
         while ($row = DB_fetchArray($result, false)) {
             if ($row['email'] == '') continue;
             $disp_name = COM_getDisplayName($row['uid']);
-            COM_errorLog("Classifieds Submit: Sending submission email to: " .
+            COM_errorLog("Notify::Submission: Sending submission email to: " .
                         $row['email'] . " - " . $row['username']);
             $T->set_var('username', $disp_name);
             $T->parse('output','message');

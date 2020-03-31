@@ -256,6 +256,8 @@ $LANG_ADVT = array (
 'no_files_uploaded' => 'No files were uploaded',
 'drop_or_select'    => 'Drop or select a file',
 'posted' => 'Posted',
+'catsub_title_1' => 'Click to unsubscribe from this category',
+'catsub_title_0' => 'Click to subscribe to this category',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Your ad has been queued for administrator approval.';

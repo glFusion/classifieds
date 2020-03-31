@@ -338,7 +338,7 @@ class Ad
             // set in the current Ad object
             $this->Cat = Category::getInstance($this->cat_id);
             $this->Type = AdType::getInstance($this->ad_type);
-            if ($this->isNew) {
+            if ($this->isNew()) {
                 if (!empty($nonce)) {
                     Image::setAdID($nonce, $this->ad_id);
                 }
@@ -684,6 +684,19 @@ class Ad
             'timthumb'  => true,
             'adblock'   => PLG_displayAdBlock('classifieds_detail', 0),
             'have_deletelink' => $this->canDelete(),
+        ) );
+
+        if ($this->Cat->isSubscribed()) {
+            $sub_status = 1;
+            $sub_cls = 'toggle-on uk-text-success';
+        } else {
+            $sub_status = 0;
+            $sub_cls = 'toggle-off';
+        }
+        $T->set_var(array(
+            'sub_status' => $sub_status,
+            'sub_cls' => $sub_cls,
+            'sub_title' => $LANG_ADVT['catsub_title_' . $sub_status],
         ) );
 
         // Display a link to email the poster, or other message as needed

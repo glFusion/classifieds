@@ -27,3 +27,43 @@ var ADVTtoggleEnabled = function(cbox, id, type) {
     });
     return false;
 };
+
+var ADVT_catsub = function(e, cat_id)
+{
+    var elemid = '#catsub_ico_' + cat_id;
+    var dataS = {
+        "action" : "catsub",
+        "cat_id": cat_id,
+        "is_subscribed": $(elemid).data('value'),
+    };
+    data = $.param(dataS);
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: glfusionSiteUrl + "/classifieds/ajax.php",
+        data: data,
+        success: function(result) {
+            try {
+                if (result.subscribed) {
+                    $(elemid).attr('class', 'uk-icon uk-icon-toggle-on uk-text-success');
+                    $(elemid).data('value', '1');
+                } else {
+                    $(elemid).attr('class', 'uk-icon uk-icon-toggle-off');
+                    $(elemid).data('value', '0');
+                }
+                $(elemid).prop('title', result.title);
+                $.UIkit.notify("<i class='uk-icon uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+            }
+            catch(err) {
+                console.log(err);
+                alert(result.statusMessage);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(ajaxOptions);
+        }
+    });
+    return false;
+
+};
+

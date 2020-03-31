@@ -183,7 +183,7 @@ $classifiedsConfigItems = array(
     array(
         'name' => 'emailusers',
         'default_value' => 0,
-        'type' => 'text',
+        'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 10,

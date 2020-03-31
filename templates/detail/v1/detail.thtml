@@ -5,6 +5,9 @@
 {breadcrumbs}
 <div id="adDetailWrapper">
   <div id="adDetailUserLinks">
+    <i id="catsub_ico_{cat_id}" class="uk-icon uk-icon-{sub_cls}" data-value="{sub_status}"
+        title="{sub_title}" data-uk-tooltip
+        onclick="ADVT_catsub(this, {cat_id});"></i>
 {!if have_editlink}
     <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
 {!endif}
