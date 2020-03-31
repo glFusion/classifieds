@@ -85,9 +85,9 @@ case 'deletecat':   // delete a single category
 
 case 'delbutton_x':
     foreach ($_POST['delitem'] as $ad_id) {
-        \Classifieds\Ad::Delete($ad_id);
+        Classifieds\Ad::Delete($ad_id);
     }
-    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?admin=ad');
+    COM_refresh($_CONF_ADVT['admin_url'] . '/index.php?ads');
     break;
 
 case 'deletead':
@@ -275,45 +275,6 @@ case 'other':
     ) );
     $T1->parse('output1', 'content');
     $content .= $T1->finish($T1->get_var('output1'));
-    break;
-
-case 'admin':
-    echo "DEPRECATED";die;
-    USES_classifieds_admin();
-    switch ($actionval) {
-    case 'cat':
-        $content .= CLASSIFIEDS_adminMenu($actionval);
-        $content .= CLASSIFIEDS_adminCategories();
-        $admin_mode = ': ' . $LANG_ADVT['mnu_cats'];
-        break;
-    case 'type':
-        $content .= CLASSIFIEDS_adminMenu($actionval);
-        $content .= CLASSIFIEDS_adminAdTypes();
-        $admin_mode = ': ' . $LANG_ADVT['mnu_types'];
-        break;
-    case 'ad':
-    default:
-        $actionval = 'ad';
-        $content .= Classifieds\Menu::Admin($actionval);
-        $content .= CLASSIFIEDS_adminAds();
-        $admin_mode = ': '. $LANG_ADVT['manage_ads'];
-        break;
-    case 'other':
-        $content .= CLASSIFIEDS_adminMenu($actionval);
-        $T1 = new Template($_CONF_ADVT['path'] . '/templates/admin/');
-        $T1->set_file('content', 'adminother.thtml');
-        $T1->set_var(array(
-            'cat_list' => SEC_getGroupDropdown($_CONF_ADVT['defgrpcat'], 3),
-            'cat_perms' => SEC_getPermissionsHTML(
-                        $_CONF_ADVT['default_perm_cat'][0],
-                        $_CONF_ADVT['default_perm_cat'][1],
-                        $_CONF_ADVT['default_perm_cat'][2],
-                        $_CONF_ADVT['default_perm_cat'][3]),
-        ) );
-        $T1->parse('output1', 'content');
-        $content .= $T1->finish($T1->get_var('output1'));
-        break;
-    }
     break;
 
 case 'ads':
