@@ -920,14 +920,14 @@ class Category
         global $_TABLES;
 
         $All = array();
-
-        //if (!empty($root)) {
         if ($root > 0) {
             $result = DB_query("SELECT lft, rgt FROM {$_TABLES['ad_category']}
                         WHERE cat_id = $root");
             $row = DB_fetchArray($result, false);
             $between = ' AND parent.lft BETWEEN ' . (int)$row['lft'] .
                         ' AND ' . (int)$row['rgt'];
+        } else {
+            $between = '';
         }
         $prefix = DB_escapeString($prefix);
         $sql = "SELECT node.*, CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
