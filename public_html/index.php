@@ -173,6 +173,7 @@ case 'editad':
 case 'home':
 default:
     // Display the ad listing, possibly filtered by category and type
+    // Pass category ID, if any, to the constructor
     $L = new \Classifieds\Lists\Ads($id);
     $L->addCats(CLASSIFIEDS_getParam('cats', 'array'))
         ->addTypes(CLASSIFIEDS_getParam('types', 'array'))
@@ -182,7 +183,9 @@ default:
     break;
 }   // switch ($mode)
 
-if (!empty($view)) COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
+if (!empty($view)) {
+    COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
+}
 
 $T->set_var('menu', Classifieds\Menu::User($mode));
 $T->set_var('content', $content);
