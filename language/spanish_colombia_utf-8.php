@@ -131,7 +131,6 @@ $LANG_ADVT = array (
 'remove'            => 'Borrar',
 'reset'             => 'Reiniciar',
 'reset_cat_perms'   => 'Ajustar todos los permisos por defecto para las Categorías',
-'reset_ad_perms'    => 'Ajustar todos los permisos por defecto para los Clasificados',
 'runfor'            => 'Durante',
 'state'             => 'Estado',
 'state'             => 'Dpto/Estado',

@@ -136,7 +136,6 @@ $LANG_ADVT = array (
 'remove'                => 'Entfernen',
 'reset'                 => 'Zurücksetzen',
 'reset_cat_perms'       => 'Standart-Berechtigung für Kategorie festlegen',
-'reset_ad_perms'        => 'Standart-Berechtigung für Anzeigen festlegen',
 'runfor'                => 'Laufzeit',
 // 'state'                 => 'State',
 'state'                 => 'Land',

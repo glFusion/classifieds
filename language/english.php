@@ -132,7 +132,6 @@ $LANG_ADVT = array (
 'remove'            => 'Remove',
 'reset'             => 'Reset',
 'reset_cat_perms'   => 'Reset all category permissions to default',
-'reset_ad_perms'    => 'Reset all ad permissions to default',
 'runfor'            => 'Run For',
 'state'             => 'State',
 'state'             => 'State',
@@ -199,7 +198,7 @@ $LANG_ADVT = array (
 'hlp_adlist'    => 'Click the edit or delete icons to edit or remove the selected ad.  Click on "New Ad" to create a new ad.',
 'hlp_adtypes' => 'Administer Ad Types.  These indicate the type of ad; for example:  "For Sale", "Wanted", "Work for Hire", etc.',
 'hlp_cats'      => 'Administer ad categories.  Add, Edit and Delete categories',
-'hlp_other'     => 'Here you can reset all ad or category permissions to their default values, as set in the global plugin configuration.',
+'hlp_other'     => 'Here you can reset all category permissions to default values. For this plugin, &quot;Read &amp; Write&quot; indicates that the group/user can submit ads to the category.',
 'hlp_add_days'  => 'Enter a number of days to extend the expiration, up to the maximum allowed.',
 
 'you_are_subscribed'    => 'You are subcribed to notifications for this category. Click to unsubscribe.',

@@ -36,10 +36,9 @@ class Menu
      * Returns the user-facing main menu.
      *
      * @param   string  $view       The menu option to set as selected
-     * @param   integer $eventid    Event ID currently selected
      * @return  array       Menu array for ppNavBar()
      */
-    public static function User($view='', $eventid=0)
+    public static function User($view='')
     {
         global $LANG_ADVT, $_CONF_ADVT;
 
@@ -81,7 +80,7 @@ class Menu
             );
         }
 
-        return \ADMIN_createMenu($menu_arr, '', '');
+        return \ADMIN_createMenu($menu_arr, $help_text, '');
     }
 
 
@@ -98,7 +97,7 @@ class Menu
 
         USES_lib_admin();
         if ($help_text == '') {
-            $help_text = 'admin_text';
+            $help_text = isset($LANG_ADVT['hlp_' . $view]) ? 'hlp_' . $view : '';
         }
 
         $menu_arr = array(
