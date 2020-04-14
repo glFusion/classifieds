@@ -3,9 +3,9 @@
  * Upgrade routines for the Classifieds plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -122,7 +122,7 @@ function classifieds_do_upgrade($dvlp = false)
     classifieds_remove_old_files();
     Classifieds\Cache::clear();
     COM_errorLog("Successfully updated the {$_CONF_ADVT['pi_display_name']} Plugin", 1);
-    CTL_clearCache($_CONF_ADVT['pi_name']);
+    CTL_clearCache();
     return true;
 }
 
