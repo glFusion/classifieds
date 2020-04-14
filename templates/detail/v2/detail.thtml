@@ -142,7 +142,8 @@ function advtUpdateImage(filename)
                 </div>
 {!endif}
             </div>
- 
+
+{!if hot_count} 
             <div class="adWhatsHot">
                 <p class="title">{$LANG_ADVT['whats_hot']}</p>
 <!-- BEGIN HotBlock -->
@@ -151,7 +152,8 @@ function advtUpdateImage(filename)
                     <div class="data"><a href="{hot_cat_url}">{hot_cat}</a></div>
                 </div>
 <!-- END HotBlock -->
-            </div>
+            </div>a
+{!endif}
         </div>
     </div>
 </div>

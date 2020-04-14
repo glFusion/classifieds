@@ -136,7 +136,8 @@
       </div>
 {!endif}
     </div>
-  
+
+{!if hot_count} 
     <div class="adWhatsHot">
       <p class="title">{$LANG_ADVT['whats_hot']}</p>
 <!-- BEGIN HotBlock -->
@@ -146,6 +147,8 @@
       </div>
 <!-- END HotBlock -->
     </div>
+{!endif} 
+
   </div>
     <div style="clear:both;">
     {usercomments}

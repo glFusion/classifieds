@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2016-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.3.0
+ * @version     v1.3.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -202,9 +202,8 @@ class Ad
             $this->ad_id = COM_sanitizeId($id, false);
         }
 
-        $result = DB_query(
-            "SELECT * from {$this->table} WHERE ad_id = '{$this->ad_id}'"
-        );
+        $sql = "SELECT * from {$this->table} WHERE ad_id = '{$this->ad_id}'";
+        $result = DB_query($sql);
         $row = DB_fetchArray($result, false);
         if ($row) {
             $this->setVars($row);
@@ -354,7 +353,7 @@ class Ad
             // Wouldn't be normal, but if this is being saved with an
             // expiration date in the past then don't tell other plugins
             // about it.
-            if ($this->exp_date > time()) {
+            if ($this->exp_date->toUnix() > time()) {
                 PLG_itemSaved($this->ad_id, $_CONF_ADVT['pi_name']);
             }
         }
@@ -756,14 +755,16 @@ class Ad
         }
 
         // Show the "hot results"
-        $hot_data = '';
         $hot_ads = self::getHotAds();
+        $hot_count = 0;
         if (!empty($hot_ads)) {
+            $T->set_var('hot_count', count($hot_ads));
             $T->set_block('detail', 'HotBlock', 'HBlock');
             foreach ($hot_ads as $hotrow) {
                 if ($hotrow->getID() == $this->ad_id) {
                     continue;
                 }
+                $hot_count++;
                 $T->set_var(array(
                     'hot_title' => $hotrow->getSubject(),
                     'hot_url'   => CLASSIFIEDS_makeURL('detail', $hotrow->getID()),
@@ -772,8 +773,8 @@ class Ad
                 ) );
                 $T->parse('HBlock', 'HotBlock', true);
             }
+            $T->set_var('hot_count', $hot_count);
         }
-        $T->set_var('whats_hot_row', $hot_data);
 
         // Show the user comments
         if (plugin_commentsupport_classifieds() && $this->comments_enabled < 2) {
