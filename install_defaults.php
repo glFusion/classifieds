@@ -3,9 +3,9 @@
  * Installation defaults for the Classifieds plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.1.3
+ * @version     v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -292,7 +292,7 @@ $classifiedsConfigItems = array(
     ),
     array(
         'name' => 'detail_tpl_ver',
-        'default_value' => 'v1',
+        'default_value' => 'v2',
         'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 0,
