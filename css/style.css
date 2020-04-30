@@ -1,5 +1,5 @@
 #rednote {
-  font-color: red;
+  color: red;
 }
 
 .advt_icon_danger {
@@ -68,7 +68,7 @@ div.adlistItem div.adType {
   font-size: 1.3em;
   font-weight: bold;
   text-align: center;
-  font-color:#000000;
+  color:#000000;
   margin-bottom:2px;
 }
 
@@ -87,7 +87,7 @@ div.adlistItem div.adType {
   min-width:125px;
   height:12px;
   font-family:Helvetica;
-  font-color:#000000;
+  color:#000000;
   font-weight:bold;
   background: #90ee90;  /* default */
 }
@@ -100,7 +100,7 @@ div.adlistItem div.adType {
   font-size: 1em;
   /*font-weight: bold;*/
   text-align: left;
-  font-color:#000000;
+  color:#000000;
   margin-bottom:24px;
 }
 
@@ -276,7 +276,7 @@ div#adDetailData .title {
 }
 #adContact .data {
     width: 80%;
-    height; 20px;
+    height: 20px;
 }
 
 div #adDetailUserLinks {
@@ -291,7 +291,7 @@ div #adDetailUserLinks {
 
 /* "No Image Available" text */
 .adNoImage {
-    size: small;
+    resize: small;
     color: #808080;
 }
 
