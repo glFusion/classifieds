@@ -91,7 +91,6 @@ case 'delbutton_x':
     break;
 
 case 'deletead':
-    $ad_id = $actionval;
     $type = CLASSIFIEDS_getParam('type', 'string');
     if (
         $type == 'submission' ||
@@ -99,11 +98,11 @@ case 'deletead':
         $type == 'moderate'
     ) {
         CLASSIFIEDS_auditLog("Deleting submission $ad_id");
-        \Classifieds\Ad::Delete($ad_id, 'ad_submission');
+        Classifieds\Ad::Delete($ad_id, 'ad_submission');
         echo COM_refresh($_CONF['site_admin_url'] . '/moderation.php');
         exit;
     } else {
-        \Classifieds\Ad::Delete($ad_id);
+        Classifieds\Ad::Delete($ad_id);
         echo COM_refresh($_CONF_ADVT['admin_url'] . '/index.php');
         exit;
     }
