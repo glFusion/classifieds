@@ -79,7 +79,6 @@ class Category
     {
         global $_CONF_ADVT;
 
-        $catid = (int)$catid;
         if (is_array($data)) {
             $this->setVars($data, true);
         } else {

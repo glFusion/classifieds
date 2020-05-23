@@ -248,7 +248,6 @@ class AdType
             'pi_admin_url'  => $_CONF_ADVT['admin_url'],
             'lang_header'   => $id == 0 ? $LANG_ADVT['newadtypehdr'] : $LANG_ADVT['editadtypehdr'],
             'cancel_url'    => $_CONF_ADVT['admin_url'] . '/index.php?types',
-            'show_name'     => $this->showName,
             'type_id'       => $this->id,
             'description'   => htmlspecialchars($this->dscp),
             'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',

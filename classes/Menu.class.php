@@ -80,7 +80,7 @@ class Menu
             );
         }
 
-        return \ADMIN_createMenu($menu_arr, $help_text, '');
+        return \ADMIN_createMenu($menu_arr, '', '');
     }
 
 
@@ -129,7 +129,7 @@ class Menu
 
         return ADMIN_createMenu(
             $menu_arr,
-            $LANG_ADVT[$help_text],
+            '',
             plugin_geticon_classifieds()
         );
     }

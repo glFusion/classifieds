@@ -28,7 +28,7 @@ class Ad
 
     /** Submitting usesr ID.
      * @var integer */
-    private $uld = 0;
+    private $uid = 0;
 
     /** Subject or short description.
      * @var string */
@@ -520,8 +520,6 @@ class Ad
             'pi_admin_url'  => $_CONF_ADVT['admin_url'],
             'ad_id'         => $this->ad_id,
             'description'   => htmlspecialchars($this->description),
-            'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
-            //'post_options'  => $post_options,
             'change_editormode'     => 'onchange="change_editmode(this);"',
             'glfusionStyleBasePath' => $_CONF['site_url']. '/fckeditor',
             'gltoken_name'  => CSRF_TOKEN,
@@ -538,12 +536,11 @@ class Ad
             'add_date'      => $this->add_date->toMySQL(true),
             'ad_type_selection' => AdType::buildSelection($this->ad_type),
             'sel_list_catid'    => Category::buildSelection($this->cat_id, '', '', 'NOT', '1'),
-            //'saveoption'    => $saveoption,
             'cancel_url'    => $cancel_url,
             'lang_runfor'   => $this->isNew ? $LANG_ADVT['runfor'] :
                                     $LANG_ADVT['add'],
             'moredays'      => $moredays,
-            'cls_exp_date'  => $this->exp_date < time() ? 'adExpiredText' : '',
+            'cls_exp_date'  => $this->exp_date->toUnix() < time() ? 'adExpiredText' : '',
             'ownerselect'   => self::userDropdown($this->uid),
             'uid'           => $_USER['uid'],
             'nonce'         => $nonce,
