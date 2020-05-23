@@ -53,7 +53,7 @@ class Image
      */
     public function __construct($img)
     {
-        global $_TABLES;
+        global $_TABLES, $_CONF_ADVT;
 
         $this->pathImage = $_CONF_ADVT['imgpath'];
         $row = array();
