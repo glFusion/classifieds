@@ -127,9 +127,10 @@ class UserInfo
         }
 
         foreach ($this->fields as $fld=>$type) {
+            $fldname = $pfx . $fld;
             switch ($type) {
             case 'int':
-                $this->$fld = (int)$A[$pfx.$fld];
+                $this->$fld = isset($A[$fldname]) ? (int)$A[$fldname] : 0;
                 break;
             case 'bool':
                 $this->$fld = isset($A[$pfx.$fld]) && $A[$pfx.$fld] ? 1 : 0;
