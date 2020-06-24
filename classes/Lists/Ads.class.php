@@ -182,6 +182,7 @@ class Ads
             ) );
             $T->parse('CC', 'CatChecks', true);
         }
+        $T->set_var('num_cats', $i);
 
         // Create the ad type filter checkboxes.
         // Only show types that are in use.
@@ -199,6 +200,7 @@ class Ads
             ) );
             $T->parse('TC', 'TypeChecks', true);
         }
+        $T->set_var('num_types', $i);
 
         // Create the user filter checkboxes.
         // Only show users who have posted ads.
@@ -209,6 +211,7 @@ class Ads
             ON ad.uid = u.uid";
         $res = DB_query($sql);
         $T->set_var('num_posters', DB_numrows($res));
+        $i = 0;
         while ($A = DB_fetchArray($res, false)) {
             $T->set_var(array(
                 'uid'   => $A['uid'],
@@ -216,7 +219,9 @@ class Ads
                 'uid_sel' => $A['uid'] == $this->uid ? 'selected="selected"' : '',
             ) );
             $T->parse('UC', 'UserChecks', true);
+            $i++;
         }
+        $T->set_var('num_users', $i);
 
         $T->set_var('totalAds', $totalAds);
         $T->set_var('adsStart', $startEntry);
