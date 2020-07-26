@@ -1,5 +1,5 @@
 # Classified Ad plugin for glFusion
-Release 1.2.0
+Release 1.3.1
 
 Classifieds is a classified advertising plugin for GLFusion.
 
