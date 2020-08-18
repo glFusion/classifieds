@@ -1713,50 +1713,11 @@ function CLASSIFIEDS_getDocURL($file='', $doclang='english')
 
 
 /**
- * Log activity to a plugin-specific log file.
- *
- * @param   string  $logentry   Text to log
- */
-function CLASSIFIEDS_auditLog($logentry = '')
-{
-    global $_CONF, $_USER, $LANG01, $_CONF_ADVT;
-
-    if ($logentry == '')
-        return '';
-
-    // A little sanitizing
-    $logentry = str_replace(
-            array('<?', '?>'),
-            array('(@', '@)'),
-            $logentry);
-
-    $timestamp = strftime( '%c' );
-    $logfile = $_CONF['path_log'] . $_CONF_ADVT['pi_name'] . '.log';
-
-    // Can't open the log file?  Return an error
-    if (!$file = fopen($logfile, 'a')) {
-        return $LANG01[33] . $logfile . ' (' . $timestamp . ')<br />' . LB;
-    }
-
-    // Get the user name if it's not anonymous
-    if (!COM_isAnonUser()) {
-        $byuser = $_USER['uid'] . '-'.
-                COM_getDisplayName($_USER['uid'],
-                    $_USER['username'], $_USER['fullname']);
-    } else {
-        $byuser = 'anon';
-    }
-    $byuser .= '@' . $_SERVER['REMOTE_ADDR'];
-
-    // Write the log entry to the file
-    fputs($file, "$timestamp ($byuser) - $logentry\n");
-}
-
-
-/**
  * Get a form or URL parameter.
  * Checks $_POST, then $_GET, and returns the raw value if found.
- * Returns NULL if the parameter is not set
+ * Returns NULL if the parameter is not set.
+ * If `array` is specified and the parameter is a string, then it is
+ * assumed to be a comma-separated set of values.
  *
  * @param   string  $name   Name of parameter
  * @param   string  $type   Type of parameter, default "string"
@@ -1776,6 +1737,20 @@ function CLASSIFIEDS_getParam($name, $type = 'string')
     case 'int':
         return (int)$value;
         break;
+    case 'array':
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        } elseif (is_array($value)) {
+            $vals = array();
+            foreach($value as $val) {
+                if (strpos($val, ',') > 0) {
+                    $vals = array_merge($vals, explode(',', $val));
+                } else {
+                    $vals[] = $val;
+                }
+            }
+            $value = array_unique($vals);
+        }
     default:
         return $value;
         break;
@@ -1816,6 +1791,47 @@ function CLASSIFIEDS_errorMsg($messages, $type='info', $hdr='Error')
             break;
     }
     return "<div class=\"$class\">$msg_txt</div>";
+}
+
+
+/**
+ * Log activity to a plugin-specific log file.
+ *
+ * @param   string  $logentry   Text to log
+ */
+function CLASSIFIEDS_auditLog($logentry = '')
+{
+    global $_CONF, $_USER, $LANG01, $_CONF_ADVT;
+
+    if ($logentry == '')
+        return '';
+
+    // A little sanitizing
+    $logentry = str_replace(
+            array('<?', '?>'),
+            array('(@', '@)'),
+            $logentry);
+
+    $timestamp = strftime( '%c' );
+    $logfile = $_CONF['path_log'] . $_CONF_ADVT['pi_name'] . '.log';
+
+    // Can't open the log file?  Return an error
+    if (!$file = fopen($logfile, 'a')) {
+        return $LANG01[33] . $logfile . ' (' . $timestamp . ')<br />' . LB;
+    }
+
+    // Get the user name if it's not anonymous
+    if (!COM_isAnonUser()) {
+        $byuser = $_USER['uid'] . '-'.
+                COM_getDisplayName($_USER['uid'],
+                    $_USER['username'], $_USER['fullname']);
+    } else {
+        $byuser = 'anon';
+    }
+    $byuser .= '@' . $_SERVER['REMOTE_ADDR'];
+
+    // Write the log entry to the file
+    fputs($file, "$timestamp ($byuser) - $logentry\n");
 }
 
 ?>
