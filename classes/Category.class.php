@@ -655,7 +655,13 @@ class Category
                     WHERE papa_id = 0
                     ORDER BY lft";
         } else {
-            $sql = "SELECT node.*, (COUNT(parent.cat_name) - (sub_tree.depth + 1)) AS depth
+            $sql = "SELECT node.cat_name, MAX(node.cat_id) AS cat_id,
+                MAX(node.papa_id) AS papa_id, MAX(node.description) AS description,
+                MAX(node.group_id) AS group_id, MAX(node.owner_id) AS owner_id,
+                MAX(node.perm_owner) AS perm_owner, MAX(node.perm_group) AS perm_group,
+                MAX(node.perm_members) AS perm_members, MAX(node.perm_anon) AS perm_anon,
+                MAX(node.image) AS image, MAX(node.lft) AS lft, MAX(node.rgt) AS rgt,
+                (COUNT(parent.cat_name) - (sub_tree.depth + 1)) AS depth
                 FROM {$_TABLES['ad_category']} AS node,
                     {$_TABLES['ad_category']} AS parent,
                     {$_TABLES['ad_category']} AS sub_parent,
@@ -929,7 +935,13 @@ class Category
             $between = '';
         }
         $prefix = DB_escapeString($prefix);
-        $sql = "SELECT node.*, CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
+        $sql = "SELECT node.cat_name, MAX(node.cat_id) AS cat_id,
+                MAX(node.papa_id) AS papa_id, MAX(node.description) AS description,
+                MAX(node.group_id) AS group_id, MAX(node.owner_id) AS owner_id,
+                MAX(node.perm_owner) AS perm_owner, MAX(node.perm_group) AS perm_group,
+                MAX(node.perm_members) AS perm_members, MAX(node.perm_anon) AS perm_anon,
+                MAX(node.image) AS image, MAX(node.lft) AS lft, MAX(node.rgt) AS rgt,
+            CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
             FROM {$_TABLES['ad_category']} AS node,
                 {$_TABLES['ad_category']} AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
