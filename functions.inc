@@ -381,21 +381,29 @@ function plugin_autouninstall_classifieds()
     global $_CONF_ADVT;
 
     $out = array (
-        'tables'    => array('ad_ads',
-                            'ad_category',
-                            'ad_photo',
-                            'ad_uinfo',
-                            'ad_catflds',
-                            'ad_submission',
-                            'ad_types',
-                        ),
-        'groups'    => array($_CONF_ADVT['pi_name'] . ' Admin'),
-        'features'  => array($_CONF_ADVT['pi_name'] . '.admin',
-                            $_CONF_ADVT['pi_name'] . '.edit',
-                            $_CONF_ADVT['pi_name'] . '.submit',
-                        ),
-        'php_blocks' => array('phpblock_' . $_CONF_ADVT['pi_name'] . '_random'),
-        'vars'      => array($_CONF_ADVT['pi_name'] . '_gid')
+        'tables'    => array(
+            'ad_ads',
+            'ad_category',
+            'ad_photo',
+            'ad_uinfo',
+            'ad_catflds',
+            'ad_submission',
+            'ad_types',
+        ),
+        'groups'    => array(
+            $_CONF_ADVT['pi_name'] . ' Admin',  // deprecated v1.3.1
+        ),
+        'features'  => array(
+            $_CONF_ADVT['pi_name'] . '.admin',
+            $_CONF_ADVT['pi_name'] . '.edit',
+            $_CONF_ADVT['pi_name'] . '.submit',
+        ),
+        'php_blocks' => array(
+            'phpblock_' . $_CONF_ADVT['pi_name'] . '_random',
+        ),
+        'vars'      => array(
+            $_CONF_ADVT['pi_name'] . '_gid',    // deprecated v1.3.1
+        )
     );
     return $out;
 }

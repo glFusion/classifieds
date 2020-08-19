@@ -257,10 +257,10 @@ class Notify
             'admin_url' => $_CONF['site_url'] . '/admin/moderation.php',
         ) );
 
-        $group_id = DB_getItem($_TABLES['groups'],'grp_id',"grp_name='classifieds Admin'");
-        $groups = self::_getGroupList($group_id);
-        if (empty($groups))
+        $groups = self::_getGroupList('classifieds.admin');
+        if (empty($groups)) {
             return true;        // Fake success if nobody to notify
+        }
         $groupList = implode(',',$groups);
 
         $sql = "SELECT DISTINCT u.uid, u.email, u.username
@@ -271,13 +271,17 @@ class Notify
                 AND u.status > 0
                 AND ga.ug_main_grp_id IN ({$groupList})";
         $result = DB_query($sql, 1);
-        if (!$result) return;
+        if (!$result) {
+            return true;    // fake success
+        }
 
         while ($row = DB_fetchArray($result, false)) {
             if ($row['email'] == '') continue;
             $disp_name = COM_getDisplayName($row['uid']);
-            COM_errorLog("Notify::Submission: Sending submission email to: " .
-                        $row['email'] . " - " . $row['username']);
+            COM_errorLog(
+                "Notify::Submission: Sending submission email to: " .
+                $row['email'] . " - " . $row['username']
+            );
             $T->set_var('username', $disp_name);
             $T->parse('output','message');
             $message = $T->finish($T->get_var('output'));
@@ -341,39 +345,45 @@ class Notify
     /**
      * Get all groups that are under the requested group.
      *
-     * @param   integer $basegroup  Group ID where search starts
+     * @param   integer $privilege  Feature name
      * @return  array   Array of group IDs
      */
-    private static function _getGroupList($basegroup)
+    private static function _getGroupList($privilege='classifieds.admin')
     {
         global $_TABLES;
 
-        $to_check = array();
-        $checked = array();
+        $groups = array();
+        $ft_id = (int)DB_getItem(
+            $_TABLES['features'],
+            'ft_id',
+            "ft_name = '" . DB_escapeString($privilege) . "'"
+        );
 
-        array_push($to_check, $basegroup);
-
-        while (sizeof($to_check) > 0) {
-            $thisgroup = array_pop($to_check);
-            if ($thisgroup > 0) {
-                $sql = "SELECT ug_grp_id
-                    FROM {$_TABLES['group_assignments']}
-                    WHERE ug_main_grp_id = $thisgroup";
-                $result = DB_query($sql);
-                if (!$result) return $checked;
-                while ($A = DB_fetchArray($result, false)) {
-                    // Check this group out if not already done
-                    if (!in_array($A['ug_grp_id'], $checked)) {
-                        if (!in_array($A['ug_grp_id'], $to_check)) {
-                            // Add this group to check for sub-groups
-                            array_push($to_check, $A['ug_grp_id']);
-                        }
-                    }
-                }
-                $checked[] = $thisgroup;
+        if ($ft_id < 1) {
+            return $groups;
+        }
+        $sql = "SELECT * FROM {$_TABLES['access']}
+                WHERE acc_ft_id = $ft_id
+                ORDER BY acc_grp_id";
+        $res = DB_query($sql, 1);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $groups[] = (int)$A['acc_grp_id'];
             }
         }
-        return $checked;
+
+        $groupList = implode(',',$groups);
+        $sql = "SELECT ug_grp_id FROM {$_TABLES['group_assignments']}
+                WHERE ug_main_grp_id IN ($groupList)
+                AND ug_grp_id IS NOT NULL";
+        $res = DB_query($sql, 1);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $groups[] = (int)$A['ug_grp_id'];
+            }
+        }
+
+        return array_values(array_unique($groups));
     }
 
 

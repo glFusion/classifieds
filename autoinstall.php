@@ -82,15 +82,6 @@ $INSTALL_plugin['classifieds'] = array(
     ),
 
     array(
-        'type' => 'group',
-        'group' => 'classifieds Admin',
-        'desc' => 'Users in this group can administer the Classifieds plugin',
-        'variable' => 'admin_group_id',
-        'admin' => true,
-        'addroot' => true,
-    ),
-
-    array(
         'type' => 'feature',
         'feature' => 'classifieds.admin',
         'desc' => 'Classifieds Admin',
@@ -113,21 +104,21 @@ $INSTALL_plugin['classifieds'] = array(
 
     array(
         'type' => 'mapping',
-        'group' => 'admin_group_id',
+        'findgroup' => 'Root',
         'feature' => 'admin_feature_id',
         'log' => 'Adding feature to the admin group',
     ),
 
     array(
         'type' => 'mapping',
-        'group' => 'admin_group_id',
+        'findgroup' => 'Root',
         'feature' => 'edit_feature_id',
         'log' => 'Adding feature to the admin group',
     ),
 
     array(
         'type' => 'mapping',
-        'group' => 'admin_group_id',
+        'findgroup' => 'Root',
         'feature' => 'submit_feature_id',
         'log' => 'Adding feature to the admin group',
     ),
@@ -194,13 +185,7 @@ function plugin_load_configuration_classifieds()
 
     require_once __DIR__ . '/install_defaults.php';
 
-    // Get the admin group ID that was saved previously.
-    $group_id = (int)DB_getItem(
-        $_TABLES['groups'],
-        'grp_id',
-        "grp_name='{$_CONF_ADVT['pi_name']} Admin'"
-    );
-    return plugin_initconfig_classifieds($group_id);
+    return plugin_initconfig_classifieds();
 }
 
 

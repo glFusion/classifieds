@@ -1,5 +1,9 @@
 # Classifieds Plugin for glFusion - Change Log
 
+## Version 1.4.0
+Release TBD
+- Use admin privilege instead of admin group.
+
 ## Version 1.3.0 (Released 2020-03-22)
 - Fix namespace usage
 - Implement `plugin_privacy_export` function

@@ -388,10 +388,9 @@ $classifiedsConfigItems = array(
  * Creates the database entries for the configuation if they don't already
  * exist.
  *
- * @param   integer $group_id   Group ID to use as the plugin's admin group
  * @return  boolean             true: success; false: an error occurred
  */
-function plugin_initconfig_classifieds($group_id = 0)
+function plugin_initconfig_classifieds()
 {
     global $classifiedsConfigItems;
 
