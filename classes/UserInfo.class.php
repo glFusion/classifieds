@@ -188,28 +188,25 @@ class UserInfo
     {
         global $_TABLES, $LANG_ADVT;
 
-        $sql = "INSERT INTO {$_TABLES['ad_uinfo']}
-                (uid, address, city, state, postcode,
-                tel, notify_exp, notify_comment)
-            VALUES (
-                '{$this->uid}',
-                '" . DB_escapeString($this->address) . "',
-                '" . DB_escapeString($this->city) . "',
-                '" . DB_escapeString($this->state) . "',
-                '" . DB_escapeString($this->postcode) . "',
-                '" . DB_escapeString($this->tel) . "',
-                '{$this->notify_exp}',
-                '{$this->notify_comment}'
-            )
+        $sql = "INSERT INTO {$_TABLES['ad_uinfo']} SET
+            uid = {$this->uid},
+            address = '" . DB_escapeString($this->address) . "',
+            city = '" . DB_escapeString($this->city) . "',
+            state = '" . DB_escapeString($this->state) . "',
+            postcode = '" . DB_escapeString($this->postcode) . "',
+            tel = '" . DB_escapeString($this->tel) . "',
+            notify_exp = '{$this->notify_exp}',
+            notify_comment = '{$this->notify_comment}',
+            lastup_date = UNIX_TIMESTAMP()
             ON DUPLICATE KEY UPDATE
-                address = '" . DB_escapeString($this->address) . "',
-                city = '" . DB_escapeString($this->city) . "',
-                state = '" . DB_escapeString($this->state) . "',
-                postcode = '" . DB_escapeString($this->postcode) . "',
-                tel = '" . DB_escapeString($this->tel) . "',
-                notify_exp = '{$this->notify_exp}',
-                notify_comment = '{$this->notify_comment}'
-            ";
+            address = '" . DB_escapeString($this->address) . "',
+            city = '" . DB_escapeString($this->city) . "',
+            state = '" . DB_escapeString($this->state) . "',
+            postcode = '" . DB_escapeString($this->postcode) . "',
+            tel = '" . DB_escapeString($this->tel) . "',
+            notify_exp = '{$this->notify_exp}',
+            notify_comment = '{$this->notify_comment}',
+            lastup_date = UNIX_TIMESTAMP()";
         //echo $sql;die;
         DB_query($sql);
         if (!DB_error()) {
