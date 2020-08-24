@@ -654,37 +654,12 @@ class Category
             $sql = "SELECT * FROM {$_TABLES['ad_category']}
                     WHERE papa_id = 0
                     ORDER BY lft";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $subcats[$id][$A['cat_id']] = new self($A);
+            }
         } else {
-            $sql = "SELECT node.cat_name, MAX(node.cat_id) AS cat_id,
-                MAX(node.papa_id) AS papa_id, MAX(node.description) AS description,
-                MAX(node.group_id) AS group_id, MAX(node.owner_id) AS owner_id,
-                MAX(node.perm_owner) AS perm_owner, MAX(node.perm_group) AS perm_group,
-                MAX(node.perm_members) AS perm_members, MAX(node.perm_anon) AS perm_anon,
-                MAX(node.image) AS image, MAX(node.lft) AS lft, MAX(node.rgt) AS rgt,
-                (COUNT(parent.cat_name) - (sub_tree.depth + 1)) AS depth
-                FROM {$_TABLES['ad_category']} AS node,
-                    {$_TABLES['ad_category']} AS parent,
-                    {$_TABLES['ad_category']} AS sub_parent,
-                (
-                    SELECT node.cat_id, node.cat_name, (COUNT(parent.cat_name) - 1) AS depth
-                    FROM {$_TABLES['ad_category']} AS node,
-                        {$_TABLES['ad_category']} AS parent
-                    WHERE node.lft BETWEEN parent.lft AND parent.rgt
-                        AND node.cat_id = $id
-                    GROUP BY node.cat_name
-                    ORDER BY node.lft
-                ) AS sub_tree
-                WHERE node.lft BETWEEN parent.lft AND parent.rgt
-                    AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-                    AND sub_parent.cat_id = sub_tree.cat_id
-                GROUP BY node.cat_name
-                HAVING depth > 0 AND depth <= $depth
-                ORDER BY node.lft";
-        }
-        //echo $sql;die;
-        $res = DB_query($sql);
-        while ($A = DB_fetchArray($res, false)) {
-            $subcats[$id][$A['cat_id']] = new self($A);
+            $subcats[$id] = self::getTree($id);
         }
         return $subcats[$id];
     }
@@ -830,7 +805,6 @@ class Category
 
         $sub = $sub ? true : false;
         $subcats = self::SubCats($this->cat_id);
-
         if ($sub === true) {
             if ($_CONF_ADVT['auto_subcats']) {
                 foreach ($subcats as $cat) {
@@ -948,6 +922,7 @@ class Category
             $between
             GROUP BY node.cat_name
             ORDER BY node.lft";
+        //echo $sql;die;
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
             $All[$A['cat_id']] = new self($A);
