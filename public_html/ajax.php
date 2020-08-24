@@ -16,6 +16,9 @@
  */
 require_once '../lib-common.php';
 
+if (!isset($_REQUEST['action'])) {
+    exit;
+}
 $result = array();
 switch ($_REQUEST['action']) {
 case 'catsub':
