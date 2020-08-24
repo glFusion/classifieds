@@ -60,7 +60,9 @@ var ADVT_catsub = function(e, cat_id)
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr);
             console.log(ajaxOptions);
+            console.log(thrownError);
         }
     });
     return false;
