@@ -1164,7 +1164,7 @@ function phpblock_classifieds_random()
     }
     $Ad = Classifieds\Ad::getRandom();
     if ($Ad->isNew()) {
-        return $retvl;
+        return $retval;
     }
 
     $img_filename = Classifieds\Image::getFirst($Ad->getID());
