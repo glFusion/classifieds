@@ -45,10 +45,10 @@ var ADVT_catsub = function(e, cat_id)
         success: function(result) {
             try {
                 if (result.subscribed) {
-                    $(elemid).attr('class', 'uk-icon uk-icon-toggle-on uk-text-success');
+                    $(elemid).attr('class', 'uk-icon uk-icon-bookmark uk-text-success');
                     $(elemid).data('value', '1');
                 } else {
-                    $(elemid).attr('class', 'uk-icon uk-icon-toggle-off');
+                    $(elemid).attr('class', 'uk-icon uk-icon-bookmark-o');
                     $(elemid).data('value', '0');
                 }
                 $(elemid).prop('title', result.title);
