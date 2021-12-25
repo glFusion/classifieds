@@ -15,10 +15,10 @@ namespace Classifieds;
 
 /**
  * Image-handling class.
- * @see Uploads for image file uploading functions.
+ * @see UploadDownload for image file uploading functions.
  * @package classifieds
  */
-class Image
+class Image extends UploadDownload
 {
     /** Path to actual image (without filename).
      * @var string */
@@ -352,6 +352,27 @@ class Image
         );
     }
 
-}   // class Image
 
-?>
+    /**
+     * Set the internal property value for a nonce.
+     *
+     * @param   string  $nonce  Nonce value to set
+     */
+    protected function setNonce($nonce)
+    {
+        $this->nonce = $nonce;
+    }
+
+
+    /**
+     * Create a unique key based on some string.
+     *
+     * @param   string  $str    Base string
+     * @return  string  Nonce string
+     */
+    public static function makeNonce($str='')
+    {
+        return uniqid() . rand(100,999);
+    }
+
+}
