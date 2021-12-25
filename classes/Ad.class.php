@@ -684,10 +684,12 @@ class Ad
 
         if ($this->Cat->isSubscribed()) {
             $sub_status = 1;
-            $sub_cls = 'toggle-on uk-text-success';
+            //$sub_cls = 'toggle-on uk-text-success';
+            $sub_cls = 'bookmark uk-text-success';
         } else {
             $sub_status = 0;
-            $sub_cls = 'toggle-off';
+            //$sub_cls = 'toggle-off';
+            $sub_cls = 'bookmark-o';
         }
         $T->set_var(array(
             'sub_status' => $sub_status,
