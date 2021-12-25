@@ -11,6 +11,7 @@
  * @filesource
  */
 
+global $_TABLES;
 
 // common SQL for ad and ad_submission tables
 $adtable_create = "
