@@ -70,7 +70,7 @@ function classifieds_do_upgrade($dvlp = false)
 
     if (!COM_checkVersion($current_ver, '1.0.1')) {
         $current_ver = '1.0.1';
-        if (!classifieds_set_version($current_ver)) return false;
+        if (!classifieds_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '1.0.2')) {
