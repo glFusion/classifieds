@@ -157,7 +157,7 @@ function classifieds_do_upgrade_sql($version='Undefined', $sql='', $dvlp = false
         DB_query($s, '1');
         if (DB_error()) {
             COM_errorLog("SQL Error during Classifieds plugin update",1);
-            if (!$dvlp) return false;
+            //if (!$dvlp) return false;
         }
     }
     return true;
@@ -359,28 +359,24 @@ function classifieds_upgrade_1_1_0()
 {
     global $_CONF_ADVT, $_TABLES;
 
-    $old_imgpath = pathinfo($_CONF_ADVT['image_dir']);
-    $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
-    $new_imgpath = $_CONF_ADVT['imgpath']  . '/user';
-    $new_catpath = $_CONF_ADVT['imgpath'] . '/cat';
-    $mv_userimages = isset($_CONF_ADVT['image_dir']) &&
-            $_CONF_ADVT['image_dir'] != $new_imgpath ? true : false;
-    $mv_catimages = isset($_CONF_ADVT['catimgpath']) &&
-            $_CONF_ADVT['catimgpath'] != $new_catpath ? true : false;
-
-    if ($mv_catimages) {
-        @mkdir($new_catpath, 755, true);
-        if (!is_dir($new_catpath)) {
-            COM_errorLog("Error creating new dir $new_catpath");
-            return false;
-        }
-        $files = glob($_CONF_ADVT['catimgpath'] . '/*');
-        if ($files) {
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    $parts = pathinfo($file);
-                    if ($parts['basename'] != 'index.html') {
-                        @rename($file, $new_catpath . '/' . $parts['basename']);
+    if (array_key_exists('catimgpath', $_CONF_ADVT)) {
+        $old_catpath = pathinfo($_CONF_ADVT['catimgpath']);
+        $new_catpath = $_CONF_ADVT['imgpath'] . '/cat';
+        $mv_catimages = $_CONF_ADVT['catimgpath'] != $new_catpath ? true : false;
+        if ($mv_catimages) {
+            @mkdir($new_catpath, 755, true);
+            if (!is_dir($new_catpath)) {
+                COM_errorLog("Error creating new dir $new_catpath");
+                return false;
+            }
+            $files = glob($_CONF_ADVT['catimgpath'] . '/*');
+            if ($files) {
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        $parts = pathinfo($file);
+                        if ($parts['basename'] != 'index.html') {
+                            @rename($file, $new_catpath . '/' . $parts['basename']);
+                        }
                     }
                 }
             }
@@ -388,19 +384,24 @@ function classifieds_upgrade_1_1_0()
     }
 
     // Move ad images to new location
-    if ($mv_userimages) {
-        @mkdir($new_imgpath, 755, true);
-        if (!is_dir($new_imgpath)) {
-            COM_errorLog("Error creating new dir $new_imgpath");
-            return false;
-        }
-        $files = glob($_CONF_ADVT['image_dir'] . '/*');
-        if ($files) {
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    $parts = pathinfo($file);
-                    if ($parts['basename'] != 'index.html') {
-                        @rename($file, $new_imgpath . '/' . $parts['basename']);
+    if (array_key_exists('image_dir', $_CONF_ADVT)) {
+        $old_imgpath = pathinfo($_CONF_ADVT['image_dir']);
+        $new_imgpath = $_CONF_ADVT['imgpath']  . '/user';
+        $mv_userimages = $_CONF_ADVT['image_dir'] != $new_imgpath ? true : false;
+        if ($mv_userimages) {
+            @mkdir($new_imgpath, 755, true);
+            if (!is_dir($new_imgpath)) {
+                COM_errorLog("Error creating new dir $new_imgpath");
+                return false;
+            }
+            $files = glob($_CONF_ADVT['image_dir'] . '/*');
+            if ($files) {
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        $parts = pathinfo($file);
+                        if ($parts['basename'] != 'index.html') {
+                            @rename($file, $new_imgpath . '/' . $parts['basename']);
+                        }
                     }
                 }
             }
@@ -493,8 +494,8 @@ function classifieds_upgrade_1_1_3()
             FROM {$_TABLES['ad_notice']} n
             LEFT JOIN {$_TABLES['ad_category']} c
                 ON c.cat_id = n.cat_id";
-    $res = DB_query($sql);
-    while ($A = DB_fetchArray($res, false)) {
+    $res = DB_query($sql, 1);
+    while ($res && $A = DB_fetchArray($res, false)) {
         PLG_subscribe($_CONF_ADVT['pi_name'], 'category', $A['cat_id'],
                 $A['uid'], $_CONF_ADVT['pi_name'], $A['description']);
     }
@@ -654,5 +655,3 @@ function CLASSIFIEDS_rmdir($dir)
     }
 }
 
-
-?>
