@@ -598,17 +598,19 @@ function classifieds_remove_old_files()
             'js/catfldxml.js',
             'js/moredays.js',
             'templates/account_settings.uikit.thtml',
-	    'templates/admin/adminedit.thtml',
-	    'templates/admin/adminedit.uikit.thtml',
-	    'templates/admin/catEditForm.uikit.thtml',
+            'templates/admin/adminedit.thtml',
+            'templates/admin/adminedit.uikit.thtml',
+            'templates/admin/catEditForm.uikit.thtml',
             'templates/adtypeform.uikit.thtml',
-	    'templates/breadcrumbs.uikit.thtml',
-	    'templates/detail.uikit.thtml'.
-	    'templates/detail/v1/detail.uikit.thtml',
-	    'templates/detail/v2/detail.uikit.thtml',
+            'templates/breadcrumbs.uikit.thtml',
+            'templates/detail.uikit.thtml'.
+            'templates/detail/v1/detail.uikit.thtml',
+            'templates/detail/v2/detail.uikit.thtml',
             'templates/edit.uikit.thtml',
             'templates/adList.thtml',
             'classes/Lists/Ads',
+            // 1.4.0
+            'templates/adlisthdrCat.thtml',
         ),
         // public_html/classifieds
         $_CONF['path_html'] . 'classifieds' => array(
