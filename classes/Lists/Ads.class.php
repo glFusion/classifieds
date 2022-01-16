@@ -140,7 +140,7 @@ class Ads
                 'cat_id'    => $row['cat_id'],
                 'subject'   => strip_tags($row['subject']),
                 'ad_id'     => $row['ad_id'],
-                'ad_url'    => CLASSIFIEDS_makeURL('detail', $row['ad_id']),
+                'ad_url'    => COM_buildUrl($_CONF_ADVT['url'] . '/detail.php?id=' . $row['ad_id']),
                 'add_date'  => date($_CONF['shortdate'], $row['ad_add_date']),
                 'ad_type'   => $AT->getDscp(),
                 'at_fgcolor' => $AT->getFGColor(),

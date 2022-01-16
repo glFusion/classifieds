@@ -966,7 +966,7 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
                 break;
             case 'url':
                 $props[$p] = COM_buildUrl($_CONF['site_url'] .
-                    '/classifieds/index.php?mode=detail&id=' . urlencode($A['ad_id']));
+                    '/classifieds/index.php?mode=detail&id=' . urlencode($id));
                 break;
             default:
                 $props[$p] = isset($A[$p]) ? $A[$p] : NULL;
@@ -1013,7 +1013,7 @@ function plugin_getcommenturlid_classifieds()
 {
     global $_CONF_ADVT;
     return array(
-        $_CONF_ADVT['url'] . '?mode=detail',
+        $_CONF_ADVT['url'] . '/detail.php',
         'id',
     );
 }
