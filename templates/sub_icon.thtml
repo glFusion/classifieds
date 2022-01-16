@@ -1,0 +1,7 @@
+<i id="catsub_icon_{cat_id}" class="tooltip uk-icon uk-icon-small
+{!if sub_status}
+uk-icon-bookmark uk-text-success"
+{!else}
+uk-icon-bookmark-o"
+{!endif}
+data-value = "{sub_status}" title="{sub_title}" onclick="ADVT_catsub(this, {cat_id});"></i>

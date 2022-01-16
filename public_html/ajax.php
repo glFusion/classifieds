@@ -40,6 +40,7 @@ case 'catsub':
         'subscribed' => $sub_stat,
         'statusMessage' => $msg,
         'title' => $LANG_ADVT['catsub_title_' . $sub_stat],
+        'innerHtml' => Classifieds\Category::getInstance($_POST['cat_id'])->getSubIcon($sub_stat),
     );
     break;
 

@@ -1235,6 +1235,30 @@ class Category
         return $this->cat_id == 0 ? 1 : 0;
     }
 
+
+    /**
+     * Get the subscription icon HTML to show on the detail page.
+     *
+     * @param   integer $sub    1 = subscribed, 0 = unsubscribed
+     * @return  string      HTML for clickable icon
+     */
+    public function getSubIcon(?int $sub = NULL) : string
+    {
+        global $_CONF_ADVT, $LANG_ADVT;
+
+        if ($sub === NULL) {
+            $sub = $this->isSubscribed() ? 1 : 0;
+        }
+        $T = new \Template($_CONF_ADVT['path'] . '/templates');
+        $T->set_file('icon', 'sub_icon.thtml');
+        $T->set_var(array(
+            'cat_id' => $this->cat_id,
+            'sub_status' => $sub,
+            'sub_title' => $LANG_ADVT['catsub_title_' . $sub],
+        ) );
+        $T->parse('output', 'icon');
+        return $T->finish($T->get_var('output'));
+    }
+
 }
 
-?>

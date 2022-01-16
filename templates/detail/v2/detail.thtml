@@ -20,20 +20,17 @@ function advtUpdateImage(filename)
 
 <div class="uk-margin-bottom">
     <div style="float:left;">{breadcrumbs}</div>
-{!if can_subscribe}
     <div id="adDetailUserLinks" style="float:right;">
-        <i id="catsub_ico_{cat_id}" class="uk-icon uk-icon-{sub_cls}" data-value="{sub_status}"
-            title="{sub_title}" data-uk-tooltip
-            onclick="ADVT_catsub(this, {cat_id});"></i>
+{!if can_subscribe}
+		<span id="catsub_span_{cat_id}" class="uk-margin-right">{sub_icon}</span>
 {!endif}
 {!if have_editlink}
-        <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
+        <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit uk-icon-small uk-margin-right"></i></a>
 {!endif}
 {!if have_deletelink}
-        <a href="{del_link}" data-uk-tooltip
-            onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
-            title="{$LANG_ADVT['del_item']}"
-            ><i class="uk-icon uk-icon-trash uk-text-danger"></i></a>
+        <a href="{del_link}" onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');"
+            title="{$LANG_ADVT['del_item']}" class="tooltip"
+            ><i class="uk-icon uk-icon-minus-square uk-text-danger uk-icon-small uk-margin-right"></i></a>
 {!endif}
     </div>
 </div>

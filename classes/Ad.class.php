@@ -691,27 +691,15 @@ class Ad
             'adblock'   => PLG_displayAdBlock('classifieds_detail', 0),
             'have_deletelink' => $this->canDelete(),
             'can_subscribe' => !COM_isAnonUser(),
-        ) );
-
-        if ($this->Cat->isSubscribed()) {
-            $sub_status = 1;
-            //$sub_cls = 'toggle-on uk-text-success';
-            $sub_cls = 'bookmark uk-text-success';
-        } else {
-            $sub_status = 0;
-            //$sub_cls = 'toggle-off';
-            $sub_cls = 'bookmark-o';
-        }
-        $T->set_var(array(
-            'sub_status' => $sub_status,
-            'sub_cls' => $sub_cls,
-            'sub_title' => $LANG_ADVT['catsub_title_' . $sub_status],
+            'sub_icon' => $this->Cat->getSubIcon(),
         ) );
 
         // Display a link to email the poster, or other message as needed
-        $emailfromuser = DB_getItem($_TABLES['userprefs'],
-                            'emailfromuser',
-                            "uid={$this->uid}");
+        $emailfromuser = DB_getItem(
+            $_TABLES['userprefs'],
+            'emailfromuser',
+            "uid={$this->uid}"
+        );
         if (
             ($_CONF['emailuserloginrequired'] == 1 && COM_isAnonUser()) ||
             $emailfromuser < 1
