@@ -50,7 +50,7 @@ $classifiedsConfigItems = array(
     ),
     array(
         'name' => 'img_max_height',
-        'default_value' => '600',
+        'default_value' => '1024',
         'type' => 'text',
         'subgroup' => 0,
         'fieldset' => 0,
@@ -61,7 +61,7 @@ $classifiedsConfigItems = array(
     ),
     array(
         'name' => 'img_max_width',
-        'default_value' => '800',
+        'default_value' => '1024',
         'type' => 'text',
         'subgroup' => 0,
         'fieldset' => 0,
