@@ -487,6 +487,16 @@ class Ad
             $can_delete = false;
         }
 
+        SEC_setCookie(
+            $_CONF['cookie_name'].'adveditor',
+            SEC_createTokenGeneral('advancededitor'),
+            time() + 1200,
+            $_CONF['cookie_path'],
+            $_CONF['cookiedomain'],
+            $_CONF['cookiesecure'],
+            false
+        );
+
         $tpl_var = $_CONF_ADVT['pi_name'] . '_entry';
         switch (PLG_getEditorType()) {
         case 'ckeditor':
