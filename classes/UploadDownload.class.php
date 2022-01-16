@@ -103,11 +103,11 @@ class UploadDownload
 
     /** Array of destination file names.
      * @var array */
-    private $_fileNames = '';
+    private $_fileNames = array();
 
     /** Array of file permissions.
      * @var array */
-    private $_permissions = '';
+    private $_permissions = array();
 
     /** Log file name.
      * @var string */
@@ -479,8 +479,11 @@ class UploadDownload
      */
     private function _getDestinationName()
     {
-        if (is_array($this->_fileNames)) {
-            $name = $this->_fileNames[$this->_imageIndex];
+        if (
+            is_array($this->_fileNames) &&
+            isset($this->_fileNames[$this->_imageIndex])
+        ) {
+            $name = $this->_fileNames[$this->_imageIndex] . '.' . $this->_currentFile['extension'];
         }
 
         if (empty($name)) {
@@ -505,7 +508,6 @@ class UploadDownload
                 $perms = $this->_permissions[0];
             }
         }
-
         if (empty($perms)) {
             $perms = '';
         }
@@ -542,7 +544,10 @@ class UploadDownload
             $returnMove = @copy($this->_currentFile['tmp_name'], $this->_filePath . '/' . $this->_getDestinationName());
             @unlink($this->_currentFile['tmp_name']);
         } else {
-            $returnMove = move_uploaded_file($this->_currentFile['tmp_name'], $this->_filePath . '/' . $this->_getDestinationName());
+            $returnMove = move_uploaded_file(
+                $this->_currentFile['tmp_name'],
+                $this->_filePath . $this->_getDestinationName()
+            );
         }
 
         if (!($sizeOK)) {
@@ -567,7 +572,7 @@ class UploadDownload
         $returnChmod = true;
         $perms = $this->_getPermissions();
         if (!empty($perms)) {
-            $returnChmod = @chmod ($this->_filePath . '/' . $this->_getDestinationName (), octdec ($perms));
+            $returnChmod = @chmod ($this->_filePath . $this->_currentFile['name'], octdec($perms));
         }
 
         if ($returnMove && $returnChmod) {
@@ -861,11 +866,7 @@ class UploadDownload
      */
     public function areErrors()
     {
-        if (count($this->_errors) > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (count($this->_errors) > 0);
     }
 
 
@@ -1026,7 +1027,7 @@ class UploadDownload
         if ($sc > 0) {
             $this->_currentFile['type'] = substr($this->_currentFile['type'], 0, $sc);
         }
-        $mimeTypes = $this->getAllowedMimeTypes ();
+        $mimeTypes = $this->getAllowedMimeTypes();
         foreach ($mimeTypes as $mimeT => $extList) {
             if ($mimeT == $this->_currentFile['type']) {
                 if (in_array($this->_currentFile['extension'], $extList)) {
@@ -1149,7 +1150,6 @@ class UploadDownload
                 $fcount = 1;
             }
         }
-
         return $fcount;
     }
 
@@ -1162,6 +1162,7 @@ class UploadDownload
     private function _uploadCurrentFile()
     {
         $metaData = IMG_getMediaMetaData($this->_currentFile['tmp_name']);
+
         if ($metaData['mime_type'] != '') {
             $this->_currentFile['type'] = $metaData['mime_type'];
         } else {
@@ -1184,7 +1185,7 @@ class UploadDownload
                 empty($this->_currentFile['localerror'])
             ) {
                 if ($this->_copyFile()) {
-                    $this->_uploadedFiles[] = $this->_filePath . '/' . $this->_getDestinationName();
+                    $this->_uploadedFiles[] = $this->_getDestinationName();
                 }
             }
 
@@ -1247,23 +1248,23 @@ class UploadDownload
             foreach ($this->_filesToUpload["error"] as $key => $error) {
                 if ($error == UPLOAD_ERR_OK) {
                     $fparts = pathinfo($this->_filesToUpload['name'][$key]);
-                    //TODO set extension
-                    $this->_currentFile['name'] = $fparts['basename'];
-                    $this->_currentFile['extension'] = strtolower($fparts['extension']);
-                    $this->_currentFile['tmp_name'] = $this->_filesToUpload["tmp_name"][$key];
-                    $this->_currentFile['type'] = $this->_filesToUpload["type"][$key];
-                    $this->_currentFile['size'] = $this->_filesToUpload["size"][$key];
-                    $this->_currentFile['error'] = $this->_filesToUpload["error"][$key];
-                    $this->_currentFile['_data_dir'] = isset($this->_filesToUpload["_data_dir"][$key]) ? $this->_filesToUpload["_data_dir"][$key] : '';
-                    $this->_currentFile['localerror'] = array();
-
+                    $this->_currentFile = array(
+                        'name' => $fparts['basename'],
+                        'extension' => strtolower($fparts['extension']),
+                        'tmp_name' => $this->_filesToUpload["tmp_name"][$key],
+                        'type' => $this->_filesToUpload["type"][$key],
+                        'size' => $this->_filesToUpload["size"][$key],
+                        'error' => $this->_filesToUpload["error"][$key],
+                        '_data_dir' => isset($this->_filesToUpload["_data_dir"][$key]) ? $this->_filesToUpload["_data_dir"][$key] : '',
+                        'localerror' => array(),
+                    );
                     $this->_uploadCurrentFile();
+
                     // If errors were set in _uploadCurrentFile(), and _continueOnError is not set,
                     // abort immediately.
                     if ($this->areErrors() && !$this->_continueOnError) {
                         break;
                     }
-
                 } else {
                     if ($error != UPLOAD_ERR_NO_FILE) {
                         $this->_uploadError($error);
@@ -1277,19 +1278,21 @@ class UploadDownload
                 $this->_filesToUpload['error'] == UPLOAD_ERR_OK
             ) {
                 $fparts = pathinfo($this->_filesToUpload['name']);
-                $this->_currentFile['name'] = $fparts['basename'];
-                $this->_currentFile['extension'] = strtolower($fparts['extension']);
-                $this->_currentFile['tmp_name'] = $this->_filesToUpload["tmp_name"];
-                $this->_currentFile['type'] = $this->_filesToUpload["type"];
-                $this->_currentFile['size'] = $this->_filesToUpload["size"];
-                $this->_currentFile['error'] = $this->_filesToUpload["error"];
-                $this->_currentFile['_data_dir'] = isset($this->_filesToUpload["_data_dir"]) ? $this->_filesToUpload["_data_dir"] : '' ;
+                $this->_currentFile = array(
+                    'name' => $fparts['basename'],
+                    'extension' => strtolower($fparts['extension']),
+                    'tmp_name' => $this->_filesToUpload["tmp_name"][$key],
+                    'type' => $this->_filesToUpload["type"][$key],
+                    'size' => $this->_filesToUpload["size"][$key],
+                    'error' => $this->_filesToUpload["error"][$key],
+                    '_data_dir' => isset($this->_filesToUpload["_data_dir"][$key]) ? $this->_filesToUpload["_data_dir"][$key] : '',
+                    'localerror' => array(),
+                );
                 $this->_uploadCurrentFile();
             } else {
                 $this->_uploadError($this->_filesToUpload['error']);
             }
         }
-
         // This function returns false if any errors were encountered
         if ($this->areErrors()) {
             return false;

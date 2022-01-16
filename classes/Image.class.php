@@ -51,7 +51,7 @@ class Image extends UploadDownload
      *
      * @param   integer $img    ID of image record or array of data
      */
-    public function __construct($img)
+    public function __construct($img=0)
     {
         global $_TABLES, $_CONF_ADVT;
 
@@ -59,7 +59,7 @@ class Image extends UploadDownload
         $row = array();
         if (is_array($img)) {
             $row = $img;
-        } else {
+        } elseif (is_integer($img) && $img > 0) {
             $img_id  = (int)$img;
             $res = DB_query(
                 "SELECT * FROM {$_TABLES['ad_photo']}
@@ -76,6 +76,15 @@ class Image extends UploadDownload
             $this->nonce = $row['nonce'];
             $this->ts = (int)$row['ts'];
         }
+        parent::__construct();
+        $this->setAllowedMimeTypes(array(
+            'image/gif' => array('gif'),
+            'image/pjpeg' => array('jpg','jpeg'),
+            'image/jpeg' => array('jpg','jpeg'),
+            'image/png' => array('png'),
+            'image/x-png' => array('png'),
+        ) );
+        $this->setMaxDimensions($_CONF_ADVT['img_max_width'], $_CONF_ADVT['img_max_height']);
     }
 
 
@@ -248,7 +257,7 @@ class Image extends UploadDownload
      * @param   string  $nonce      Nonce used to identify images
      * @param   string  $ad_id      New ad ID
      */
-    public static function setAdID($nonce, $ad_id)
+    public static function updateAdID($nonce, $ad_id)
     {
         global $_TABLES;
 
@@ -258,6 +267,19 @@ class Image extends UploadDownload
             SET ad_id = '$ad_id'
             WHERE nonce = '$nonce'";
         DB_query($sql);
+    }
+
+
+    /**
+     * Set the local ad_id value.
+     *
+     * @param   string  $ad_id      Ad ID
+     * @return  object  $this
+     */
+    public function withAdID(string $ad_id) : self
+    {
+        $this->ad_id = $ad_id;
+        return $this;
     }
 
 
@@ -341,15 +363,17 @@ class Image extends UploadDownload
             "SELECT * FROM {$_TABLES['ad_photo']}
             WHERE ad_id = '' AND ts < $min_ts"
         );
-        while ($A = DB_fetchArray($res, false)) {
-            self::deleteFile($A['filename']);
-        }
+        if ($res && DB_numRows($res) > 0) {
+            while ($A = DB_fetchArray($res, false)) {
+                self::deleteFile($A['filename']);
+            }
 
-        // Now delete from the DB, just using one query.
-        DB_query(
-            "DELETE FROM {$_TABLES['ad_photo']}
-            WHERE ad_id = '' AND ts < $min_ts"
-        );
+            // Now delete from the DB, just using one query.
+            DB_query(
+                "DELETE FROM {$_TABLES['ad_photo']}
+                WHERE ad_id = '' AND ts < $min_ts"
+            );
+        }
     }
 
 
@@ -358,9 +382,10 @@ class Image extends UploadDownload
      *
      * @param   string  $nonce  Nonce value to set
      */
-    protected function setNonce($nonce)
+    public function setNonce(string $nonce) : self
     {
         $this->nonce = $nonce;
+        return $this;
     }
 
 
@@ -373,6 +398,32 @@ class Image extends UploadDownload
     public static function makeNonce($str='')
     {
         return uniqid() . rand(100,999);
+    }
+
+
+    /**
+     * Upload images and associate with the current ad ID.
+     *
+     * @return  boolean     True on success, False on error
+     */
+    public function uploadFiles()
+    {
+        global $_TABLES;
+
+        $status = parent::uploadFiles();
+        if ($status) {
+            $ad_id = DB_escapeString($this->ad_id);
+            $nonce = DB_escapeString($this->nonce);
+            foreach ($this->getUploadedFiles() as $filename) {
+                $sql = "INSERT INTO {$_TABLES['ad_photo']} SET
+                    ad_id = '$ad_id',
+                    nonce = '$nonce',
+                    filename = '" . DB_escapeString($filename) . "',
+                    ts = UNIX_TIMESTAMP()";
+                DB_query($sql);
+            }
+        }
+        return $status;
     }
 
 }

@@ -3,9 +3,9 @@
  * Common AJAX functions.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2021 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v0.3.1
+ * @version     v1.4.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -19,6 +19,7 @@ require_once '../lib-common.php';
 if (!isset($_REQUEST['action'])) {
     exit;
 }
+
 $result = array();
 switch ($_REQUEST['action']) {
 case 'catsub':
@@ -71,17 +72,29 @@ case 'dropupload':
     // the product id to name the images filenames.
     if (!empty($_FILES['files'])) {
         $sent = count($_FILES['files']['name']);
-        $U = new Classifieds\Upload($ad_id);
-        $U->setNonce($nonce);
-        $filenames = $U->uploadFiles();
-        $processed = count($filenames);
-        // Only one filename here, this to get the image id also
-        foreach ($filenames as $img_id=>$filename) {
-            $result['filenames'][] = array(
-                'img_url'   => Classifieds\Image::dispUrl($filename),
-                'thumb_url' => Classifieds\Image::thumbUrl($filename),
-                'img_id' => $img_id,
-            );
+        $filenames = array();
+        $sid = COM_makesid();
+        for ($i = 0; $i < $sent; $i++) {
+            $filenames[] = $sid . '_' . rand(0, 9999);
+        }
+        $U = new Classifieds\Image;
+        $U->withAdID($ad_id)
+          ->setNonce($nonce)
+          ->setPath($_CONF_ADVT['imgpath'] . '/user/')
+          ->setFieldName('files')
+          ->setFileNames($filenames);
+        $status = $U->uploadFiles();
+        if ($status) {
+            $filenames = $U->getUploadedFiles();
+            $processed = count($filenames);
+            // Only one filename here, this to get the image id also
+            foreach ($filenames as $img_id=>$filename) {
+                $result['filenames'][] = array(
+                    'img_url'   => Classifieds\Image::dispUrl($filename),
+                    'thumb_url' => Classifieds\Image::thumbUrl($filename),
+                    'img_id' => $img_id,
+                );
+            }
         }
         $msg = '<ul>';
         $msg .= '<li>' . sprintf($LANG_ADVT['x_of_y_uploaded'], $processed, $sent, $_CONF_ADVT['imagecount']) . '</li>';

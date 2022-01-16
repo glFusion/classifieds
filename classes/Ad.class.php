@@ -339,7 +339,7 @@ class Ad
             $this->Type = AdType::getInstance($this->ad_type);
             if ($this->isNew()) {
                 if (!empty($nonce)) {
-                    Image::setAdID($nonce, $this->ad_id);
+                    Image::updateAdID($nonce, $this->ad_id);
                 }
                 if ($this->isSubmission()) {
                     // Submission, notify moderators
