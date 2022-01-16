@@ -9,10 +9,10 @@
 	<span id="catsub_span_{cls_id}">{sub_icon}</span>
 {!endif}
 {!if have_editlink}
-    <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
+    <a href="{edit_link}" class="tooltip" title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
 {!endif}
 {!if have_deletelink}
-    <a href="{del_link}" data-uk-tooltip
+    <a href="{del_link}" class="tooltip"
         onclick="return confirm('{$LANG_ADVT['confirm_delitem']}');" 
         title="{$LANG_ADVT['del_item']}" 
         ><i class="uk-icon uk-icon-trash uk-icon-danger" style="color:red"></i></a>
@@ -81,8 +81,7 @@
         <div class="data">{username}
 {!if ad_uid}
           <a href="{site_url}/profiles.php?uid={ad_uid}&subject={subject}">
-            <i class="uk-icon uk-icon-envelope" title="{$LANG_ADVT['ask_question']}"
-                data-uk-tooltip></i>
+            <i class="uk-icon uk-icon-envelope tooltip" title="{$LANG_ADVT['ask_question']}"></i>
           </a>
 {!else}
           &nbsp;&nbsp;<i>({$LANG_ADVT['login_to_email']})</i>
