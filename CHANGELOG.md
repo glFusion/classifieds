@@ -5,6 +5,8 @@ Release TBD
 - Use admin privilege instead of admin group.
 - Increase default image dimensions.
 - Hide topic subscription option from anon users.
+- Fixes to drag-n-drop image uploading.
+- Add separate detail.php to work with `plugin_getcommenturlid()`.
 
 ## Version 1.3.0 (Released 2020-03-22)
 - Fix namespace usage
