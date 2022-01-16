@@ -3,6 +3,8 @@
 ## Version 1.4.0
 Release TBD
 - Use admin privilege instead of admin group.
+- Increase default image dimensions.
+- Hide topic subscription option from anon users.
 
 ## Version 1.3.0 (Released 2020-03-22)
 - Fix namespace usage
