@@ -680,6 +680,7 @@ class Ad
             'timthumb'  => true,
             'adblock'   => PLG_displayAdBlock('classifieds_detail', 0),
             'have_deletelink' => $this->canDelete(),
+            'can_subscribe' => !COM_isAnonUser(),
         ) );
 
         if ($this->Cat->isSubscribed()) {

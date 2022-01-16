@@ -20,10 +20,12 @@ function advtUpdateImage(filename)
 
 <div class="uk-margin-bottom">
     <div style="float:left;">{breadcrumbs}</div>
+{!if can_subscribe}
     <div id="adDetailUserLinks" style="float:right;">
         <i id="catsub_ico_{cat_id}" class="uk-icon uk-icon-{sub_cls}" data-value="{sub_status}"
             title="{sub_title}" data-uk-tooltip
             onclick="ADVT_catsub(this, {cat_id});"></i>
+{!endif}
 {!if have_editlink}
         <a href="{edit_link}" data-uk-tooltip title="{$LANG_ADVT['edit']}"><i class="uk-icon uk-icon-edit"></i></a>
 {!endif}
