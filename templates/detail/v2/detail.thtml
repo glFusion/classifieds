@@ -150,7 +150,7 @@ function advtUpdateImage(filename)
                     <div class="data"><a href="{hot_cat_url}">{hot_cat}</a></div>
                 </div>
 <!-- END HotBlock -->
-            </div>a
+            </div>
 {!endif}
         </div>
     </div>
