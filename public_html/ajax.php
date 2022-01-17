@@ -96,11 +96,16 @@ case 'dropupload':
                     'img_id' => $img_id,
                 );
             }
+            $statusMsg = sprintf(
+                $LANG_ADVT['x_of_y_uploaded'],
+                $processed,
+                $sent,
+                $_CONF_ADVT['imagecount']
+            );
+        } else {
+            $statusMsg = implode('</li><li>', $U->getErrors());
         }
-        $msg = '<ul>';
-        $msg .= '<li>' . sprintf($LANG_ADVT['x_of_y_uploaded'], $processed, $sent, $_CONF_ADVT['imagecount']) . '</li>';
-        $msg .= '</ul>';
-        $result['statusMessage'] = $msg;
+        $result['statusMessage'] = '<ul><li>' . $statusMsg . '</li></ul>';
     } else {
         $result['status'] = false;
         $result['statusMessage'] = $LANG_ADVT['no_files_uploaded'];
