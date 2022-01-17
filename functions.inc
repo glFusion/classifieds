@@ -49,7 +49,7 @@ $_CONF_ADVT['purchase_enabled'] = 0;
 $langpath = $_CONF_ADVT['path'] . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!is_file("$langpath/$langfile")) {
-    $langfile = 'english.php';
+    $langfile = 'english_utf-8.php';
 }
 /** Include the proper language file */
 include_once "$langpath/$langfile";
