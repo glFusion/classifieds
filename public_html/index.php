@@ -104,7 +104,7 @@ case 'update_account':
     $U = new \Classifieds\UserInfo($_USER['uid']);
     $U->SetVars($_POST);
     $U->Save();
-    $view = $view == '' ? 'account' : $view;
+    $view = 'account';
     break;
 
 case 'update_ad':
@@ -184,7 +184,7 @@ default:
 }   // switch ($mode)
 
 if (!empty($view)) {
-    COM_refresh($_CONF_ADVT['url'] . "?mode=$view");
+    COM_refresh($_CONF_ADVT['url'] . "/index.php?mode=$view");
 }
 
 $T->set_var('menu', Classifieds\Menu::User($mode));
