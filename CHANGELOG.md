@@ -11,6 +11,8 @@ Release TBD
 - Separate autotags into classes.
 - Count already-uploaded images against max when editing an ad.
 - Fix image ID for delete button on just-uploaded images.
+- Cache autotag content (glFusion 2.0+).
+- Implement adminlist fields from glFusion 2.0 for cross-theme compatibility.
 
 ## Version 1.3.0 (Released 2020-03-22)
 - Fix namespace usage
