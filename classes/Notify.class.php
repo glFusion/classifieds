@@ -117,7 +117,7 @@ class Notify
             'price'     => $Ad->getPrice(),
             'cat'       => $Ad->getCat()->getDscp(),
             'ad_type'   => $Ad->getType()->getDscp(),
-            'ad_url'    => "{$_CONF_ADVT['url']}/index.php?mode=detail&id={$Ad->getID()}",
+            'ad_url'    => Ad::getDetailUrl($Ad->getID()),
             'site_name' => $_CONF['site_name'],
         ) );
         $T->parse('output','message');

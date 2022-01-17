@@ -626,7 +626,7 @@ function plugin_dopluginsearch_classifieds(
     $sql = "SELECT a.ad_id as id, a.cat_id, a.subject as title,
                 a.description, a.uid, a.views as hits,
                 a.add_date AS date, a.ad_type,
-                CONCAT('/{$_CONF_ADVT['pi_name']}/index.php?mode=detail&id=',a.ad_id,'&query=$htmlquery') as url
+                CONCAT('/{$_CONF_ADVT['pi_name']}/detail.php?id=',a.ad_id,'&query=$htmlquery') as url
             FROM {$_TABLES['ad_ads']} a
             RIGHT JOIN {$_TABLES['ad_category']} c
                 ON a.cat_id = c.cat_id
@@ -965,8 +965,7 @@ function plugin_getiteminfo_classifieds($id, $what, $uid=0, $options=array())
                         $A['keywords'];
                 break;
             case 'url':
-                $props[$p] = COM_buildUrl($_CONF['site_url'] .
-                    '/classifieds/index.php?mode=detail&id=' . urlencode($id));
+                $props[$p] = Classifieds\Ad::getDetailUrl($id);
                 break;
             default:
                 $props[$p] = isset($A[$p]) ? $A[$p] : NULL;

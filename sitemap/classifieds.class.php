@@ -120,10 +120,7 @@ class sitemap_classifieds extends sitemap_base
             $entries[] = array(
                 'id'        => $A['ad_id'],
                 'title'     => $A['subject'],
-                'uri'       => COM_buildUrl($_CONF['site_url']
-                                . '/' . $_CONF_ADVT['pi_name']
-                                . '/index.php?mode=detail&amp;id='
-                                . urlencode($A['ad_id'])),
+                'uri'       => Classifieds\Ad::getDetailUrl($A['id']),
                 'date'      => $A['add_date'],
                 'image_uri' => false,
             );
