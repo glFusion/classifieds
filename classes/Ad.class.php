@@ -278,7 +278,7 @@ class Ad
         }
 
         // Get the nonce to associate images
-        $nonce = SHOP_getVar($A, 'nonce');
+        $nonce = LGLIB_getVar($A, 'nonce');
 
         if ($this->isNew) {
             if (!$this->isAdmin && $_CONF_ADVT['submission']) {
@@ -393,7 +393,6 @@ class Ad
                 if (DB_error()) return NULL;
             }
         }
-        Cache::clear();
         return $this->ad_id;
     }
 
@@ -947,7 +946,7 @@ class Ad
         global $_USER, $_CONF, $_CONF_ADVT, $_TABLES;
 
         $req_days = (int)$days;
-	$max_days = $this->calcMaxAddDays();
+        $max_days = $this->calcMaxAddDays();
 
         if (
             $req_days < 1 ||
@@ -964,10 +963,13 @@ class Ad
         // Finally, we have access to this add and there's a valid number
         // of days to add.
         $this->setExpDate($this->exp_date->toUnix() + ($add_days * 86400));
-        DB_query("UPDATE {$_TABLES['ad_ads']} SET
-                exp_date = {$this->exp_date->toUnix()},
-                exp_sent=0
-            WHERE ad_id='$this->ad_id'");
+        DB_query(
+            "UPDATE {$_TABLES['ad_ads']} SET
+            exp_date = {$this->exp_date->toUnix()},
+            exp_sent=0
+            WHERE ad_id='$this->ad_id'"
+        );
+        Cache::clear();
         return $max_days - $add_days;
     }
 

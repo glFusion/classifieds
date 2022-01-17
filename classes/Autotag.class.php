@@ -118,13 +118,11 @@ class Autotag
     {
         global $_CONF, $_CONF_ADVT, $_TABLES, $_USER, $LANG01;
 
-        // display = how many items to get from the database. If 0, then all.
-        // meta = show meta data (i.e.; who when etc)
-        // titleLink - make title a hot link
-        // cols - number of columns to show
-        // sort - sort by date, views, rating, featured (implies date)
-        // order - desc, asc
-        // template - the template name
+        $cacheID = md5($p1 . $fulltag);
+        $retval = Cache::get($cacheID);
+        if ($retval !== NULL) {
+            return $retval;
+        }
 
         $retval = '';
         $this->getOpts($opts);
@@ -170,6 +168,7 @@ class Autotag
             }
             $T->parse('output', 'page');
             $retval = $T->finish($T->get_var('output'));
+            Cache::set($cacheID, $retval, array('autotags'));
         }
         return $retval;
     }

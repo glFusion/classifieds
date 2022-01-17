@@ -3,9 +3,9 @@
  * Class to cache DB and web lookup results.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018-2022 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.2.2
+ * @version     v1.4.0
  * @since       v1.2.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
@@ -21,11 +21,11 @@ class Cache
 {
     /** Tag added to all cache items.
      * @const string */
-    CONST TAG = 'classifieds'; // fallback tag
+    const TAG = 'classifieds'; // fallback tag
 
     /** Minmum glFusion version to support caching
      * @const string */
-    CONST MIN_GVERSION = '2.0.0';
+    const MIN_GVERSION = '2.0.0';
 
     /**
      * Update the cache.
@@ -128,4 +128,3 @@ class Cache
 
 }   // class Classifieds\Cache
 
-?>

@@ -1061,23 +1061,22 @@ function plugin_runScheduledTask_classifieds($standalone=false)
 {
     global $_TABLES, $_CONF_ADVT, $_CONF, $LANG_ADVT;
 
-    if (!$standalone && $_CONF_ADVT['use_gl_cron'] == 0)
+    if (!$standalone && $_CONF_ADVT['use_gl_cron'] == 0) {
         return;
+    }
 
-    $purge_cache = false;   // assume there's nothing to delete
+    $purge_cache = false;
 
     // Other plugins should consider expired ads as "deleted"
     $r = DB_query(
         "SELECT ad_id FROM {$_TABLES['ad_ads']}
         WHERE exp_date < " . time()
     );
-    while ($A = DB_fetchArray($r, false)) {
-        $purge_cache = true;    // Flag to clear cache
-        PLG_itemDeleted($A['ad_id'], $_CONF_ADVT['pi_name']);
-    }
-    if ($purge_cache) {
-        // Clear the cache to force recreation of lists and blocks
-        \Classifieds\Cache::clear('ads');
+    if ($r && DB_numRows($r) > 0) {
+        while ($A = DB_fetchArray($r, false)) {
+            PLG_itemDeleted($A['ad_id'], $_CONF_ADVT['pi_name']);
+        }
+        $purge_cache = true;
     }
 
     // Check if purging is disabled
@@ -1089,18 +1088,23 @@ function plugin_runScheduledTask_classifieds($standalone=false)
         );
         if ($r) {
             $numrows = DB_numRows($r);
-            while ($row = DB_fetchArray($r, false)) {
-                \Classifieds\Ad::Delete($row['ad_id']);
-            }
-
             if ($numrows > 0) {
+                while ($row = DB_fetchArray($r, false)) {
+                    \Classifieds\Ad::Delete($row['ad_id']);
+                }
+                $purge_cache = true;
                 $msg = sprintf($LANG_ADVT['purged_ads'], $numrows) .
                     date("Y-m-d H:i:s", $purge_exp_date);
                 CLASSIFIEDS_auditLog($msg);
-                if ($standalone)
+                if ($standalone) {
                     echo $msg;
+                }
             }
         }
+    }
+
+    if ($purge_cache) {
+        \Classifieds\Cache::clear();
     }
 
     // Clean up orphaned image records.
@@ -1562,6 +1566,9 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
             if (!isset($opts['sortdir'])) {
                 $opts['sortdir'] = 'desc';
             }
+            $AT = new Classifieds\Autotag;
+            $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
+            break;
         case 'ad':      // Show a single ad by ID.
             if (!isset($opts['id']) && !isset($opts['ad_id'])) {
                 return $content;   // must have a valid ad ID

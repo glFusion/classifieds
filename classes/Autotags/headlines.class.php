@@ -15,6 +15,7 @@ namespace Classifieds\Autotags;
 use Classifieds\Ad;
 use Classifieds\Image;
 use Classifieds\Category;
+use Classifieds\Cache;
 
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own!');
@@ -38,10 +39,15 @@ class headlines extends \Classifieds\Autotag
     {
         global $_CONF, $_CONF_ADVT, $_TABLES, $_USER, $LANG01;
 
-        $this->template = 'headlines.thtml';    // override default
-        parent::getOpts($opts);     // populate the standard options
+        $cacheID = md5($p1 . $fulltag);
+        $retval = Cache::get($cacheID);
+        if ($retval !== NULL) {
+            return $retval;
+        }
 
         $retval = '';
+        $this->template = 'headlines.thtml';    // override default
+        parent::getOpts($opts);     // populate the standard options
 
         $cols       = 3;        // number of columns
         $autoplay   = 'true';   // auto-play by default
@@ -93,6 +99,7 @@ class headlines extends \Classifieds\Autotag
                 $T->parse('hl', 'headlines', true);
             }
             $retval = $T->finish($T->parse('output', 'page'));
+            Cache::set($cacheID, $retval, array('autotags'));
         }
         return $retval;
     }
