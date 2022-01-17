@@ -45,6 +45,11 @@ class Image extends UploadDownload
      * @var integer */
     private $ts = 0;
 
+    /** Array of uploaded files.
+     * Overrides the parent and holds the DB record ID with the filename.
+     * @var array */
+    private $_uploadedFiles = array();
+
 
     /**
      * Constructor.
@@ -402,6 +407,18 @@ class Image extends UploadDownload
 
 
     /**
+     * Get the files uploaded.
+     * Returns the local array indexed by DB record ID.
+     *
+     * @return  array   Array of record_id->filename pairs
+     */
+    public function getUploadedFiles() : array
+    {
+        return $this->_uploadedFiles;
+    }
+
+
+    /**
      * Upload images and associate with the current ad ID.
      *
      * @return  boolean     True on success, False on error
@@ -414,13 +431,14 @@ class Image extends UploadDownload
         if ($status) {
             $ad_id = DB_escapeString($this->ad_id);
             $nonce = DB_escapeString($this->nonce);
-            foreach ($this->getUploadedFiles() as $filename) {
+            foreach (parent::getUploadedFiles() as $filename) {
                 $sql = "INSERT INTO {$_TABLES['ad_photo']} SET
                     ad_id = '$ad_id',
                     nonce = '$nonce',
                     filename = '" . DB_escapeString($filename) . "',
                     ts = UNIX_TIMESTAMP()";
                 DB_query($sql);
+                $this->_uploadedFiles[DB_insertId()] = $filename;
             }
         }
         return $status;
