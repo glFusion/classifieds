@@ -3,15 +3,16 @@
  * Class to provide admin and user-facing menus.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2022 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.3.0
+ * @version     v1.4.0
  * @since       v1.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Classifieds;
+
 
 /**
  * Class to provide admin and user-facing menus.
@@ -28,7 +29,7 @@ class Menu
     {
         global $_CONF_ADVT;
 
-        return $_CONF_ADVT['url'] . '/index.php?mode=submit';
+        return COM_buildUrl($_CONF_ADVT['url'] . '/index.php?mode=submit');
     }
 
 
