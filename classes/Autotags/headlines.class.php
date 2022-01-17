@@ -38,29 +38,20 @@ class headlines extends \Classifieds\Autotag
     {
         global $_CONF, $_CONF_ADVT, $_TABLES, $_USER, $LANG01;
 
-        // display = how many items to get from the database. If 0, then all.
-        // meta = show meta data (i.e.; who when etc)
-        // titleLink - make title a hot link
-        // cols - number of columns to show
-        // sort - sort by date, views, rating, featured (implies date)
-        // order - desc, asc
-        // template - the template name
-
         $this->template = 'headlines.thtml';    // override default
         parent::getOpts($opts);     // populate the standard options
 
         $retval = '';
 
         $cols       = 3;        // number of columns
-        $autoplay   = 'true';
-        $interval   = 7000;
-        $category   = 0;
+        $autoplay   = 'true';   // auto-play by default
+        $interval   = 7000;     // move every 7 seconds
         // Now populate options specific to headlines
         foreach ($opts as $key=>$val) {
             $val = strtolower($val);
             switch ($key) {
             case 'autoplay':
-                $autoplay = $val == 'true' ? 'true' : 'false';
+                $autoplay = $val ? 'true' : 'false';
                 break;
             case 'cols':
             case 'interval':
@@ -82,7 +73,11 @@ class headlines extends \Classifieds\Autotag
         if ($numRows > 0) {
             $T = new \Template($_CONF_ADVT['path'] . '/templates/autotags');
             $T->set_file('page', $this->template);
-            $T->set_var('columns' ,$cols);
+            $T->set_var(array(
+                'columns' => $cols,
+                'autoplay'  => $autoplay,
+                'autoplay_interval' => $interval,
+            ) );
             $T->set_block('page', 'headlines', 'hl');
             foreach ($allItems as $A) {
                 $Ad = Ad::getInstance($A['ad_id']);
@@ -94,8 +89,6 @@ class headlines extends \Classifieds\Autotag
                     'text'      => $Ad->getDscp(),
                     'title'     => $Ad->getSubject(),
                     'thumb_url' => $image,
-                    'autoplay'  => $autoplay,
-                    'autoplay_interval' => $interval,
                 ) );
                 $T->parse('hl', 'headlines', true);
             }
