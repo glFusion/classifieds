@@ -80,6 +80,7 @@ case 'edit':
         $Ad->setCatID($_GET['cat_id']);
     }
     $content .= $Ad->Edit();
+    $T->set_var('header', $LANG_ADVT['submit_an_ad']);
     break;
 
 case 'delete':
@@ -168,6 +169,7 @@ case 'editad':
     if ($isAnon) COM_404();
     $Ad = new \Classifieds\Ad($id);
     $content .= $Ad->Edit();
+    $T->set_var('header', $LANG_ADVT['edit_an_ad']);
     break;
 
 case 'home':
