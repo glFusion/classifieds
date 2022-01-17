@@ -1114,6 +1114,7 @@ class Category
                 'text' => $LANG_ADVT['edit'],
                 'field' => 'edit',
                 'sort' => false,
+                'align' => 'center',
             ),
             array(
                 'text' => $LANG_ADVT['name'],
@@ -1128,7 +1129,8 @@ class Category
             array(
                 'text' => $LANG_ADVT['delete'],
                 'field' => 'delete',
-                'sort' => false
+                'sort' => false,
+                'align' => 'center',
             ),
         );
         $defsort_arr = array(
@@ -1181,29 +1183,24 @@ class Category
 
         switch($fieldname) {
         case 'edit':
-            $retval = COM_createLink('',
-                $_CONF_ADVT['admin_url'] .
-                    "/index.php?editcat=x&cat_id={$A['cat_id']}",
-                array(
-                    'class' => 'uk-icon uk-icon-edit',
-                )
-            );
+            $retval = FieldList::edit(array(
+                'url' => $_CONF_ADVT['admin_url'] .
+                "/index.php?editcat=x&cat_id={$A['cat_id']}"
+            ) );
             break;
 
         case 'delete':
             if ($A['cat_id'] > 1) {
                 $conf_txt = $LANG_ADVT['confirm_delitem'] . ' ' .
                     $LANG_ADVT['confirm_delcat'];
-                $retval .= COM_createLink('',
-                    $_CONF_ADVT['admin_url'] .
+                $retval .= FieldList::delete(array(
+                    'delete_url' => $_CONF_ADVT['admin_url'] .
                         "/index.php?deletecat=cat&amp;cat_id={$A['cat_id']}",
-                    array(
+                    'attr' => array(
                         'title' => $LANG_ADVT['del_item'],
-                        'class' => 'uk-icon uk-icon-trash advt_icon_danger',
-                        'data-uk-tooltip' => '',
                         'onclick' => "return confirm('{$conf_txt}');",
                     )
-                );
+                ) );
             }
             break;
 

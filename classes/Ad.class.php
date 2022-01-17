@@ -3,17 +3,18 @@
  * Class to manage classified ads.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2016-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2016-2022 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.3.1
+ * @version     v1.4.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Classifieds;
 
+
 /**
- * Class for ad objects
+ * Class for ad objects.
  * @package classifieds
  */
 class Ad
@@ -1465,34 +1466,25 @@ class Ad
 
         switch($fieldname) {
         case 'edit':
-            $retval = COM_createLink('',
-                $_CONF_ADVT['admin_url'] .  "/index.php?editad=x&ad_id={$A['ad_id']}",
-                array(
-                    'class' => 'uk-icon uk-icon-edit',
-                )
-            );
+            $retval = FieldList::edit(array(
+                'url' => $_CONF_ADVT['admin_url'] .  "/index.php?editad=x&ad_id={$A['ad_id']}"
+            ) );
             break;
 
         case 'user_edit':
-            $retval = COM_createLink(
-                '',
-                $_CONF_ADVT['url'] .
+            $retval = FieldList::edit(array(
+                'url' => $_CONF_ADVT['url'] .
                     "/index.php?mode=editad&amp;id={$A['ad_id']}",
                 array(
-                    'class' => 'uk-icon uk-icon-edit',
                     'title' => $LANG_ADVT['edit'],
-                    'data-uk-tooltip' => ''
                 )
-            );
+            ) );
             break;
 
         case 'copy':
-            $retval = COM_createLink('',
-                $_CONF_ADVT['admin_url'] .  "/index.php?dupad={$A['ad_id']}",
-                array(
-                    'class' => 'uk-icon uk-icon-copy',
-                )
-            );
+            $retval = FieldList::copy(array(
+                'url' => $_CONF_ADVT['admin_url'] .  "/index.php?dupad={$A['ad_id']}"
+            ) );
            break;
 
         case 'add_date':
@@ -1502,30 +1494,25 @@ class Ad
             break;
 
         case 'delete':
-            $retval = COM_createLink('',
-                $_CONF_ADVT['admin_url'] .
+            $retval = FieldList::delete(array(
+                'delete_url' => $_CONF_ADVT['admin_url'] .
                     "/index.php?deletead={$A['ad_id']}",
-                array(
-                    'class' => 'uk-icon uk-icon-trash uk-text-danger',
-                    'data-uk-tooltip' => '',
+                'attr' => array(
                     'title' => $LANG_ADVT['del_item'],
                     'onclick' => "return confirm('{$LANG_ADVT['confirm_delitem']}');",
                 )
-            );
+            ) );
             break;
 
         case 'user_delete':
-            $retval = COM_createLink(
-                '',
-                $_CONF_ADVT['url'] .
+            $retval = FieldList::delete(array(
+                'delete_url' => $_CONF_ADVT['url'] .
                     "/index.php?mode=deletead&amp;id={$A['ad_id']}",
-                array(
+                'attr' => array(
                     'title' => $LANG_ADVT['del_item'],
-                    'class' => 'uk-icon uk-icon-trash uk-text-danger',
-                    'data-uk-tooltip' => '',
                     'onclick' => "return confirm('{$LANG_ADVT['del_item_confirm']}');",
                 )
-            );
+            ) );
             break;
 
         case 'subject':
@@ -1564,5 +1551,5 @@ class Ad
         return COM_buildUrl($_CONF_ADVT['url'] . '/detail.php?id=' . urlencode($ad_id));
     }
 
-}   // class Ad
+}
 

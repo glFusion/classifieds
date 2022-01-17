@@ -3,9 +3,9 @@
  * Class to manage ad types.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     classifieds
- * @version     v1.3.0
+ * @version     v1.4.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -410,7 +410,7 @@ class AdType
      *
      * @return  string  HTML for admin list
      */
-    public static function adminList()
+    public static function adminList() : string
     {
         global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS, $_CONF_ADVT, $LANG_ADVT;
 
@@ -482,7 +482,7 @@ class AdType
      * @param   array   $icon_arr   Array of icons available for display
      * @return  string              Complete HTML to display the field
      */
-    public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
+    public static function getListField($fieldname, $fieldvalue, $A, $icon_arr) : string
     {
         global $_CONF, $_CONF_ADVT, $LANG24, $LANG_ADVT, $_TABLES;
 
@@ -490,43 +490,31 @@ class AdType
 
         switch($fieldname) {
         case 'edit':
-            $retval = COM_createLink(
-                '',
-                $_CONF_ADVT['admin_url'] . "/index.php?editadtype={$A['id']}",
-                array(
-                    'class' => 'uk-icon uk-icon-edit'
-                )
-            );
+            $retval = FieldList::edit(array(
+                'url' => $_CONF_ADVT['admin_url'] . "/index.php?editadtype={$A['id']}"
+            ) );
             break;
 
         case 'enabled':
-            if ($fieldvalue == 1) {
-                $chk = ' checked="checked" ';
-                $enabled = 1;
-            } else {
-                $chk = '';
-                $enabled = 0;
-            }
             $fld_id = $fieldname . '_' . $A['id'];
-            $retval =
-                "<input name=\"{$fld_id}\" id=\"{$fld_id}\" " .
-                "type=\"checkbox\" $chk " .
-                "onclick='ADVTtoggleEnabled(this, \"{$A['id']}\", \"adtype\", \"{$_CONF['site_url']}\");' ".
-                ">\n";
+            $retval = FieldList::checkbox(array(
+                'name' => $fld_id,
+                'id' => $fld_id,
+                'checked' => (int)$fieldvalue,
+                'onclick' => "ADVTtoggleEnabled(this, '{$A['id']}', 'adtype', '{$_CONF['site_url']}');",
+            ) );
             break;
 
         case 'delete':
             if (DB_count($_TABLES['ad_ads'], 'ad_type', $A['id']) == 0) {
-                $retval .= COM_createLink(
-                    '',
-                    $_CONF_ADVT['admin_url'] .
+                $retval .= FieldList::delete(array(
+                    'delete_url' => $_CONF_ADVT['admin_url'] .
                         "/index.php?deleteadtype=x&amp;type_id={$A['id']}",
-                    array(
+                    'attr' => array(
                         'title' => 'Delete this item',
-                        'class' => 'uk-icon uk-icon-trash advt_icon_danger',
                         'onclick' => "return confirm('Do you really want to delete this item?');",
                     )
-                );
+                ) );
             }
             break;
 
@@ -537,6 +525,5 @@ class AdType
         return $retval;
     }
 
-}   // class AdType
+}
 
-?>
