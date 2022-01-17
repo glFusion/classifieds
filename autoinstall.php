@@ -136,7 +136,7 @@ $INSTALL_plugin['classifieds'] = array(
         'type' => 'mkdir',
         'dirs' => array(
             $_CONF['path'] . 'data/' . $_CONF_ADVT['pi_name'],
-            $_CONF['path'] . 'data/' . $_CONF_ADVT['pi_name'] . '/images',
+            $_CONF_ADVT['imgpath'],
             $_CONF_ADVT['imgpath'] . '/user',
         ),
     ),
