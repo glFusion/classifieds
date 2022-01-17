@@ -257,6 +257,7 @@ $LANG_ADVT = array (
 'posted' => 'Posted',
 'catsub_title_1' => 'Click to unsubscribe from this category',
 'catsub_title_0' => 'Click to subscribe to this category',
+'at_dscp_classifieds' => 'Include classified ads in the content.',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Your ad has been queued for administrator approval.';

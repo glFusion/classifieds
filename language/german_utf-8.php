@@ -259,6 +259,9 @@ $LANG_ADVT = array (
 'duplicate'         => 'Duplicate',
 'newadtypehdr'      => 'Creating an Ad Type',
 'posted' => 'Posted',
+'catsub_title_1' => 'Click to unsubscribe from this category',
+'catsub_title_0' => 'Click to subscribe to this category',
+'at_dscp_classifieds' => 'Include classified ads in the content.',
 );
 
 $PLG_classifieds_MESSAGE01 = 'Deine Kleinanzeige wird so schnell wie möglich geprüft und frei gegeben.';

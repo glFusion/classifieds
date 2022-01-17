@@ -1529,7 +1529,7 @@ class Ad
         case 'subject':
             $retval = COM_createLink(
                 $fieldvalue,
-                $_CONF_ADVT['url'] . '/index.php?mode=detail&id=' . $A['ad_id'],
+                self::getDetailUrl($A['ad_id']),
                 array(
                     'title' => $LANG_ADVT['view_ad'],
                     'class' => 'tooltip',
@@ -1548,6 +1548,19 @@ class Ad
         return $retval;
     }
 
+
+    /**
+     * Get the URL to the detail page for an ad.
+     *
+     * @param   string  $ad_id      ID of ad
+     * @return  string      URL to detail page
+     */
+    public static function getDetailUrl(string $ad_id) : string
+    {
+        global $_CONF_ADVT;
+
+        return COM_buildUrl($_CONF_ADVT['url'] . '/detail.php?id=' . urlencode($ad_id));
+    }
+
 }   // class Ad
 
-?>

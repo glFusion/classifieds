@@ -7,7 +7,7 @@
       <img src="{tn_url}" border="0" 
           alt="{$LANG_ADVT[click_to_enlarge]}" 
           title="{$LANG_ADVT[click_to_enlarge]}"
-          class="gl_mootip" data-uk-tooltip />
+          class="tooltip" />
     </a>
   </div>
 {!endif}

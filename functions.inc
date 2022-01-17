@@ -1526,136 +1526,59 @@ function plugin_autotags_classifieds($op, $content = '', $autotag = '')
 {
     global $_CONF_ADVT, $LANG_ADVT, $_TABLES;
 
-    if ($op == 'tagname') {
-        return 'classifieds';
-    } else if ($op != 'parse') {
-        return '';
-    }
-
-    // Process the auto tag to remove any embedded &nbsp;
-    $tag = str_replace('&nbsp;', ' ', $autotag['tagstr']);
-    $parms = explode(' ', $tag);
-
-    // Extra test to see if autotag was entered with a space
-    // after the module name
-    if (substr($parms[0], -1) == ':') {
-        $startpos = strlen($parms[0]) + strlen($parms[1]) + 2;
-        $label = str_replace(']', '', substr($tag, $startpos));
-        $tagid = $parms[1];
-    } else {
-        $label = str_replace(']', '', substr($tag, strlen($parms[0]) + 1));
-        $parms = explode(':', $parms[0]);
-        if (count($parms) > 2) {
-            // whoops, there was a ':' in the tag id ...
-            array_shift($parms);
-            $tagid = implode(':', $parms);
-        } else {
-            $tagid = $parms[1];
+    $pi_name = $_CONF_ADVT['pi_name'];
+    switch ($op) {
+    case 'tagname':
+        $tags = array($pi_name);
+        return $tags;
+        break;
+    case 'tagusage':
+        return array(array('namespace' => $pi_name, 'usage' => 'description'));
+        break;
+    case 'desc':
+        switch ($content) {
+        case $pi_name:
+            return $LANG_ADVT['at_dscp_' . $content];
+            break;
+        default:
+            return '';
+            break;
         }
-    }
-    $autotag['parm1'] = str_replace(']','',$tagid);
-    $autotag['parm2'] = $label;
+        break;
+    case 'parse':
+        $t1 = explode(' ', $autotag['parm2']);
+        $opts = array();
+        foreach ($t1 as $tmp) {
+            $t2 = explode(':', $tmp);
+            $opts[$t2[0]] = isset($t2[1]) ? $t2[1] : '';
+        }
 
-    $T = new Template($_CONF_ADVT['path'] . '/templates');
-
-    // Set default values for what gets shown and how
-    $ad_id = '';
-    $template = 'autotag.thtml';
-    $limit = 1;
-    $textlen = 65535;
-
-    $px = explode(' ', trim($autotag['parm2']));
-    if (is_array($px)) {
-        foreach ($px as $part) {
-            if (strstr($part, ':') !== false) {
-                $a = explode(':', $part);
-                switch ($a[0]) {
-                case 'id':          // specify the ad to show
-                    $ad_id = $a[1];
-                    break;
-                case 'template':    // specify the template
-                    $template = $a[1];
-                    break;
-                case 'limit':       // limit the number of returns
-                    $limit = (int)$a[1];
-                    break;
-                case 'textlen':     // limit the amount of description shown
-                    $textlen = (int)$a[1];
-                    break;
-                }
+        switch ($autotag['parm1']) {
+        case 'recent':
+            // Show one or more recent ads.
+            // Just override sorting if not supplied.
+            if (!isset($opts['sortby'])) {
+                $opts['sortby'] = 'add_date';
             }
+            if (!isset($opts['sortdir'])) {
+                $opts['sortdir'] = 'desc';
+            }
+        case 'ad':      // Show a single ad by ID.
+            if (!isset($opts['id']) && !isset($opts['ad_id'])) {
+                return $content;   // must have a valid ad ID
+            }
+            $AT = new Classifieds\Autotag;
+            $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
+            break;
+        case 'headlines':
+            $AT = new Classifieds\Autotags\headlines;
+            $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
+            break;
         }
-    }
-    $where = ' 1=1 ';
-    $order = '';
-    $limit = "LIMIT $limit";
-
-    switch ($autotag['parm1']) {
-    case 'ad':      // Show an ad
-        if (empty($ad_id)) return $content;   // must have a valid ad ID
-        $where = " ad_id = '" . DB_escapeString($ad_id) . "' ";
-        break;
-    case 'recent':  // Show one or more recent ads
-        $order = ' ORDER BY ad.add_date DESC ';
-        break;
-    }
-
-    //$sql = "SELECT ad.ad_id, ad.uid, c.cat_id
-    $sql = "SELECT ad.*, c.description as type
-            FROM {$_TABLES['ad_ads']} ad
-            LEFT JOIN {$_TABLES['ad_category']} c
-                ON ad.cat_id = c.cat_id
-            WHERE $where " . COM_getPermSQL('AND', 0, 2, 'c') .
-            " $order $limit";
-    $result = DB_query($sql, 1);
-    // In case of an error, log it and return unchanged content
-    if (DB_error()) {
-        COM_errorLog("plugin_autotags_classifieds SQL error: $sql");
+        $content = str_replace($autotag['tagstr'], $repl, $content);
         return $content;
+        break;
     }
-    // No results found is a normal condition
-    if (DB_numRows($result) > 0) {
-
-        $T->set_file('autotag', $template);
-        $T->set_block('autotag', 'tag_data', 'TAG');
-        while ($A = DB_fetchArray($result, false)) {
-            $img_file = DB_getItem($_TABLES['ad_photo'], 'filename',
-                    "ad_id='{$A['ad_id']}'");
-             if ($img_file != '') {
-                $T->set_var('img_url', \Classifieds\Image::dispUrl($img_file));
-                $T->set_var('tn_url', \Classifieds\Image::thumbUrl($img_file));
-            } else {
-                $T->clear_var('img_url');
-                $T->clear_var('tn_url');
-            }
-            if (isset($A['description'])) {
-                if (strlen($A['description']) > $textlen) {
-                    $A['description'] = substr($A['description'], 0, $textlen - 3) . ' ...';
-                }
-            }
-            $T->set_var(array(
-                'ad_id'     => $A['ad_id'],
-                'cat_id'    => $A['cat_id'],
-                'uid'       => $A['uid'],
-                'subject'   => htmlspecialchars($A['subject']),
-                'description'  => htmlspecialchars($A['description']),
-                'url'       => COM_sanitizeURL($A['url']),
-                'add_date'  => COM_getUserDateTimeFormat($A['add_date']),
-                'exp_date'  => COM_getUserDateTimeFormat($A['exp_date']),
-                'ad_type'   => htmlspecialchars($A['type']),
-                'pi_url'    => $_CONF_ADVT['url'],
-                'ad_url'    => COM_buildUrl($_CONF_ADVT['url']
-                        . '/index.php?mode=detail&id=' . urlencode($ad_id)),
-            ) );
-            $T->parse('TAG', 'tag_data', true);
-        }
-        $T->parse('output', 'autotag');
-        $tag_data = $T->finish($T->get_var('output'));
-    } else {
-        $tag_data = '';
-    }
-    $content = str_replace($autotag['tagstr'], $tag_data, $content);
-    return $content;
 }
 
 
