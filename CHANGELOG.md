@@ -7,6 +7,10 @@ Release TBD
 - Hide topic subscription option from anon users.
 - Fixes to drag-n-drop image uploading.
 - Add separate detail.php to work with `plugin_getcommenturlid()`.
+- Remove non-utf-8 languages.
+- Separate autotags into classes.
+- Count already-uploaded images against max when editing an ad.
+- Fix image ID for delete button on just-uploaded images.
 
 ## Version 1.3.0 (Released 2020-03-22)
 - Fix namespace usage
