@@ -83,12 +83,18 @@ case 'dropupload':
           ->setNonce($nonce)
           ->setPath($_CONF_ADVT['imgpath'] . '/user/')
           ->setFieldName('files')
+          ->setMaxFileUploads($_CONF_ADVT['imagecount'])
           ->setFileNames($filenames);
+        if (!empty($ad_id)) {
+            // Editing an ad, set the number of files already uploaded.
+            $images = Classifieds\Image::getAll($ad_id);
+            $U->setCurrentFileUploads(count($images));
+        }
         $status = $U->uploadFiles();
         if ($status) {
+            // Get the filenames and image IDs to populate the form.
             $filenames = $U->getUploadedFiles();
             $processed = count($filenames);
-            // Only one filename here, this to get the image id also
             foreach ($filenames as $img_id=>$filename) {
                 $result['filenames'][] = array(
                     'img_url'   => Classifieds\Image::dispUrl($filename),

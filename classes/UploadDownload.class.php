@@ -101,6 +101,10 @@ class UploadDownload
      * @var integer */
     private $_maxFileUploadsPerForm = 5;
 
+    /** Number of files already uploaded.
+     * @var integer */
+    private $_formFileCount = 0;
+
     /** Array of destination file names.
      * @var array */
     private $_fileNames = array();
@@ -357,7 +361,6 @@ class UploadDownload
         }
 
         $imageInfo = $this->_getImageDimensions($this->_currentFile['tmp_name']);
-
         $sizeOK = true;
 
         if ($this->_debug) {
@@ -501,7 +504,8 @@ class UploadDownload
      */
     private function _getPermissions()
     {
-        if (is_array($this->_permissions)) {
+        $perms = '';
+        if (is_array($this->_permissions) && !empty($this->_permissions)) {
             if (count($this->_permissions) > 1) {
                 $perms = $this->_permissions[$this->_imageIndex];
             } else {
@@ -529,6 +533,7 @@ class UploadDownload
             $this->_addError('Specified upload directory, ' . $this->_filePath . ' exists but is not writable');
             return false;
         }
+
         $sizeOK = true;
         if (!($this->_imageSizeOK(false)) && $this->_autoResize) {
             $imageInfo = $this->_getImageDimensions($this->_currentFile['tmp_name']);
@@ -663,12 +668,27 @@ class UploadDownload
     /**
      * Sets the max number of files that can be uploaded per form.
      *
-     * @param   int       $maxfiles    Maximum number of files to allow. Default is 5
-     * @return  boolean   True if set, false otherwise
+     * @param   integer $maxfiles   Maximum number of files to allow.
+     * @return  object  $this
      */
-    public function setMaxFileUploads($maxfiles)
+    public function setMaxFileUploads(int $maxfiles) : self
     {
         $this->_maxFileUploadsPerForm = (int)$maxfiles;
+        return $this;
+    }
+
+
+    /**
+     * Sets the number of existing file uploads on the form.
+     * Used with setMaxFileUploads() to limit the total uploads when
+     * editing a form.
+     *
+     * @param   integer $curfiles   Number of current files uploaded
+     * @return  object  $this
+     */
+    public function setCurrentFileUploads(int $curfiles) : self
+    {
+        $this->_formFileCount = (int)$curfiles;
         return $this;
     }
 
@@ -1108,9 +1128,9 @@ class UploadDownload
      * @param   string|array    $perms      A string or string array of file permissions
      * @return  object  $this
      */
-    public function setPerms($perms)
+    public function setPerms($perms) : self
     {
-        if (isset($perms) AND is_array($perms)) {
+        if (is_array($perms)) {
             // this is an array of file names, set them
             $this->_permissions = $perms;
         } else {
@@ -1223,29 +1243,37 @@ class UploadDownload
             }
         }
         $numFiles = $this->numFiles();
+        $maxFiles = max($this->_maxFileUploadsPerForm - $this->_formFileCount, 0);
 
         // For security sake, check to make sure a DOS isn't happening by making
         // sure there is a limit of the number of files being uploaded
-        if ($numFiles > $this->_maxFileUploadsPerForm) {
-            $this->_addError('Max. number of files you can upload from a form is '
+        /*if ($numFiles > $this->_maxFileUploadsPerForm) {
+            $this->_addError('Max. number of files you can upload from this form is '
                 . $this->_maxFileUploadsPerForm . ' and you sent ' . $numFiles);
             return false;
-        }
+        }*/
 
         // Verify upload directory is valid
         if (!$this->_filePath) {
             $this->_addError('No Upload Directory Specified, use setPath() method');
+            return false;
         }
 
         // Verify allowed mime types exist
         if (!$this->_allowedMimeTypes && $this->_allowAnyType == false) {
             // TODO: Better to just assume allowed = available?
             $this->_addError('No allowed mime types specified, use setAllowedMimeTypes() method');
+            return false;
         }
 
         if (is_array($this->_filesToUpload['name'])) {
             // Multiple files uploaded
             foreach ($this->_filesToUpload["error"] as $key => $error) {
+                if ($this->_imageIndex >= $maxFiles) {
+                    // Reached the limit of total files. Just break, the user
+                    // will be advised of how many files were uploaded.
+                    break;
+                }
                 if ($error == UPLOAD_ERR_OK) {
                     $fparts = pathinfo($this->_filesToUpload['name'][$key]);
                     $this->_currentFile = array(
