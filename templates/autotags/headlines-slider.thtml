@@ -23,7 +23,7 @@
 				<a href="{url}">
 					<div class="uk-panel uk-panel-box">
 {!if thumb_url}
-						<div class="uk-panel-teaser">
+						<div class="uk-panel-teaser" style="text-align:center;">
 							{thumb_url}
 						</div>
 {!endif}

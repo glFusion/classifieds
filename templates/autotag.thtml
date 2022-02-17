@@ -2,18 +2,19 @@
 <!-- BEGIN tag_data -->
 <div style="clear:both;">
 {!if img_url}
-  <div style="float:left;padding:10px;">
-    <a href="{img_url}" data-uk-lightbox="{group:'ad'}">
-      <img src="{tn_url}" border="0" 
-          alt="{$LANG_ADVT[click_to_enlarge]}" 
-          title="{$LANG_ADVT[click_to_enlarge]}"
-          class="tooltip" />
-    </a>
-  </div>
+	<div style="float:left;padding:10px;">
+		<a href="{img_url}" data-uk-lightbox="{group:'ad'}">
+			<img src="{tn_url}" border="0" alt="{$LANG_ADVT[click_to_enlarge]}"
+				title="{$LANG_ADVT[click_to_enlarge]}" class="tooltip" />
+		</a>
+	</div>
 {!endif}
-  <div style="float:left;">
-    <a href="{ad_url}">{subject}</a>
-  </div>
+	<div style="float:left;">
+		<a href="{ad_url}">{subject}</a>
+{!if text}
+		<br />{text}
+{!endif}
+	</div>
 </div>
 <!-- END tag_data -->
 {# end {templatelocation} #}

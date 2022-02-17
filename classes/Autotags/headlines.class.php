@@ -49,7 +49,7 @@ class headlines extends \Classifieds\Autotag
         $this->template = 'headlines.thtml';    // override default
         parent::getOpts($opts);     // populate the standard options
 
-        $cols       = 3;        // number of columns
+        $cols       = 3;        // default number of columns
         $autoplay   = 'true';   // auto-play by default
         $interval   = 7000;     // move every 7 seconds
         // Now populate options specific to headlines
@@ -59,6 +59,8 @@ class headlines extends \Classifieds\Autotag
             case 'autoplay':
                 $autoplay = $val ? 'true' : 'false';
                 break;
+            case 'columns':
+                $key = 'cols';
             case 'cols':
             case 'interval':
                 $$key = (int)$val;
@@ -92,7 +94,7 @@ class headlines extends \Classifieds\Autotag
                 $image = COM_createImage($img_url);
                 $T->set_var(array(
                     'url'       => Ad::getDetailUrl($A['ad_id']),
-                    'text'      => $Ad->getDscp(),
+                    'text'      => COM_truncate($Ad->getDscp(), 300, '...'),
                     'title'     => $Ad->getSubject(),
                     'thumb_url' => $image,
                 ) );

@@ -150,12 +150,13 @@ class Autotag
                         $A['description'] = substr($A['description'], 0, $this->textlen - 3) . ' ...';
                     }
                 }
+
                 $T->set_var(array(
                     'ad_id'     => $A['ad_id'],
                     'cat_id'    => $A['cat_id'],
                     'uid'       => $A['uid'],
                     'subject'   => htmlspecialchars($A['subject']),
-                    'description'  => htmlspecialchars($A['description']),
+                    'text'      => COM_truncate($A['description'], 300, '...'),
                     'url'       => COM_sanitizeURL($A['url']),
                     'add_date'  => COM_getUserDateTimeFormat($A['add_date']),
                     'exp_date'  => COM_getUserDateTimeFormat($A['exp_date']),
